@@ -6,7 +6,7 @@ class Server {
     private:
         int _port;
         std::string _password;
-        int _socketFd;
+        //int _socketFd;
 
     public:
         
