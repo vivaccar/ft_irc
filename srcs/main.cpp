@@ -1,13 +1,6 @@
-#include <iostream>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <unistd.h>
-#include <string.h>
 #include "../includes/Server.hpp"
-#include <poll.h>
-#include <vector>
 
-#define PORT 6667
+/* #define PORT 6667
 #define MAX_CLIENTS 10
 
 int main() {
@@ -95,4 +88,25 @@ int main() {
     }
     close(server_fd);  // Fechar o socket do servidor
     return 0;
+}
+ */
+
+ 
+int main(int ac, char **av)
+{
+    if (ac != 3)
+    {
+        std::cout << "Invalid arguments. Try ./ircserv <port> <password>" << std::endl;
+        return 0;
+    }
+    Server server(av[1], av[2]);
+    try
+    {
+        server.createSocket();
+        server.runPoll();
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
 }
