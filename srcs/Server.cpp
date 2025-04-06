@@ -19,6 +19,7 @@ const std::string& Server::getPassword() const {
 
 void    Server::createSocket() {
     // CRIA O SOCKET DO SERVIDOR
+    std::cout << "Creating socket" <<std::endl;
     _socketFd = socket(AF_INET, SOCK_STREAM, 0);
     if (_socketFd <= 0)
         throw("Server Socket Fail");
@@ -40,7 +41,7 @@ void    Server::runPoll() {
     struct pollfd server;
     server.fd = _socketFd;
     server.events = POLLIN;
-    server.events = 0;
+    server.revents = 0;
     _fds.push_back(server);
     
     while (1)

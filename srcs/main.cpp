@@ -100,13 +100,6 @@ int main(int ac, char **av)
         return 0;
     }
     Server server(av[1], av[2]);
-    try
-    {
-        server.createSocket();
-        server.runPoll();
-    }
-    catch(const std::exception& e)
-    {
-        std::cerr << e.what() << '\n';
-    }
+    server.createSocket();
+    server.runPoll();
 }
