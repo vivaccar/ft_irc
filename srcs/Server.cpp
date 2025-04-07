@@ -36,6 +36,62 @@ void    Server::createSocket() {
         throw("Listen Fail");
 }
 
+void    Server::createClient(int socket) {
+    Client *newClient = new Client(socket);
+    this->_clients.insert(std::make_pair(socket, newClient));
+}
+
+
+void    Server::checkPassword(std::vector<std::string> &cmds, int clientSocket)
+{
+    if (cmds.size() == 2)
+    {
+        if (cmds[1] == _password)
+        {
+            std::cout << "Client " << clientSocket << " type the correct password!" << std::endl;
+            std::map<int, Client*>::iterator it = _clients.lower_bound(clientSocket);
+            Client *client = it->second;
+            client->setInsertPassword(true);
+        }
+        else
+            std::cout << "Client " << clientSocket << " type the incorrect password!" << std::endl;
+    }
+}
+
+void    Server::setNick(std::vector<std::string> &cmds, int clientSocket)
+{
+        std::map<int, Client*>::iterator it = _clients.lower_bound(clientSocket);
+        Client *client = it->second;
+
+        client->setNick(cmds[1]);
+}
+
+void    Server::setUser(std::vector<std::string> &cmds, int clientSocket)
+{
+        std::map<int, Client*>::iterator it = _clients.lower_bound(clientSocket);
+        Client *client = it->second;
+
+        client->setNick(cmds[1]);
+}
+
+void    Server::parseCommand(std::string cmd, int clientSocket) {
+    std::vector<std::string> cmds;
+    std::istringstream stream(cmd);
+    std::string word;
+    
+
+    (void) clientSocket;
+    while (stream >> word)
+        cmds.push_back(word);
+
+    if (cmds[0] == "PASS")
+        checkPassword(cmds, clientSocket);
+    else if (cmds[0] == "NICK")
+        setNick(cmds, clientSocket);
+    else if (cmds[0] == "USER")
+        setUser(cmds, clientSocket);
+}
+
 void    Server::runPoll() {
     // CRIA A ESTRUTURADO DO SOCKET DO SERVIDOR PARA SER UTILIZADO NO POLL
     struct pollfd server;
@@ -51,17 +107,21 @@ void    Server::runPoll() {
             throw("Poll Error");
         if (_fds[0].revents & POLLIN)
         {
+            
             int newClientSock = accept (_socketFd, NULL, NULL);
             if (newClientSock < 0)
             {
                 std::cout << "Fail to accept connection" << std::endl;
                 continue;
             }
+            createClient(newClientSock);
             struct pollfd newClient;
             newClient.fd = newClientSock;
             newClient.events = POLLIN;
             newClient.revents = 0;
             _fds.push_back(newClient);
+            const char *login = "To authenticate, follow the steps\n1 - PASS [password]\n2 - NICK [nickname]\n3 - USER [username]\n";
+            send(newClientSock, login, strlen(login), 0);
             std::cout << "New client connected on FD: " << newClient.fd << std::endl;
         }
         for (size_t i = 1; i < _fds.size(); i++)
@@ -70,7 +130,7 @@ void    Server::runPoll() {
             {
                 char buffer[1024] = {0};
                 int client_socket = _fds[i].fd;
-                int bytes_read = read(client_socket, buffer, sizeof(buffer));
+                int bytes_read = recv(client_socket, buffer, 1024, 0);
                 if (bytes_read == 0)
                 {
                     // Cliente desconectou
@@ -82,6 +142,7 @@ void    Server::runPoll() {
                 {
                     std::cout << "Client " << _fds[i].fd << " say:" << buffer << std::endl;
                     // Envia resposta ao cliente
+                    parseCommand(std::string(buffer), client_socket);
                     const char* response = "Message received by the server!";
                     send(client_socket, response, strlen(response), 0);
                 }
