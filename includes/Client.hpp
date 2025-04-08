@@ -25,4 +25,9 @@ class Client {
         void setInsertPassword(bool status);
         void setNick(const std::string &nick);
         void setUser(const std::string &user);
+        int  getSocket() const;
+        std::string getUser() const;
+        std::string getNick() const;
+        bool isAuth() const;
+        bool insertPassword() const;
 };

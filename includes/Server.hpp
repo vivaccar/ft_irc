@@ -16,11 +16,12 @@ class Server {
         int getPort() const;
         const std::string &getPassword() const;
 
+        Client *getClient(int socket);
         void    createSocket();
         void    runPoll();
         void    createClient(int socket);
         void    parseCommand(std::string cmd, int clientSocket);
-        void    checkPassword(std::vector<std::string> &cmds, int clientSocket);
-        void    setNick(std::vector<std::string> &cmds, int clientSocket);
-        void    setUser(std::vector<std::string> &cmds, int clientSocket);
+        void    checkPassword(std::vector<std::string> &cmds, Client *client);
+        void    setNick(std::vector<std::string> &cmds, Client *client);
+        void    setUser(std::vector<std::string> &cmds, Client *client);
 };

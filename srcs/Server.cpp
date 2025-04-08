@@ -17,6 +17,13 @@ const std::string& Server::getPassword() const {
     return this->_password;
 }
 
+Client* Server::getClient(int socket) {
+    std::map<int, Client*>::iterator it = _clients.lower_bound(socket);
+    if (it != _clients.end())
+        return it->second;
+    return NULL;
+} 
+
 void    Server::createSocket() {
     // CRIA O SOCKET DO SERVIDOR
     std::cout << "Creating socket" <<std::endl;
@@ -42,36 +49,30 @@ void    Server::createClient(int socket) {
 }
 
 
-void    Server::checkPassword(std::vector<std::string> &cmds, int clientSocket)
+void    Server::checkPassword(std::vector<std::string> &cmds, Client *client)
 {
     if (cmds.size() == 2)
     {
         if (cmds[1] == _password)
         {
-            std::cout << "Client " << clientSocket << " type the correct password!" << std::endl;
-            std::map<int, Client*>::iterator it = _clients.lower_bound(clientSocket);
-            Client *client = it->second;
+            std::cout << "Client " << client->getSocket() << " type the correct password!" << std::endl;
             client->setInsertPassword(true);
         }
         else
-            std::cout << "Client " << clientSocket << " type the incorrect password!" << std::endl;
+            std::cout << "Client " << client->getSocket() << " type the incorrect password!" << std::endl;
     }
 }
 
-void    Server::setNick(std::vector<std::string> &cmds, int clientSocket)
+void    Server::setNick(std::vector<std::string> &cmds, Client *client)
 {
-        std::map<int, Client*>::iterator it = _clients.lower_bound(clientSocket);
-        Client *client = it->second;
-
         client->setNick(cmds[1]);
+        std::cout << client->getSocket() << " :" << " set new NICKNAME :" << client->getNick() << std::endl;
 }
 
-void    Server::setUser(std::vector<std::string> &cmds, int clientSocket)
+void    Server::setUser(std::vector<std::string> &cmds, Client *client)
 {
-        std::map<int, Client*>::iterator it = _clients.lower_bound(clientSocket);
-        Client *client = it->second;
-
-        client->setNick(cmds[1]);
+        client->setUser(cmds[1]);
+        std::cout << client->getSocket() << " :" << " set new USERNAME :" << client->getUser() << std::endl;
 }
 
 void    Server::parseCommand(std::string cmd, int clientSocket) {
@@ -84,12 +85,13 @@ void    Server::parseCommand(std::string cmd, int clientSocket) {
     while (stream >> word)
         cmds.push_back(word);
 
+    Client *client = getClient(clientSocket);
     if (cmds[0] == "PASS")
-        checkPassword(cmds, clientSocket);
+        checkPassword(cmds, client);
     else if (cmds[0] == "NICK")
-        setNick(cmds, clientSocket);
+        setNick(cmds, client);
     else if (cmds[0] == "USER")
-        setUser(cmds, clientSocket);
+        setUser(cmds, client);
 }
 
 void    Server::runPoll() {
@@ -140,8 +142,8 @@ void    Server::runPoll() {
                     --i;  // Ajusta o índice após a remoção
                 } else
                 {
-                    std::cout << "Client " << _fds[i].fd << " say:" << buffer << std::endl;
                     // Envia resposta ao cliente
+                    std::cout << "Client " << _fds[i].fd << " say:" << buffer << std::endl;
                     parseCommand(std::string(buffer), client_socket);
                     const char* response = "Message received by the server!";
                     send(client_socket, response, strlen(response), 0);
