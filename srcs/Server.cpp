@@ -57,22 +57,32 @@ void    Server::checkPassword(std::vector<std::string> &cmds, Client *client)
         {
             std::cout << "Client " << client->getSocket() << " type the correct password!" << std::endl;
             client->setInsertPassword(true);
+			const char *response = "Correct password! You are connected to the server\nNow insert your nickname\n";
+            send(client->getSocket(), response, strlen(response), 0);
         }
         else
             std::cout << "Client " << client->getSocket() << " type the incorrect password!" << std::endl;
+			const char *response = "Incorrect password!\nTry again\n";
+            send(client->getSocket(), response, strlen(response), 0);
     }
 }
 
 void    Server::setNick(std::vector<std::string> &cmds, Client *client)
 {
-        client->setNick(cmds[1]);
-        std::cout << client->getSocket() << " :" << " set new NICKNAME :" << client->getNick() << std::endl;
+	if (cmds.size() > 1) {
+		client->setNick(cmds[1]);
+		std::cout << "Client " << client->getSocket() << " :" << " set new NICKNAME :" << client->getNick() << std::endl;
+		std::string response = "Nickname set!\nWelcome " + client->getNick() + " to the IRC server!\n";
+		send(client->getSocket(), response.c_str(), response.size(), 0);
+	}
 }
 
 void    Server::setUser(std::vector<std::string> &cmds, Client *client)
 {
-        client->setUser(cmds[1]);
-        std::cout << client->getSocket() << " :" << " set new USERNAME :" << client->getUser() << std::endl;
+	client->setUser(cmds[1]);
+	std::cout << "Client " << client->getSocket() << " :" << " set new USERNAME :" << client->getUser() << std::endl;
+	const char* response = "Username set!\nNow you are able to join/create a channel\n";
+	send(client->getSocket(), response, strlen(response), 0);
 }
 
 void    Server::parseCommand(std::string cmd, int clientSocket) {
@@ -80,18 +90,18 @@ void    Server::parseCommand(std::string cmd, int clientSocket) {
     std::istringstream stream(cmd);
     std::string word;
     
-
-    (void) clientSocket;
     while (stream >> word)
         cmds.push_back(word);
 
     Client *client = getClient(clientSocket);
-    if (cmds[0] == "PASS")
-        checkPassword(cmds, client);
-    else if (cmds[0] == "NICK")
-        setNick(cmds, client);
-    else if (cmds[0] == "USER")
-        setUser(cmds, client);
+	if (cmds.size() > 1) {
+		if (cmds[0] == "PASS")
+			checkPassword(cmds, client);
+		else if (cmds[0] == "NICK")
+			setNick(cmds, client);
+		else if (cmds[0] == "USER")
+			setUser(cmds, client);
+	}
 }
 
 void    Server::runPoll() {
@@ -145,7 +155,7 @@ void    Server::runPoll() {
                     // Envia resposta ao cliente
                     std::cout << "Client " << _fds[i].fd << " say:" << buffer << std::endl;
                     parseCommand(std::string(buffer), client_socket);
-                    const char* response = "Message received by the server!";
+                    const char* response = "Message received by the server!\n";
                     send(client_socket, response, strlen(response), 0);
                 }
             }

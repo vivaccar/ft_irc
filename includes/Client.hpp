@@ -9,6 +9,15 @@
 #include <cstdlib>
 #include <map>
 
+#define RED "\e[31m"
+#define BLUE "\e[34m"
+#define GREEN "\e[32m"
+#define YELLOW "\e[33m"
+
+#define BOLD "\e[1m"
+#define BLINK "\e[5m"
+#define RESET "\e[0m"
+
 class Client {
     private:
         int _socket;
@@ -31,3 +40,5 @@ class Client {
         bool isAuth() const;
         bool insertPassword() const;
 };
+
+#define ERR_ALREADYREGISTRED "User is already registered!\n"

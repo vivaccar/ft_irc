@@ -3,8 +3,8 @@
 class Server {
     private:
         int _port;
-        std::string _password;
         int _socketFd;
+        std::string _password;
         struct sockaddr_in _sockAddr;
         std::vector<struct pollfd> _fds;
         std::map<int, Client*>  _clients;
