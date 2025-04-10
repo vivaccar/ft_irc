@@ -1,11 +1,4 @@
-#include <iostream>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <unistd.h>
-#include <string.h>
-#include <poll.h>
-#include <vector>
-#include <cstdlib>
+#include "Client.hpp"
 
 class Server {
     private:
@@ -14,7 +7,7 @@ class Server {
         int _socketFd;
         struct sockaddr_in _sockAddr;
         std::vector<struct pollfd> _fds;
-        
+        std::map<int, Client*>  _clients;
 
     public:
         
@@ -23,6 +16,12 @@ class Server {
         int getPort() const;
         const std::string &getPassword() const;
 
+        Client *getClient(int socket);
         void    createSocket();
         void    runPoll();
+        void    createClient(int socket);
+        void    parseCommand(std::string cmd, int clientSocket);
+        void    checkPassword(std::vector<std::string> &cmds, Client *client);
+        void    setNick(std::vector<std::string> &cmds, Client *client);
+        void    setUser(std::vector<std::string> &cmds, Client *client);
 };

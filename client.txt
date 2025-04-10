@@ -1,0 +1,21 @@
+client {
+    fd (id)
+    authenticate
+    nick
+    user
+
+}
+
+
+channels {
+    name
+    topic
+    clients
+}
+
+
+server {
+    ...
+    channels...
+    cliente...
+}
