@@ -25,6 +25,7 @@ class Client {
         bool _insertPassword;
         std::string _nick;
         std::string _user;
+		std::vector<Channel *> _channels;
 
     public:
         Client(const int socket);

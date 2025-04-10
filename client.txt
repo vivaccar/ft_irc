@@ -11,7 +11,7 @@ channels {
     name
     topic
     clients (vetor de sockets)
-	admins (veto)
+	admins (vetor)
 }
 
 

@@ -6,6 +6,10 @@ Client::Client(int socket) : _socket(socket), _isAuth(false), _insertPassword(fa
 
 Client::~Client() {}
 
+void	Client::createChannel(const std::string &name) {
+	
+}
+
 void    Client::setInsertPassword(bool status) {
     _insertPassword = status;
 }

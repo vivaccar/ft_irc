@@ -85,6 +85,16 @@ void    Server::setUser(std::vector<std::string> &cmds, Client *client)
 	send(client->getSocket(), response, strlen(response), 0);
 }
 
+void    Server::joinChannel(std::vector<std::string> &cmds, Client *client) {
+	std::map<std::string, Channel *>::iterator it = _channels.find(cmds[1]);
+	if (it == _channels.end())
+		client->createChannel()
+	else
+		//client->joinChannel();
+	
+}
+
+
 void    Server::parseCommand(std::string cmd, int clientSocket) {
     std::vector<std::string> cmds;
     std::istringstream stream(cmd);
@@ -101,6 +111,8 @@ void    Server::parseCommand(std::string cmd, int clientSocket) {
 			setNick(cmds, client);
 		else if (cmds[0] == "USER")
 			setUser(cmds, client);
+		else if (cmds[0] == "JOIN")
+			joinChannel(cmds, client);
 	}
 }
 

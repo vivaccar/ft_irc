@@ -1,4 +1,5 @@
 #include "Client.hpp"
+#include "Channel.hpp"
 
 class Server {
     private:
@@ -8,6 +9,7 @@ class Server {
         struct sockaddr_in _sockAddr;
         std::vector<struct pollfd> _fds;
         std::map<int, Client*>  _clients;
+        std::map<std::string, Channel*>  _channels;
 
     public:
         
@@ -24,4 +26,5 @@ class Server {
         void    checkPassword(std::vector<std::string> &cmds, Client *client);
         void    setNick(std::vector<std::string> &cmds, Client *client);
         void    setUser(std::vector<std::string> &cmds, Client *client);
+        void    joinChannel(std::vector<std::string> &cmds, Client *client);
 };
