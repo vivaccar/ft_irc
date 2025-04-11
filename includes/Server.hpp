@@ -8,7 +8,7 @@ class Server {
         std::string _password;
         struct sockaddr_in _sockAddr;
         std::vector<struct pollfd> _fds;
-        std::map<int, Client*>  _clients;
+        std::map<std::string, Client*>  _clients;
         std::map<std::string, Channel*>  _channels;
 
     public:
@@ -21,10 +21,13 @@ class Server {
         Client *getClient(int socket);
         void    createSocket();
         void    runPoll();
-        void    createClient(int socket);
+        void    addNewClient(Client *client);
+
+		//COMMANDS
         void    parseCommand(std::string cmd, int clientSocket);
         void    checkPassword(std::vector<std::string> &cmds, Client *client);
         void    setNick(std::vector<std::string> &cmds, Client *client);
         void    setUser(std::vector<std::string> &cmds, Client *client);
-        void    joinChannel(std::vector<std::string> &cmds, Client *client);
+        void    joinCommand(std::vector<std::string> &cmds, Client *client);
+        void    privMsg(std::vector<std::string> &cmds, Client *client);
 };

@@ -43,9 +43,8 @@ void    Server::createSocket() {
         throw("Listen Fail");
 }
 
-void    Server::createClient(int socket) {
-    Client *newClient = new Client(socket);
-    this->_clients.insert(std::make_pair(socket, newClient));
+void    Server::addNewClient(Client *client) {
+    this->_clients.insert(std::make_pair(client->getNick(), client));
 }
 
 
@@ -83,17 +82,36 @@ void    Server::setUser(std::vector<std::string> &cmds, Client *client)
 	std::cout << "Client " << client->getSocket() << " :" << " set new USERNAME :" << client->getUser() << std::endl;
 	const char* response = "Username set!\nNow you are able to join/create a channel\n";
 	send(client->getSocket(), response, strlen(response), 0);
+	this->addNewClient(client);
 }
 
-void    Server::joinChannel(std::vector<std::string> &cmds, Client *client) {
-	std::map<std::string, Channel *>::iterator it = _channels.find(cmds[1]);
-	if (it == _channels.end())
-		client->createChannel()
-	else
-		//client->joinChannel();
+void    Server::joinCommand(std::vector<std::string> &cmds, Client *client) {
+	std::map<std::string, Channel *>::iterator it = this->_channels.find(cmds[1]);
+	if (it == _channels.end()) {
+		Channel *newChannel = client->createChannel(cmds[1]);
+		this->_channels.insert(std::make_pair(newChannel->getName(), newChannel));
+	}
+	else {
+		int ret = client->joinChannel(it->second);
+		//mensagens de erro serao tratadas aqui, dependendo do retorno de joinChannel
+		(void) ret;
+
+
+	}
 	
 }
 
+void	Server::privMsg(std::vector<std::string> &cmds, Client *client) {
+	//verificar se eh para canal ou user
+	/* if (cmds[1][0] == '#')
+		msgChannel */
+	std::map<std::string, Client *>::iterator it = this->_clients.find(cmds[1]);
+	if (it != this->_clients.end()) { //O USER DESTINO EXISTE
+		std::string msg = "@" + client->getNick() + "sent a private message to you: " + cmds[3] + "\n";
+		send(it->second->getSocket(), msg.c_str(), msg.size(), 0);
+	}
+
+}
 
 void    Server::parseCommand(std::string cmd, int clientSocket) {
     std::vector<std::string> cmds;
@@ -112,7 +130,9 @@ void    Server::parseCommand(std::string cmd, int clientSocket) {
 		else if (cmds[0] == "USER")
 			setUser(cmds, client);
 		else if (cmds[0] == "JOIN")
-			joinChannel(cmds, client);
+			joinCommand(cmds, client);
+		else if (cmds[0] == "PRIVMSG")
+			privMsg(cmds, client);
 	}
 }
 
@@ -138,7 +158,7 @@ void    Server::runPoll() {
                 std::cout << "Fail to accept connection" << std::endl;
                 continue;
             }
-            createClient(newClientSock);
+            //createClient(newClientSock); so se pode colocar o cliente no map, apos a autenticacao
             struct pollfd newClient;
             newClient.fd = newClientSock;
             newClient.events = POLLIN;
@@ -165,7 +185,7 @@ void    Server::runPoll() {
                 } else
                 {
                     // Envia resposta ao cliente
-                    std::cout << "Client " << _fds[i].fd << " say:" << buffer << std::endl;
+                    std::cout << "Client " << client_socket << " say:" << buffer << std::endl;
                     parseCommand(std::string(buffer), client_socket);
                     const char* response = "Message received by the server!\n";
                     send(client_socket, response, strlen(response), 0);
