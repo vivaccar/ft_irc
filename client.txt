@@ -1,0 +1,22 @@
+client {
+    fd (id)
+    authenticate
+    nick
+    user
+
+}
+
+
+channels {
+    name
+    topic
+    clients (vetor de sockets)
+	admins (vetor)
+}
+
+
+server {
+    ...
+    channels...
+    cliente...
+}
