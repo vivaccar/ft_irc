@@ -24,4 +24,6 @@ class Server {
         void    checkPassword(std::vector<std::string> &cmds, Client *client);
         void    setNick(std::vector<std::string> &cmds, Client *client);
         void    setUser(std::vector<std::string> &cmds, Client *client);
+		//commands
+		void	kickUser(std::vector<std::string> &cmds, Client *client);
 };
