@@ -23,6 +23,7 @@ class Server {
 		std::map<int, Client*> getClientsMap() const;
         Client *getClientBySocket(int socket);
 		Client* getClientByNick(const std::string &nick);
+        Channel *getChannelByName(const std::string &name);
 
         void    createSocket();
         void    runPoll();

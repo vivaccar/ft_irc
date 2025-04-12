@@ -37,6 +37,14 @@ Client* Server::getClientByNick(const std::string &nick) {
 	return NULL;
 } 
 
+Channel *Server::getChannelByName(const std::string &name) {
+	std::map<std::string, Channel *>::iterator it = this->_channels.find(name);
+	if (it != this->_channels.end())
+		return it->second;
+	return NULL;
+}
+
+
 void    Server::createSocket() {
     // CRIA O SOCKET DO SERVIDOR
     std::cout << "Creating socket" <<std::endl;
@@ -103,8 +111,10 @@ void    Server::joinCommand(std::vector<std::string> &cmds, Client *client) {
 	if (it == _channels.end()) {
 		Channel *newChannel = client->createChannel(cmds[1]);
 		this->_channels.insert(std::make_pair(newChannel->getName(), newChannel));
+		std::cout << " - - - - - CHANNEL " + cmds[1] + " HAS BEEN CREATED  - - - - - " << std::endl;
 	}
 	else {
+		std::cout << "Channel ja existe e se chama " << it->second->getName() << std::endl; 
 		int ret = client->joinChannel(it->second);
 		//mensagens de erro serao tratadas aqui, dependendo do retorno de joinChannel
 		(void) ret;
@@ -116,15 +126,37 @@ void    Server::joinCommand(std::vector<std::string> &cmds, Client *client) {
 
 void	Server::privMsg(std::vector<std::string> &cmds, Client *client) {
 	//verificar se eh para canal ou user
-	/* if (cmds[1][0] == '#')
-		msgChannel */
-	Client *dest = this->getClientByNick(cmds[1]);
-	if (dest != NULL) { //O USER DESTINO EXISTE
-		std::string msg = "@" + client->getNick() + " sent a private message to you: ";
-		for (size_t i = 3; i < cmds.size(); i++)
-			msg+= cmds[i] + " ";
-		msg+= "\n";
-		send(dest->getSocket(), msg.c_str(), msg.size(), 0);
+	if (cmds[1][0] == '#') {
+		Channel *channel = getChannelByName(cmds[1]); // verificar se o nome do canal esta sendo armazenado com '#'
+		if (channel != NULL && cmds[2][0] == ':') {
+			std::string msg = "@" + client->getNick() + " sent a message to the channel " + channel->getName();
+			for (size_t i = 2; i < cmds.size(); i++)
+				msg+= cmds[i] + " ";
+			msg += "\n";
+			std::vector<int> clients = channel->getClients();
+			for(std::vector<int>::iterator it = clients.begin(); it != clients.end(); it++) {
+				std::cout << "SOCKET -> " << *it << std::endl;
+				send(*it, msg.c_str(), msg.size(), 0);
+			}
+		}
+	}	
+	else {
+		Client *dest = this->getClientByNick(cmds[1]);
+		if (dest != NULL && cmds[2][0] == ':') { //O USER DESTINO EXISTE
+			std::string msg = "@" + client->getNick() + " sent a private message to you";
+			for (size_t i = 2; i < cmds.size(); i++)
+				msg+= cmds[i] + " ";
+			msg+= "\n";
+			send(dest->getSocket(), msg.c_str(), msg.size(), 0);
+		}
+		else if (dest == NULL) {
+			std::string msg = "User @" + cmds[1] + " not found!\n";
+			send(client->getSocket(), msg.c_str(), msg.size(), 0);
+		}
+		else {
+			std::string msg = "Invalid Synthax\nThe command must be \"PRIVMSG <nickname> : <message>\"\n";
+			send(client->getSocket(), msg.c_str(), msg.size(), 0);
+		}
 	}
 
 }

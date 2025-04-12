@@ -45,7 +45,7 @@ void	Channel::setMode(const std::string &newMode) {
 }
 
 void	Channel::addClient(const Client *client) {
-	this->_channelAdmins.push_back(client->getSocket());
+	this->_channelClients.push_back(client->getSocket());
 	client->getChannels().push_back(this);
 }
 
