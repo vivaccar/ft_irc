@@ -11,6 +11,10 @@ int     Client::getSocket() const {
     return this->_socket;
 }
 
+bool    Client::passInserted() const {
+    return this->_insertPassword;
+}
+
 std::string     Client::getUser() const {
     return this->_user;
 }

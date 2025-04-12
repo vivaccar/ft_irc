@@ -1,5 +1,6 @@
-SRCS = srcs/main.cpp srcs/Server.cpp srcs/Client.cpp srcs/Channel.cpp
-
+SRCS = srcs/main.cpp srcs/Server.cpp srcs/Client.cpp srcs/Channel.cpp \
+		srcs/Commands/pass.cpp srcs/Commands/nick.cpp srcs/Commands/user.cpp
+ 
 OBJS = $(SRCS:.cpp=.o)
 
 NAME = ircserv

@@ -2,6 +2,12 @@
 #include "Client.hpp"
 #include "Channel.hpp"
 
+#define ERR_NEEDMOREPARAMS "ERROR 461: Need more parameters\n"
+#define ERR_PASSWDMISMATCH "ERROR 464: Invalid password\n"
+#define ERR_ALREADYREGISTERED "ERROR 462: Already Registered\n"
+#define ERR_NOTREGISTERED "ERROR 451: You have not Registered\n"
+#define ERR_NONICKNAMEGIVEN "ERROR 431: No Nickname Given\n"
+
 class Server {
     private:
         int _port;

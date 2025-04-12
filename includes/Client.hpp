@@ -36,7 +36,8 @@ class Client {
         Client(const int socket);
         ~Client();
     //GETTERS    
-		int  getSocket() const;
+		bool passInserted() const;
+        int  getSocket() const;
         std::string getUser() const;
         std::string getNick() const;
 		std::vector<Channel *> getChannels() const;
@@ -51,5 +52,3 @@ class Client {
 		Channel *createChannel(const std::string &name);
 		int	joinChannel(Channel *channel);
 };
-
-#define ERR_ALREADYREGISTRED "User is already registered!\n"
