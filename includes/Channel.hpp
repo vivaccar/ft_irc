@@ -11,7 +11,7 @@ class Channel {
 	std::string _mode;
 	std::vector<int> _channelClients;
 	std::vector<int> _channelAdmins;
-	int		_userLimit;
+	//int		_userLimit;
 
 	public:
 		Channel(const std::string &name);

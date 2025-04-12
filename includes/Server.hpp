@@ -1,3 +1,4 @@
+#pragma once
 #include "Client.hpp"
 #include "Channel.hpp"
 
@@ -8,20 +9,24 @@ class Server {
         std::string _password;
         struct sockaddr_in _sockAddr;
         std::vector<struct pollfd> _fds;
-        std::map<std::string, Client*>  _clients;
+        std::map<int, Client*>  _clients;
         std::map<std::string, Channel*>  _channels;
 
     public:
         
         Server(const std::string &port, const std::string &password);
         ~Server();
+
+		//GETTERS
         int getPort() const;
         const std::string &getPassword() const;
+		std::map<int, Client*> getClientsMap() const;
+        Client *getClientBySocket(int socket);
+		Client* getClientByNick(const std::string &nick);
 
-        Client *getClient(int socket);
         void    createSocket();
         void    runPoll();
-        void    addNewClient(Client *client);
+        void	createClient(int socket);
 
 		//COMMANDS
         void    parseCommand(std::string cmd, int clientSocket);
