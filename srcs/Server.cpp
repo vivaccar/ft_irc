@@ -17,12 +17,33 @@ const std::string& Server::getPassword() const {
     return this->_password;
 }
 
-Client* Server::getClient(int socket) {
+std::map<int, Client*> Server::getClientsMap() const{
+	return this->_clients;
+}
+
+Client* Server::getClientBySocket(int socket) {
     std::map<int, Client*>::iterator it = _clients.lower_bound(socket);
     if (it != _clients.end())
         return it->second;
     return NULL;
+}
+
+Client* Server::getClientByNick(const std::string &nick) {
+	std::map<int, Client*> c = this->getClientsMap();
+	for (std::map<int, Client *>::iterator it = c.begin(); it != c.end(); it++) {
+		if (it->second->getNick() == nick)
+			return it->second;
+	}
+	return NULL;
 } 
+
+Channel *Server::getChannelByName(const std::string &name) {
+	std::map<std::string, Channel *>::iterator it = this->_channels.find(name);
+	if (it != this->_channels.end())
+		return it->second;
+	return NULL;
+}
+
 
 void    Server::createSocket() {
     // CRIA O SOCKET DO SERVIDOR
@@ -43,8 +64,9 @@ void    Server::createSocket() {
         throw("Listen Fail");
 }
 
-void    Server::addNewClient(Client *client) {
-    this->_clients.insert(std::make_pair(client->getNick(), client));
+void    Server::createClient(int socket) {
+    Client *newClient = new Client(socket);
+    this->_clients.insert(std::make_pair(socket, newClient));
 }
 
 
@@ -82,7 +104,6 @@ void    Server::setUser(std::vector<std::string> &cmds, Client *client)
 	std::cout << "Client " << client->getSocket() << " :" << " set new USERNAME :" << client->getUser() << std::endl;
 	const char* response = "Username set!\nNow you are able to join/create a channel\n";
 	send(client->getSocket(), response, strlen(response), 0);
-	this->addNewClient(client);
 }
 
 void    Server::joinCommand(std::vector<std::string> &cmds, Client *client) {
@@ -90,8 +111,10 @@ void    Server::joinCommand(std::vector<std::string> &cmds, Client *client) {
 	if (it == _channels.end()) {
 		Channel *newChannel = client->createChannel(cmds[1]);
 		this->_channels.insert(std::make_pair(newChannel->getName(), newChannel));
+		std::cout << " - - - - - CHANNEL " + cmds[1] + " HAS BEEN CREATED  - - - - - " << std::endl;
 	}
 	else {
+		std::cout << "Channel ja existe e se chama " << it->second->getName() << std::endl; 
 		int ret = client->joinChannel(it->second);
 		//mensagens de erro serao tratadas aqui, dependendo do retorno de joinChannel
 		(void) ret;
@@ -103,12 +126,37 @@ void    Server::joinCommand(std::vector<std::string> &cmds, Client *client) {
 
 void	Server::privMsg(std::vector<std::string> &cmds, Client *client) {
 	//verificar se eh para canal ou user
-	/* if (cmds[1][0] == '#')
-		msgChannel */
-	std::map<std::string, Client *>::iterator it = this->_clients.find(cmds[1]);
-	if (it != this->_clients.end()) { //O USER DESTINO EXISTE
-		std::string msg = "@" + client->getNick() + "sent a private message to you: " + cmds[3] + "\n";
-		send(it->second->getSocket(), msg.c_str(), msg.size(), 0);
+	if (cmds[1][0] == '#') {
+		Channel *channel = getChannelByName(cmds[1]); // verificar se o nome do canal esta sendo armazenado com '#'
+		if (channel != NULL && cmds[2][0] == ':') {
+			std::string msg = "@" + client->getNick() + " sent a message to the channel " + channel->getName();
+			for (size_t i = 2; i < cmds.size(); i++)
+				msg+= cmds[i] + " ";
+			msg += "\n";
+			std::vector<int> clients = channel->getClients();
+			for(std::vector<int>::iterator it = clients.begin(); it != clients.end(); it++) {
+				std::cout << "SOCKET -> " << *it << std::endl;
+				send(*it, msg.c_str(), msg.size(), 0);
+			}
+		}
+	}	
+	else {
+		Client *dest = this->getClientByNick(cmds[1]);
+		if (dest != NULL && cmds[2][0] == ':') { //O USER DESTINO EXISTE
+			std::string msg = "@" + client->getNick() + " sent a private message to you";
+			for (size_t i = 2; i < cmds.size(); i++)
+				msg+= cmds[i] + " ";
+			msg+= "\n";
+			send(dest->getSocket(), msg.c_str(), msg.size(), 0);
+		}
+		else if (dest == NULL) {
+			std::string msg = "User @" + cmds[1] + " not found!\n";
+			send(client->getSocket(), msg.c_str(), msg.size(), 0);
+		}
+		else {
+			std::string msg = "Invalid Synthax\nThe command must be \"PRIVMSG <nickname> : <message>\"\n";
+			send(client->getSocket(), msg.c_str(), msg.size(), 0);
+		}
 	}
 
 }
@@ -121,7 +169,7 @@ void    Server::parseCommand(std::string cmd, int clientSocket) {
     while (stream >> word)
         cmds.push_back(word);
 
-    Client *client = getClient(clientSocket);
+    Client *client = getClientBySocket(clientSocket);
 	if (cmds.size() > 1) {
 		if (cmds[0] == "PASS")
 			checkPassword(cmds, client);
@@ -158,7 +206,7 @@ void    Server::runPoll() {
                 std::cout << "Fail to accept connection" << std::endl;
                 continue;
             }
-            //createClient(newClientSock); so se pode colocar o cliente no map, apos a autenticacao
+            createClient(newClientSock);
             struct pollfd newClient;
             newClient.fd = newClientSock;
             newClient.events = POLLIN;

@@ -58,7 +58,8 @@ Channel *Client::createChannel(const std::string &name) {
 
 int	Client::joinChannel(Channel *channel) {
 	//SE O CLIENTE JA FIZER PARTE DO CANAL, NADA ACONTECE
-	if (std::find(channel->getClients().begin(), channel->getClients().end(), this->getSocket()) == channel->getClients().end()) {
+	std::vector<int> clients = channel->getClients();
+	if (std::find(clients.begin(), clients.end(), this->getSocket()) == clients.end()) {
 		channel->addClient(this);
 		//MENSAGEM DE BOAS VINDAS
 		std::string msg = "Welcome to channel " + channel->getName() + "\nTopic: " + channel->getTopic() + "\n"; 
