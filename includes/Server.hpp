@@ -37,3 +37,12 @@ class Server {
         void    joinCommand(std::vector<std::string> &cmds, Client *client);
         void    privMsg(std::vector<std::string> &cmds, Client *client);
 };
+
+#define ERR_NEEDMOREPARAMS "461 ERROR: Not enough parameters\n"
+#define ERR_BANNEDFROMCHAN "474 ERROR: You are banned from this channel\n"
+#define ERR_INVITEONLYCHAN "473 ERROR: Invite-only channel\n"
+#define ERR_BADCHANNELKEY "476 ERROR: Wrong password\n"
+#define ERR_CHANNELISFULL "471 ERROR: Channel is full\n"
+#define ERR_BADCHANMASK "476 ERROR: Bad Channel Mask\n"
+#define ERR_NOSUCHCHANNEL "403 ERROR: No such channel\n"
+#define ERR_TOOMANYCHANNELS "405 ERROR: You have joined too many channels\n"
