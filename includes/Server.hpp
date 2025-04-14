@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Client.hpp"
 
 class Server {
@@ -25,5 +27,5 @@ class Server {
         void    setNick(std::vector<std::string> &cmds, Client *client);
         void    setUser(std::vector<std::string> &cmds, Client *client);
 		//commands
-		void	kickUser(std::vector<std::string> &cmds, Client *client);
+		int		kickUser(std::vector<std::string> &cmds, Client *client);
 };

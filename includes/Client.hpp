@@ -1,3 +1,6 @@
+
+#pragma once
+
 #include <iostream>
 #include <sstream>
 #include <sys/socket.h>

@@ -92,8 +92,11 @@ void    Server::parseCommand(std::string cmd, int clientSocket) {
         setNick(cmds, client);
     else if (cmds[0] == "USER")
         setUser(cmds, client);
+	else if (cmds[0] == "KICK") //TO START WORKING AT THE COMMANDS REQUIRED BY THE SUBJECT
+		kickUser(cmds, client);
+	/*
 	// (PASS, NICK, USER, JOIN, PART, TOPIC, INVITE, KICK, QUIT, MODE, and PRIVMSG)
-	/* else if (cmds[0] == "KICK") //TO START WORKING AT THE COMMANDS REQUIRED BY THE SUBJECT
+	else if (cmds[0] == "KICK") //TO START WORKING AT THE COMMANDS REQUIRED BY THE SUBJECT
 		//kick function
 		kickUser(cmds, client);
 	else if (cmds[0] == "INVITE")

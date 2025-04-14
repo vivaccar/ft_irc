@@ -1,16 +1,29 @@
 #include "../includes/Server.hpp"
+#include "../includes/tests.hpp"
 
-void	Server::kickUser(std::vector<std::string> &cmds, Client *client)
+int	Server::kickUser(std::vector<std::string> &cmds, Client *client)
 {
 
+	(void)client;
 	//command validation
 	//if command is invalid (DOES NOT FOLLOW THIS -> KICK #channel targetUser [:reason])
 		//return (does not have correct arguments)
+	if (cmds.size() < 3)
+	{
+		print_container(cmds, "Size < 3");
+		//Broadcast here msg de kick invalido para todos os usuarios
+		return (EXIT_FAILURE);
+	}
 	//[:reason] is optional. Define a default generic reason in case where the user didnt define anything.
-	
+	else if (cmds.size() == 3)
+	{
+		cmds.push_back("This is a default message because you didn't define a reason for kick\n");
+		print_container(cmds, "cmds == 3 \n");
+	}
+
+	// AQUI verificar se quem esta querendo kickar eh operator
 	//check if channel exist
 		//if yes
-			//check if user who gave the command is an operator
 				//if yes
 					//check if user to be expelled exists and is in channel
 						//if yes
@@ -21,8 +34,7 @@ void	Server::kickUser(std::vector<std::string> &cmds, Client *client)
 							//broadcast a messate to the server
 						//if no
 							//error user not in the channel
-				//if no
-					//return error msg user not operator
 		//if no
 	//return error msg "no channel"
+	return (EXIT_SUCCESS);
 }
