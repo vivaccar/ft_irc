@@ -3,6 +3,7 @@
 
 int	Server::kickUser(std::vector<std::string> &cmds, Client *client)
 {
+	std::cout << "kickUser method \n";
 
 	(void)client;
 	//command validation
@@ -17,11 +18,13 @@ int	Server::kickUser(std::vector<std::string> &cmds, Client *client)
 	//[:reason] is optional. Define a default generic reason in case where the user didnt define anything.
 	else if (cmds.size() == 3)
 	{
-		cmds.push_back("This is a default message because you didn't define a reason for kick\n");
+		cmds.push_back("Default reason\n");
 		print_container(cmds, "cmds == 3 \n");
 	}
 
 	// AQUI verificar se quem esta querendo kickar eh operator
+	//Ainda nao tenho essa funcao
+
 	//check if channel exist
 		//if yes
 				//if yes
