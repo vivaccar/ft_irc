@@ -7,6 +7,8 @@
 #define ERR_ALREADYREGISTERED "462 ERROR: Already Registered\n"
 #define ERR_NOTREGISTERED "451 ERROR: You have not Registered\n"
 #define ERR_NONICKNAMEGIVEN "431 ERROR: No Nickname Given\n"
+#define ERR_NICKNAMEINUSE " :Nickname is already in use.\n"
+#define ERR_ERRONEUSNICKNAME "432 ERROR: Erroneus nickname\n"
 
 class Server {
     private:
@@ -38,6 +40,7 @@ class Server {
         void    parseCommand(std::string cmd, int clientSocket);
         void    checkPassword(std::vector<std::string> &cmds, Client *client);
         void    setNick(std::vector<std::string> &cmds, Client *client);
+        bool	nickColission(std::string &nick);
         void    setUser(std::vector<std::string> &cmds, Client *client);
         void    joinCommand(std::vector<std::string> &cmds, Client *client);
         void    privMsg(std::vector<std::string> &cmds, Client *client);
