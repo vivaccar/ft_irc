@@ -7,6 +7,7 @@
 #define ERR_ALREADYREGISTERED "462 ERROR: Already Registered\n"
 #define ERR_NOTREGISTERED "451 ERROR: You have not Registered\n"
 #define ERR_NONICKNAMEGIVEN "431 ERROR: No Nickname Given\n"
+#define ERR_NOSUCHCHANNEL "403 ERROR :No such channel"
 
 class Server {
     private:
