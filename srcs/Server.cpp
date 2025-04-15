@@ -92,29 +92,40 @@ void	Server::privMsg(std::vector<std::string> &cmds, Client *client) {
 }
 
 void    Server::parseCommand(std::string cmd, int clientSocket) {
-    std::vector<std::string> cmds;
-    std::istringstream stream(cmd);
-    std::string word;
+    std::vector<std::string> lines;
+    std::istringstream streamLine(cmd);
+    std::string line;
     
-    while (stream >> word)
-        cmds.push_back(word);
-
+    while (std::getline(streamLine, line))
+        lines.push_back(line);
     Client *client = getClientBySocket(clientSocket);
-	if (cmds.size() > 1)
+    for (std::vector<std::string>::iterator it = lines.begin(); it != lines.end(); it++) 
     {
-		if (cmds[0] == "PASS")
-			checkPassword(cmds, client);
-		else if (cmds[0] == "NICK")
-			setNick(cmds, client);
-		else if (cmds[0] == "USER")
-			setUser(cmds, client);
-        else if (!client->isAuth())
-            send(client->getSocket(), ERR_NOTREGISTERED, strlen(ERR_NOTREGISTERED), 0);
-		else if (cmds[0] == "JOIN")
-			joinCommand(cmds, client);
-		else if (cmds[0] == "PRIVMSG")
-			privMsg(cmds, client);
-	}
+        std::vector<std::string> cmds;
+        std::string word;
+        std::istringstream streamCmd(*it);
+        while (streamCmd >> word)
+            cmds.push_back(word);
+        if (cmds.size() > 1)
+        {
+            if (cmds[0] == "PASS")
+                checkPassword(cmds, client);
+            else if (cmds[0] == "NICK")
+                setNick(cmds, client);
+            else if (cmds[0] == "USER")
+                setUser(cmds, client);
+            else if (!client->isAuth())
+                send(client->getSocket(), ERR_NOTREGISTERED, strlen(ERR_NOTREGISTERED), 0);
+            else if (cmds[0] == "JOIN")
+            {
+                joinCommand(cmds, client);
+                std::string joinresp = ":" + client->getNick() + " JOIN " + cmds[1];
+                send(clientSocket, joinresp.c_str(), strlen(joinresp.c_str()), 0);
+            }
+            else if (cmds[0] == "PRIVMSG")
+                privMsg(cmds, client);
+        }
+    }
 }
 
 void    Server::runPoll() {
@@ -167,9 +178,9 @@ void    Server::runPoll() {
                 {
                     // Envia resposta ao cliente
                     std::cout << "Client " << client_socket << " say:" << buffer << std::endl;
-                    const char* response = "Message received by the server!\n";
+                    //const char* response = "Message received by the server!\n";
                     parseCommand(std::string(buffer), client_socket);
-                    send(client_socket, response, strlen(response), 0);
+                    //send(client_socket, response, strlen(response), 0);
                 }
             }
         }
