@@ -17,11 +17,24 @@ const std::string& Server::getPassword() const {
     return this->_password;
 }
 
-Client* Server::getClient(int socket) {
+std::map<int, Client*> Server::getClientsMap() const{
+	return this->_clients;
+}
+
+Client* Server::getClientBySocket(int socket) {
     std::map<int, Client*>::iterator it = _clients.lower_bound(socket);
     if (it != _clients.end())
         return it->second;
     return NULL;
+}
+
+Client* Server::getClientByNick(const std::string &nick) {
+	std::map<int, Client*> c = this->getClientsMap();
+	for (std::map<int, Client *>::iterator it = c.begin(); it != c.end(); it++) {
+		if (it->second->getNick() == nick)
+			return it->second;
+	}
+	return NULL;
 } 
 
 void    Server::createSocket() {
@@ -48,31 +61,34 @@ void    Server::createClient(int socket) {
     this->_clients.insert(std::make_pair(socket, newClient));
 }
 
+void    Server::joinCommand(std::vector<std::string> &cmds, Client *client) {
+	std::map<std::string, Channel *>::iterator it = this->_channels.find(cmds[1]);
+	if (it == _channels.end()) {
+		Channel *newChannel = client->createChannel(cmds[1]);
+		this->_channels.insert(std::make_pair(newChannel->getName(), newChannel));
+	}
+	else {
+		int ret = client->joinChannel(it->second);
+		//mensagens de erro serao tratadas aqui, dependendo do retorno de joinChannel
+		(void) ret;
 
-void    Server::checkPassword(std::vector<std::string> &cmds, Client *client)
-{
-    if (cmds.size() == 2)
-    {
-        if (cmds[1] == _password)
-        {
-            std::cout << "Client " << client->getSocket() << " type the correct password!" << std::endl;
-            client->setInsertPassword(true);
-        }
-        else
-            std::cout << "Client " << client->getSocket() << " type the incorrect password!" << std::endl;
-    }
+
+	}
 }
 
-void    Server::setNick(std::vector<std::string> &cmds, Client *client)
-{
-        client->setNick(cmds[1]);
-        std::cout << client->getSocket() << " :" << " set new NICKNAME :" << client->getNick() << std::endl;
-}
+void	Server::privMsg(std::vector<std::string> &cmds, Client *client) {
+	//verificar se eh para canal ou user
+	/* if (cmds[1][0] == '#')
+		msgChannel */
+	Client *dest = this->getClientByNick(cmds[1]);
+	if (dest != NULL) { //O USER DESTINO EXISTE
+		std::string msg = "@" + client->getNick() + " sent a private message to you: ";
+		for (size_t i = 3; i < cmds.size(); i++)
+			msg+= cmds[i] + " ";
+		msg+= "\n";
+		send(dest->getSocket(), msg.c_str(), msg.size(), 0);
+	}
 
-void    Server::setUser(std::vector<std::string> &cmds, Client *client)
-{
-        client->setUser(cmds[1]);
-        std::cout << client->getSocket() << " :" << " set new USERNAME :" << client->getUser() << std::endl;
 }
 
 void    Server::parseCommand(std::string cmd, int clientSocket) {
@@ -80,37 +96,44 @@ void    Server::parseCommand(std::string cmd, int clientSocket) {
     std::istringstream stream(cmd);
     std::string word;
     
-
-    (void) clientSocket;
     while (stream >> word)
         cmds.push_back(word);
 
-    Client *client = getClient(clientSocket);
-    if (cmds[0] == "PASS")
-        checkPassword(cmds, client);
-    else if (cmds[0] == "NICK")
-        setNick(cmds, client);
-    else if (cmds[0] == "USER")
-        setUser(cmds, client);
-	else if (cmds[0] == "KICK") //TO START WORKING AT THE COMMANDS REQUIRED BY THE SUBJECT
-		kickUser(cmds, client);
-	/*
-	// (PASS, NICK, USER, JOIN, PART, TOPIC, INVITE, KICK, QUIT, MODE, and PRIVMSG)
-	else if (cmds[0] == "KICK") //TO START WORKING AT THE COMMANDS REQUIRED BY THE SUBJECT
-		//kick function
-		kickUser(cmds, client);
-	else if (cmds[0] == "INVITE")
-		//invite function
-	else if (cmds[0] == "TOPIC") 
-		//topic function
-	else if (cmds[0] == "MODE")
-		//mode function, where
-			//i: Set/Remove Invite-only channel
-			//t: set/remove the restrictions of the TOPIC command to channel operator
-			//k: set/remove the channel key (password)
-			//o: give/take channel operator(moderador) privilege
-			//l: set/remove the user limit to channel
-	*/
+    Client *client = getClientBySocket(clientSocket);
+	if (cmds.size() > 1)
+    {
+		if (cmds[0] == "PASS")
+			checkPassword(cmds, client);
+		else if (cmds[0] == "NICK")
+			setNick(cmds, client);
+		else if (cmds[0] == "USER")
+			setUser(cmds, client);
+        else if (!client->isAuth())
+            send(client->getSocket(), ERR_NOTREGISTERED, strlen(ERR_NOTREGISTERED), 0);
+		else if (cmds[0] == "JOIN")
+			joinCommand(cmds, client);
+		else if (cmds[0] == "PRIVMSG")
+			privMsg(cmds, client);
+		else if (cmds[0] == "KICK") //TO START WORKING AT THE COMMANDS REQUIRED BY THE SUBJECT
+			kickUser(cmds, client);
+		/*
+		// (PASS, NICK, USER, JOIN, PART, TOPIC, INVITE, KICK, QUIT, MODE, and PRIVMSG)
+		else if (cmds[0] == "KICK") //TO START WORKING AT THE COMMANDS REQUIRED BY THE SUBJECT
+			//kick function
+			kickUser(cmds, client);
+		else if (cmds[0] == "INVITE")
+			//invite function
+		else if (cmds[0] == "TOPIC") 
+			//topic function
+		else if (cmds[0] == "MODE")
+			//mode function, where
+				//i: Set/Remove Invite-only channel
+				//t: set/remove the restrictions of the TOPIC command to channel operator
+				//k: set/remove the channel key (password)
+				//o: give/take channel operator(moderador) privilege
+				//l: set/remove the user limit to channel
+		*/
+	}
 }
 
 void    Server::runPoll() {
@@ -162,9 +185,9 @@ void    Server::runPoll() {
                 } else
                 {
                     // Envia resposta ao cliente
-                    std::cout << "Client " << _fds[i].fd << " say:" << buffer << std::endl;
+                    std::cout << "Client " << client_socket << " say:" << buffer << std::endl;
+                    const char* response = "Message received by the server!\n";
                     parseCommand(std::string(buffer), client_socket);
-                    const char* response = "Message received by the server!";
                     send(client_socket, response, strlen(response), 0);
                 }
             }

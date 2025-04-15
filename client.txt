@@ -10,7 +10,8 @@ client {
 channels {
     name
     topic
-    clients
+    clients (vetor de sockets)
+	admins (vetor)
 }
 
 

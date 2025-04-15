@@ -1,5 +1,5 @@
-#include "../includes/Server.hpp"
-#include "../includes/tests.hpp"
+#include "../../includes/Server.hpp"
+#include "../../includes/tests.hpp"
 
 int	Server::kickUser(std::vector<std::string> &cmds, Client *client)
 {
