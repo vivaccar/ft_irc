@@ -8,9 +8,9 @@ void    Server::setNick(std::vector<std::string> &cmds, Client *client)
 		return ;
 	}
 	if (cmds.size() > 1) {
+		std::string response = ":" + client->getNick() + std::string(" NICK :") + cmds[1] + "\n";
 		client->setNick(cmds[1]);
 		std::cout << "Client " << client->getSocket() << " :" << " set new NICKNAME :" << client->getNick() << std::endl;
-		std::string response = "New Nickname set! : " + client->getNick() + "\n";
 		send(client->getSocket(), response.c_str(), response.size(), 0);
 		return ;
 	}

@@ -2,11 +2,11 @@
 #include "Client.hpp"
 #include "Channel.hpp"
 
-#define ERR_NEEDMOREPARAMS "ERROR 461: Need more parameters\n"
-#define ERR_PASSWDMISMATCH "ERROR 464: Invalid password\n"
-#define ERR_ALREADYREGISTERED "ERROR 462: Already Registered\n"
-#define ERR_NOTREGISTERED "ERROR 451: You have not Registered\n"
-#define ERR_NONICKNAMEGIVEN "ERROR 431: No Nickname Given\n"
+#define ERR_NEEDMOREPARAMS "461 ERROR: Need more parameters\n"
+#define ERR_PASSWDMISMATCH "464 ERROR: Invalid password\n"
+#define ERR_ALREADYREGISTERED "462 ERROR: Already Registered\n"
+#define ERR_NOTREGISTERED "451 ERROR: You have not Registered\n"
+#define ERR_NONICKNAMEGIVEN "431 ERROR: No Nickname Given\n"
 
 class Server {
     private:
