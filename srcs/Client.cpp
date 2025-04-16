@@ -1,6 +1,6 @@
 #include "../includes/Client.hpp"
 
-Client::Client(int socket) : _socket(socket), _isAuth(false), _insertPassword(false) {
+Client::Client(const int socket) : _socket(socket), _isAuth(false), _insertPassword(false) {
     std::cout << "New client created Socket " << _socket << std::endl; 
 }
 
@@ -56,24 +56,33 @@ Channel *Client::createChannel(const std::string &name) {
 	return c;
 }
 
-int	Client::joinChannel(Channel *channel) {
-	//SE O CLIENTE JA FIZER PARTE DO CANAL, NADA ACONTECE
-	std::vector<int> clients = channel->getClients();
-	if (std::find(clients.begin(), clients.end(), this->getSocket()) == clients.end()) {
-		channel->addClient(this);
-		//MENSAGEM DE BOAS VINDAS
-		std::string msg = "Welcome to channel " + channel->getName() + "\nTopic: " + channel->getTopic() + "\n"; 
-		send(this->getSocket(), msg.c_str(), msg.size(), 0);
-		//DESENVOLVER MENSAGEM DE JOIN PARA OUTROS MEMBROS DO CANAL
-		return 1;
+void	Client::sendToChannel(Channel *channel, std::string &msg) {
+	std::vector<int> members = channel->getClients();
+	for (std::vector<int>::iterator it = members.begin(); it != members.end(); it++) {
+		if (*it == this->getSocket())
+			continue ;
+		send(*it, msg.c_str(), msg.size(), 0);
 	}
-	//desenvolver outras possibilidades, como:
-	//tentar entrar num canal que esta mode invite-only, sem convite;
-	//verificar se canal tem password;
-	//verificar se o canal tem users limit;
-	return 0;
-		
-	
-
 }
 
+void	Client::sendToClient(Client *client, std::string &msg) {
+	send(client->getSocket(), msg.c_str(), msg.size(), 0);
+}
+
+void	Client::sendError(Client *client, const char *error) {
+	send(client->getSocket(), error, strlen(error), 0);
+}
+
+bool	Client::isChannelMember(Channel *channel) {
+	std::vector<int> members = channel->getClients();
+	if (std::find(members.begin(), members.end(), this->getSocket()) != members.end())
+		return true;
+	return false;
+}
+
+bool	Client::isChannelAdmin(Channel *channel) {
+	std::vector<int> admins = channel->getAdmins();
+	if (std::find(admins.begin(), admins.end(), this->getSocket()) != admins.end())
+		return true;
+	return false;
+}

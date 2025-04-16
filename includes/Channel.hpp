@@ -2,6 +2,7 @@
 #include "Client.hpp"
 
 class Client; 
+class Server; 
 
 class Channel {
 	private:

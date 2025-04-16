@@ -50,6 +50,12 @@ class Client {
         bool insertPassword() const;
 		Channel *createChannel(const std::string &name);
 		int	joinChannel(Channel *channel);
+
+		void	sendToChannel(Channel *channel, std::string &msg);
+		void	sendToClient(Client *client, std::string &msg);
+		void	sendError(Client *client, const char *error);
+		bool	isChannelMember(Channel *channel);
+		bool	isChannelAdmin(Channel *channel);
 };
 
 #define ERR_ALREADYREGISTRED "User is already registered!\n"
