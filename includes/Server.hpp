@@ -2,13 +2,17 @@
 #include "Client.hpp"
 #include "Channel.hpp"
 
-#define ERR_NEEDMOREPARAMS "461 ERROR: Need more parameters\n"
-#define ERR_PASSWDMISMATCH "464 ERROR: Invalid password\n"
-#define ERR_ALREADYREGISTERED "462 ERROR: Already Registered\n"
-#define ERR_NOTREGISTERED "451 ERROR: You have not Registered\n"
-#define ERR_NONICKNAMEGIVEN "431 ERROR: No Nickname Given\n"
-#define ERR_NICKNAMEINUSE " :Nickname is already in use.\n"
-#define ERR_ERRONEUSNICKNAME "432 ERROR: Erroneus nickname\n"
+#define ERR_NEEDMOREPARAMS(nick, cmd) ": 461 " + nick + " " + cmd + " :Need more parameters\r\n"
+#define ERR_PASSWDMISMATCH(nick) ": 464 " + nick + " : Invalid password\r\n"
+#define ERR_ALREADYREGISTERED(nick) ": 462 " + nick + " :You may not reregister\r\n"
+#define ERR_NOTREGISTERED(nick) ": 451 " + nick + " :You have not Registered\r\n"
+#define ERR_NONICKNAMEGIVEN(nick) ": 431 " + nick + " :No Nickname Given\r\n"
+#define ERR_NICKNAMEINUSE(nick, attempt) ": 433 " + nick + " " + attempt + " :Nickname in use.\r\n"
+#define ERR_ERRONEUSNICKNAME(nick, attempt) ": 432 " + nick + " " + attempt + ": Erroneus nickname\r\n"
+#define ERR_UNKNOWNCOMMAND(nick, cmd) ": 421 " + nick + " " + cmd + " :Unknown command\r\n"
+
+#define WELCOME(nick) ": 001 " + nick + " :Welcome " + nick + " to the ft_irc\r\n"
+
 
 class Server {
     private:
@@ -44,4 +48,7 @@ class Server {
         void    setUser(std::vector<std::string> &cmds, Client *client);
         void    joinCommand(std::vector<std::string> &cmds, Client *client);
         void    privMsg(std::vector<std::string> &cmds, Client *client);
+
+        //RESPONSE
+        void	sendResponse(int socket, const std::string &response) const;
 };

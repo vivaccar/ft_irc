@@ -39,7 +39,7 @@ Client* Server::getClientByNick(const std::string &nick) {
 
 void    Server::createSocket() {
     // CRIA O SOCKET DO SERVIDOR
-    std::cout << "Creating socket" <<std::endl;
+    std::cout << "Creating Server Socket and preparing for receive connections..." <<std::endl;
     _socketFd = socket(AF_INET, SOCK_STREAM, 0);
     if (_socketFd <= 0)
         throw("Server Socket Fail");
@@ -106,25 +106,24 @@ void    Server::parseCommand(std::string cmd, int clientSocket) {
         std::istringstream streamCmd(*it);
         while (streamCmd >> word)
             cmds.push_back(word);
-        if (cmds.size() > 1)
+        if (cmds[0] == "PASS" || cmds[0] == "pass")
+            checkPassword(cmds, client);
+        else if (cmds[0] == "NICK" || cmds[0] == "nick")
+            setNick(cmds, client);
+        else if (cmds[0] == "USER" || cmds[0] == "user")
+            setUser(cmds, client);
+        else if (!client->isAuth())
+            sendResponse(client->getSocket(), ERR_NOTREGISTERED(client->getNick()));
+        else if (cmds[0] == "JOIN")
         {
-            if (cmds[0] == "PASS")
-                checkPassword(cmds, client);
-            else if (cmds[0] == "NICK")
-                setNick(cmds, client);
-            else if (cmds[0] == "USER")
-                setUser(cmds, client);
-            else if (!client->isAuth())
-                send(client->getSocket(), ERR_NOTREGISTERED, strlen(ERR_NOTREGISTERED), 0);
-            else if (cmds[0] == "JOIN")
-            {
-                joinCommand(cmds, client);
-                std::string joinresp = ":" + client->getNick() + " JOIN " + cmds[1];
-                send(clientSocket, joinresp.c_str(), strlen(joinresp.c_str()), 0);
-            }
-            else if (cmds[0] == "PRIVMSG")
-                privMsg(cmds, client);
+            joinCommand(cmds, client);
+            std::string joinresp = ":" + client->getNick() + " JOIN " + cmds[1] + "\n";
+            send(clientSocket, joinresp.c_str(), strlen(joinresp.c_str()), 0);
         }
+        else if (cmds[0] == "PRIVMSG")
+            privMsg(cmds, client);
+        else
+            sendResponse(client->getSocket(), ERR_UNKNOWNCOMMAND(client->getNick(), cmds[0]));
     }
 }
 
@@ -136,6 +135,8 @@ void    Server::runPoll() {
     server.revents = 0;
     _fds.push_back(server);
     
+    std::cout << std::endl << GREEN << "Server waiting connections on FD "
+        << _socketFd << RESET << std::endl;
     while (1)
     {
         int ret = poll(_fds.data(), _fds.size(), 0);
@@ -158,7 +159,8 @@ void    Server::runPoll() {
             _fds.push_back(newClient);
             const char *login = "To authenticate, follow the steps\n1 - PASS [password]\n2 - NICK [nickname]\n3 - USER [username]\n";
             send(newClientSock, login, strlen(login), 0);
-            std::cout << "New client connected on FD: " << newClient.fd << std::endl;
+            std::cout << GREEN << std::endl << "New client connected on FD: "
+                << newClient.fd << RESET << std::endl;
         }
         for (size_t i = 1; i < _fds.size(); i++)
         {  // Começa no índice 1, já que o índice 0 é o servidor
@@ -170,19 +172,25 @@ void    Server::runPoll() {
                 if (bytes_read == 0)
                 {
                     // Cliente desconectou
-                    std::cout << "Client desconected on FD" << _fds[i].fd << std::endl;
+                    Client *toDelete = getClientBySocket(client_socket);
+                    if (toDelete)
+                        delete toDelete;
+                    std::cout << RED << std::endl << "Client desconected on FD" << _fds[i].fd << RESET << std::endl;
                     close(client_socket);
                     _fds.erase(_fds.begin() + i);  // Remove o cliente da lista
+                    _clients.erase(client_socket);
                     --i;  // Ajusta o índice após a remoção
                 } else
                 {
                     // Envia resposta ao cliente
-                    std::cout << "Client " << client_socket << " say:" << buffer << std::endl;
-                    //const char* response = "Message received by the server!\n";
+                    std::cout << "\nClient " << client_socket << " say: " << buffer << std::endl;
                     parseCommand(std::string(buffer), client_socket);
-                    //send(client_socket, response, strlen(response), 0);
                 }
             }
         }
     }
+}
+
+void	Server::sendResponse(int socket, const std::string &response) const {
+    send(socket, response.c_str(), strlen(response.c_str()), 0);
 }

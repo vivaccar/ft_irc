@@ -1,7 +1,7 @@
 #include "../includes/Client.hpp"
 
 Client::Client(int socket) : _socket(socket), _isAuth(false), _insertPassword(false) {
-    std::cout << "New client created Socket " << _socket << std::endl; 
+    //std::cout << "New client created Socket " << _socket << std::endl; 
 }
 
 Client::~Client() {}

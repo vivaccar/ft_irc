@@ -32,19 +32,11 @@ bool	validNickname(std::string &nick)
 void    Server::setNick(std::vector<std::string> &cmds, Client *client)
 {
 	if (!client->insertPassword())
-	{
-		send(client->getSocket(), ERR_NOTREGISTERED, strlen(ERR_NOTREGISTERED), 0);
-		return ;
-	}
+		return sendResponse(client->getSocket(), ERR_NOTREGISTERED(client->getNick()));
 	if (nickColission(cmds[1]))
-	{
-		send(client->getSocket(), ": 433 ", strlen(": 433 "), 0);
-		send(client->getSocket(), client->getNick().c_str(), strlen(client->getNick().c_str()), 0);
-		send(client->getSocket(), " ", strlen(" "), 0);
-		send(client->getSocket(), cmds[1].c_str(), strlen(cmds[1].c_str()), 0);
-		send(client->getSocket(), ERR_NICKNAMEINUSE, strlen(ERR_NICKNAMEINUSE), 0);
-		return ;
-	}
+		return sendResponse(client->getSocket(), ERR_NICKNAMEINUSE(client->getNick(), cmds[1]));
+	if (cmds.size() < 2)
+		return sendResponse(client->getSocket(), ERR_NONICKNAMEGIVEN(client->getNick()));
 	if (validNickname(cmds[1]))
 	{
 		if (cmds.size() > 1) 
@@ -53,13 +45,15 @@ void    Server::setNick(std::vector<std::string> &cmds, Client *client)
 			client->setNick(cmds[1]);
 			std::cout << "Client " << client->getSocket() << " :" << " set new NICKNAME :" << client->getNick() << std::endl;
 			send(client->getSocket(), response.c_str(), response.size(), 0);
+			if (!client->getUser().empty() && !client->isAuth())
+			{
+				sendResponse(client->getSocket(), WELCOME(client->getNick()));
+				client->setAuth(true);
+			}
 			return ;
 		}
 	}
 	else
-	{
-		send(client->getSocket(), ERR_ERRONEUSNICKNAME, strlen(ERR_ERRONEUSNICKNAME), 0);
-		return;
-	}
-	send(client->getSocket(), ERR_NEEDMOREPARAMS, strlen(ERR_NEEDMOREPARAMS), 0);
+		return sendResponse(client->getSocket(), ERR_ERRONEUSNICKNAME(client->getNick(), cmds[1]));
+	sendResponse(client->getSocket(), ERR_NEEDMOREPARAMS(client->getNick(), cmds[0]));
 }
