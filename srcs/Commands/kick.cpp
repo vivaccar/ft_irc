@@ -2,13 +2,14 @@
 #include "../../includes/tests.hpp"
 
 
+
 //Aqui a intencao eh buscar dentro da lista de todos os channels do server
 //e verificar se o server existe
 //tendo em consideracao o nome do servidor a ser procurado
 //(que eh o comando dado no KICK)
-bool	IsAValidChannel(std::map<std::string, Channel*> channels, std::string name)
+static bool	IsAValidChannel(std::map<std::string, Channel*> channels, std::string name)
 {
-	std::cout << "IsAValidChannel Mathod\n";
+	std::cout << "IsAValidChannel Method\n";
 	for (std::map<std::string, Channel*>::iterator it = channels.begin(); it != channels.end(); it ++)
 	{
 		std::cout << "Name var: " << name << " \n";
@@ -23,9 +24,26 @@ bool	IsAValidChannel(std::map<std::string, Channel*> channels, std::string name)
 
 //Aqui a intencao eh buscar o channel por nome para verificar se o client que esta
 //tentando realizar a acao eh um admin ou nao
-bool	isClientAdmin(Client *client, std::string channel_name)
+static bool	isClientOperator(Client *client, std::map<std::string, Channel*> channels, std::string channel_name)
 {
+	std::map<std::string, Channel*>::iterator channel_found = channels.begin(); //iguala iterador ao comeco
+	for (std::map<std::string, Channel*>::iterator it = channels.begin(); it != channels.end(); it ++) //roda por todos os canais
+	{
+		if (channel_name.substr(1).compare(it->first) == 0) //se encontrar o canal
+		{
+			channel_found = it; // o iterador indicando que achou o canal aponta para ele
+			break;
+		}
+	}
 
+	if (channel_found == channels.end()) // se rodar todos os canais e nao achar nada, canal invalido.
+		return (false);
+
+	std::vector<int> admins = channel_found->second->getAdmins(); //busca os admins do canal encontrado
+	if (std::find(admins.begin(), admins.end(), client->getSocket()) != admins.end()) //se achar o admin, retorna true
+		return (true);
+
+	return (false);
 }
 
 int	Server::kickUser(std::vector<std::string> &cmds, Client *client)
@@ -51,11 +69,11 @@ int	Server::kickUser(std::vector<std::string> &cmds, Client *client)
 	}
 
 	// AQUI verificar se quem esta querendo kickar eh operator
-	//Ainda nao tenho essa funcao
 	//check if channel exist
-	if (IsAValidChannel(this->_channels, cmds[1]))
+	//cmds[1] em tese eh o nome do canal (seguindo isso KICK #channel targetUser [:reason])
+	if (IsAValidChannel(this->_channels, cmds[1]) && isClientOperator(client, this->_channels, cmds[1]))
 	{
-		std::cout << "CHANNEL ENCONTRADO" << std::endl;
+		std::cout << "CHANNEL ENCONTRADO E CLIENTE EH ADMIN" << std::endl;
 		//if yes
 			//check if user to be expelled exists and is in channel
 				//if yes
