@@ -25,7 +25,7 @@ void    Server::joinCommand(std::vector<std::string> &cmds, Client *client) {
 		Channel *channel = it->second;
 		//checar limite de users do canal
 		//checar se o canal eh modo invite-only
-		int ret = client->joinChannel(it->second);
+		int ret = client->joinChannel(channel);
 		//mensagens de erro serao tratadas aqui, dependendo do retorno de joinChannel
 		(void) ret;
 
