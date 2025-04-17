@@ -45,7 +45,10 @@ static bool	isClientOperator(Client *client, std::map<std::string, Channel*> cha
 
 bool	isTargetUserOnChannel(std::map<std::string, Channel*> channels, std::string channel_name, std::string Target)
 {
-
+	(void)channels;
+	(void)channel_name;
+	(void)Target;
+	return (true);
 }
 
 int	Server::kickUser(std::vector<std::string> &cmds, Client *client)

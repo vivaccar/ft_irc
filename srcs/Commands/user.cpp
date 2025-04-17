@@ -2,19 +2,16 @@
 
 void    Server::setUser(std::vector<std::string> &cmds, Client *client)
 {
-	if (!client->insertPassword())
-	{
-		send(client->getSocket(), ERR_NOTREGISTERED, strlen(ERR_NOTREGISTERED), 0);
-		return;
-	}
-	if (client->getNick().empty())
-	{
-		send(client->getSocket(), ERR_NONICKNAMEGIVEN, strlen(ERR_NONICKNAMEGIVEN), 0);
-		return;
-	}
+	if (!client->passInserted())
+		return sendResponse(client->getSocket(), ERR_NOTREGISTERED(client->getNick()));
+	if (cmds.size() < 5)
+		return sendResponse(client->getSocket(), ERR_NEEDMOREPARAMS(client->getNick(), cmds[0]));
+	if (client->isAuth())
+		return sendResponse(client->getSocket(), ERR_ALREADYREGISTERED(client->getNick()));
 	client->setUser(cmds[1]);
-	std::cout << "Client " << client->getSocket() << " :" << " set new USERNAME :" << client->getUser() << std::endl;
-	const char* response = "Username set!\nNow you are able to join/create a channel\n";
-	client->setAuth(true);
-	send(client->getSocket(), response, strlen(response), 0);
+	if (!client->isAuth() && !client->getNick().empty())
+	{
+		sendResponse(client->getSocket(), WELCOME(client->getNick()));
+		client->setAuth(true);
+	}
 }

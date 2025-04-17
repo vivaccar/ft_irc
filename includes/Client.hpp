@@ -11,6 +11,7 @@
 #include <map>
 #include <algorithm>
 #include "Channel.hpp"
+#include <fcntl.h>
 
 #define RED "\e[31m"
 #define BLUE "\e[34m"
@@ -25,30 +26,38 @@ class Channel;
 
 class Client {
     private:
-        int _socket;
-        bool _isAuth;
-        bool _insertPassword;
-        std::string _nick;
-        std::string _user;
-		std::vector<Channel *> _channels;
-
-    public:
-        Client(const int socket);
-        ~Client();
-    //GETTERS    
-		bool passInserted() const;
-        int  getSocket() const;
-        std::string getUser() const;
-        std::string getNick() const;
-		std::vector<Channel *> getChannels() const;
-	//SETTERS
-        void setAuth(bool status);
-        void setInsertPassword(bool status);
-        void setNick(const std::string &nick);
-        void setUser(const std::string &user);
+            int _socket;
+            bool _isAuth;
+            bool _insertPassword;
+            std::string _nick;
+            std::string _user;
+            std::vector<Channel *> _channels;
         
-		bool isAuth() const;
-        bool insertPassword() const;
-		Channel *createChannel(const std::string &name);
-		int	joinChannel(Channel *channel);
+        public:
+            Client(const int socket);
+            ~Client();
+
+            //GETTERS    
+            bool passInserted() const;
+            int  getSocket() const;
+            std::string getUser() const;
+            std::string getNick() const;
+            std::vector<Channel *> getChannels() const;
+            bool isAuth() const;
+
+            //SETTERS
+            void setAuth(bool status);
+            void setInsertPassword(bool status);
+            void setNick(const std::string &nick);
+            void setUser(const std::string &user);
+            
+            Channel *createChannel(const std::string &name);
+            int	joinChannel(Channel *channel);
+
+
+            void	sendToChannel(Channel *channel, std::string &msg);
+            void	sendToClient(Client *client, std::string &msg);
+            void	sendError(Client *client, const char *error);
+            bool	isChannelMember(Channel *channel);
+            bool	isChannelAdmin(Channel *channel);
 };
