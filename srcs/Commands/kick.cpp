@@ -2,7 +2,6 @@
 #include "../../includes/tests.hpp"
 
 
-
 //Aqui a intencao eh buscar dentro da lista de todos os channels do server
 //e verificar se o server existe
 //tendo em consideracao o nome do servidor a ser procurado
@@ -12,10 +11,6 @@ static bool	IsAValidChannel(std::map<std::string, Channel*> channels, std::strin
 	std::cout << "IsAValidChannel Method\n";
 	for (std::map<std::string, Channel*>::iterator it = channels.begin(); it != channels.end(); it ++)
 	{
-		std::cout << "Name var: " << name << " \n";
-		std::cout << "Channel name var: " << it->first << " \n";
-		std::cout << "Channel name TO COMPARE: " << name.substr(1) << " \n";
-
 		if (name.substr(1).compare(it->first) == 0)
 			return (true);
 	}
@@ -46,6 +41,13 @@ static bool	isClientOperator(Client *client, std::map<std::string, Channel*> cha
 	return (false);
 }
 
+//Aqui a intencao eh procurar o user escrito pelo Operator e verificar se ele existe e esta no canal
+
+bool	isTargetUserOnChannel(std::map<std::string, Channel*> channels, std::string channel_name, std::string Target)
+{
+
+}
+
 int	Server::kickUser(std::vector<std::string> &cmds, Client *client)
 {
 	std::cout << "kickUser method \n";
@@ -73,12 +75,13 @@ int	Server::kickUser(std::vector<std::string> &cmds, Client *client)
 	//cmds[1] em tese eh o nome do canal (seguindo isso KICK #channel targetUser [:reason])
 	if (IsAValidChannel(this->_channels, cmds[1]) && isClientOperator(client, this->_channels, cmds[1]))
 	{
-		std::cout << "CHANNEL ENCONTRADO E CLIENTE EH ADMIN" << std::endl;
+		std::cout << "ENTROU NO IF DE CANAL VALIDO, CLIENTE OPERATOR \n";
 		//if yes
 			//check if user to be expelled exists and is in channel
 				//if yes
 					//expell the target user from the channel
-					//remove it from channels list
+					//remove it from channels list <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+						//send(seguindo aquela strin do rawlog)
 						//if user is the last of the channel
 							//delete channel??? maybe.
 					//broadcast a messate to the server
@@ -89,7 +92,7 @@ int	Server::kickUser(std::vector<std::string> &cmds, Client *client)
 	{
 		//if no
 		//return error msg "no channel"
-		std::cout << "CHANNEL NAO ENCONTRADO\n" << std::endl;
+		std::cout << "NAO ENTROU NO IF DE CANAL VALIDO, CLIENTE OPERATOR\n";
 	}
 		
 		
