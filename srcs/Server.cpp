@@ -59,6 +59,14 @@ void Server::recSignal() {
     signal(SIGQUIT, SIG_IGN);
 }
 
+Channel *Server::getChannelByName(const std::string &name) {
+	std::map<std::string, Channel *>::iterator it = this->_channels.find(name);
+	if (it != this->_channels.end())
+		return it->second;
+	return NULL;
+}
+
+
 void    Server::createSocket() {
     // CRIA O SOCKET DO SERVIDOR
     std::cout << "Creating Server Socket and preparing for receive connections..." <<std::endl;
@@ -90,32 +98,39 @@ void    Server::createClient(int socket) {
     this->_clients.insert(std::make_pair(socket, newClient));
 }
 
-void    Server::joinCommand(std::vector<std::string> &cmds, Client *client) {
-	std::map<std::string, Channel *>::iterator it = this->_channels.find(cmds[1]);
-	if (it == _channels.end()) {
-		Channel *newChannel = client->createChannel(cmds[1]);
-		this->_channels.insert(std::make_pair(newChannel->getName(), newChannel));
-	}
-	else {
-		int ret = client->joinChannel(it->second);
-		//mensagens de erro serao tratadas aqui, dependendo do retorno de joinChannel
-		(void) ret;
-
-
-	}
-}
-
 void	Server::privMsg(std::vector<std::string> &cmds, Client *client) {
 	//verificar se eh para canal ou user
-	/* if (cmds[1][0] == '#')
-		msgChannel */
-	Client *dest = this->getClientByNick(cmds[1]);
-	if (dest != NULL) { //O USER DESTINO EXISTE
-		std::string msg = "@" + client->getNick() + " sent a private message to you: ";
-		for (size_t i = 3; i < cmds.size(); i++)
-			msg+= cmds[i] + " ";
-		msg+= "\n";
-		send(dest->getSocket(), msg.c_str(), msg.size(), 0);
+	if (cmds[1][0] == '#') {
+		Channel *channel = getChannelByName(cmds[1]); // verificar se o nome do canal esta sendo armazenado com '#'
+		if (channel && client->isChannelMember(channel)) {
+			if (channel != NULL && cmds[2][0] == ':') {
+                std::string msg = ":" + client->getNick() + " PRIVMSG " + channel->getName() + " ";
+				for (size_t i = 2; i < cmds.size(); i++)
+					msg+= cmds[i] + " ";
+				msg += "\n";
+				client->sendToChannel(channel, msg);
+			}
+		}
+	}	
+	else {
+		Client *dest = this->getClientByNick(cmds[1]);
+		if (dest != NULL && cmds[2][0] == ':') { //O USER DESTINO EXISTE
+            std::string msg = ":" + client->getNick() + " PRIVMSG " + dest->getNick() + " ";
+            //:Angel PRIVMSG Wiz :Hello are you receiving this message ?
+			//std::string msg = "@" + client->getNick() + " sent a private message to you";
+			for (size_t i = 2; i < cmds.size(); i++)
+				msg+= cmds[i] + " ";
+			msg+= "\n";
+			client->sendToClient(dest, msg);
+		}
+		else if (dest == NULL) {
+			std::string msg = "User @" + cmds[1] + " not found!\n";
+			client->sendToClient(client, msg);
+		}
+		else {
+			std::string msg = "Invalid Synthax\nThe command must be \"PRIVMSG <nickname> : <message>\"\n";
+			client->sendToClient(client, msg);
+		}
 	}
 
 }
@@ -146,8 +161,8 @@ void    Server::parseCommand(std::string cmd, int clientSocket) {
         else if (cmds[0] == "JOIN")
         {
             joinCommand(cmds, client);
-            std::string joinresp = ":" + client->getNick() + " JOIN " + cmds[1] + "\n";
-            send(clientSocket, joinresp.c_str(), strlen(joinresp.c_str()), 0);
+            /* std::string joinresp = ":" + client->getNick() + " JOIN " + cmds[1] + "\n";
+            send(clientSocket, joinresp.c_str(), strlen(joinresp.c_str()), 0); */
         }
         else if (cmds[0] == "PRIVMSG")
             privMsg(cmds, client);

@@ -40,6 +40,7 @@ class Server {
         Client *getClientBySocket(int socket);
 		Client* getClientByNick(const std::string &nick);
         int     servRunning() const;
+        Channel *getChannelByName(const std::string &name);
 
         void    createSocket();
         void    runPoll();
@@ -59,3 +60,12 @@ class Server {
         //RESPONSE
         void	sendResponse(int socket, const std::string &response) const;
 };
+
+
+#define ERR_BANNEDFROMCHAN "474 ERROR: You are banned from this channel\n"
+#define ERR_INVITEONLYCHAN "473 ERROR: Invite-only channel\n"
+#define ERR_BADCHANNELKEY "476 ERROR: Wrong password\n"
+#define ERR_CHANNELISFULL "471 ERROR: Channel is full\n"
+#define ERR_BADCHANMASK "476 ERROR: Bad Channel Mask\n"
+#define ERR_NOSUCHCHANNEL "403 ERROR: No such channel\n"
+#define ERR_TOOMANYCHANNELS "405 ERROR: You have joined too many channels\n"

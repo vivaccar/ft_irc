@@ -31,7 +31,7 @@ bool	validNickname(std::string &nick)
 
 void    Server::setNick(std::vector<std::string> &cmds, Client *client)
 {
-	if (!client->insertPassword())
+	if (!client->passInserted())
 		return sendResponse(client->getSocket(), ERR_NOTREGISTERED(client->getNick()));
 	if (nickColission(cmds[1]))
 		return sendResponse(client->getSocket(), ERR_NICKNAMEINUSE(client->getNick(), cmds[1]));

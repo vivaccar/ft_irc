@@ -2,7 +2,7 @@
 
 void    Server::setUser(std::vector<std::string> &cmds, Client *client)
 {
-	if (!client->insertPassword())
+	if (!client->passInserted())
 		return sendResponse(client->getSocket(), ERR_NOTREGISTERED(client->getNick()));
 	if (cmds.size() < 5)
 		return sendResponse(client->getSocket(), ERR_NEEDMOREPARAMS(client->getNick(), cmds[0]));

@@ -1,5 +1,5 @@
 SRCS = srcs/main.cpp srcs/Server.cpp srcs/Client.cpp srcs/Channel.cpp \
-		srcs/Commands/pass.cpp srcs/Commands/nick.cpp srcs/Commands/user.cpp
+		srcs/Commands/pass.cpp srcs/Commands/nick.cpp srcs/Commands/user.cpp srcs/Commands/join.cpp
  
 OBJS = $(SRCS:.cpp=.o)
 
