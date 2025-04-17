@@ -1,6 +1,7 @@
 #pragma once
 #include "Client.hpp"
 #include "Channel.hpp"
+#include <csignal>
 
 #define ERR_NEEDMOREPARAMS(nick, cmd) ": 461 " + nick + " " + cmd + " :Need more parameters\r\n"
 #define ERR_PASSWDMISMATCH(nick) ": 464 " + nick + " : Invalid password\r\n"
@@ -16,6 +17,8 @@
 
 class Server {
     private:
+
+        int _run;
         int _port;
         int _socketFd;
         std::string _password;
@@ -23,11 +26,12 @@ class Server {
         std::vector<struct pollfd> _fds;
         std::map<int, Client*>  _clients;
         std::map<std::string, Channel*>  _channels;
-
+    
     public:
-        
+    
         Server(const std::string &port, const std::string &password);
         ~Server();
+        static Server* instance;
 
 		//GETTERS
         int getPort() const;
@@ -35,10 +39,13 @@ class Server {
 		std::map<int, Client*> getClientsMap() const;
         Client *getClientBySocket(int socket);
 		Client* getClientByNick(const std::string &nick);
+        int     servRunning() const;
 
         void    createSocket();
         void    runPoll();
         void	createClient(int socket);
+        void    recSignal();
+        static void    signalHandler(int signal);
 
 		//COMMANDS
         void    parseCommand(std::string cmd, int clientSocket);

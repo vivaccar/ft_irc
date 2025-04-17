@@ -102,6 +102,7 @@ int main(int ac, char **av)
     Server server(av[1], av[2]);
     try
     {
+        server.recSignal();
         server.createSocket();
         server.runPoll();
     }

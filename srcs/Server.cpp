@@ -1,16 +1,26 @@
 #include "../includes/Server.hpp"
 
+Server *Server::instance = NULL;
+
 Server::Server(const std::string &port, const std::string &password) {
     this->_port = atoi(port.c_str());
     this->_password = password;
+    this->_run = 1;
 }
 
 Server::~Server() {
     std::cout << "Server Destroyed!" << std::endl;
+    for (std::map<int, Client*>::iterator it = _clients.begin(); it != _clients.end(); it++)
+        delete it->second;
+    close(_socketFd);
 }
 
 int Server::getPort() const {
     return this->_port;
+}
+
+int Server::servRunning() const {
+    return this->_run;
 }
 
 const std::string& Server::getPassword() const {
@@ -37,23 +47,42 @@ Client* Server::getClientByNick(const std::string &nick) {
 	return NULL;
 } 
 
+void Server::signalHandler(int signal) {
+    (void)signal;
+    std::cout << "ctrl-c received" << std::endl;
+    instance->_run = 0;
+}
+
+void Server::recSignal() {
+    instance = this;
+    signal(SIGINT, Server::signalHandler);
+    signal(SIGQUIT, SIG_IGN);
+}
+
 void    Server::createSocket() {
     // CRIA O SOCKET DO SERVIDOR
     std::cout << "Creating Server Socket and preparing for receive connections..." <<std::endl;
-    _socketFd = socket(AF_INET, SOCK_STREAM, 0);
+    _socketFd = socket(AF_INET, SOCK_STREAM, 0); //AF_INET = IPV4, SOCK_STREAM = TCP, 0 = PADRAO
     if (_socketFd <= 0)
         throw("Server Socket Fail");
     _sockAddr.sin_family = AF_INET;
     _sockAddr.sin_port = htons(_port);
     _sockAddr.sin_addr.s_addr = INADDR_ANY;
 
+    int en = 1;
+    if (setsockopt(_socketFd, SOL_SOCKET, SO_REUSEADDR, &en, sizeof(en)) == -1) //HABILITAR A REUTILIZACAO DA PORTA ASSIM QUE FOR FECHADO
+        throw(std::runtime_error("faild to set option (SO_REUSEADDR) on socket"));
+    
+    if (fcntl(_socketFd, F_SETFL, O_NONBLOCK) == -1)
+        throw(std::runtime_error("faild to set option (O_NONBLOCK) on socket"));
+    
     // FAZ O SOCKET ESCUTAR NA PORTA E IP DESEJADOS
     if (bind(_socketFd, (struct sockaddr *)&_sockAddr, sizeof(_sockAddr)) < 0)
-        throw ("Bind Fail");
+        throw (std::runtime_error("Bind Fail"));
     
     // COLOCA O SOCKET DO SERVIDOR EM MODO ESCUTA
     if (listen(_socketFd, __INT_MAX__) < 0)
-        throw("Listen Fail");
+        throw(std::runtime_error("Listen Fail"));
 }
 
 void    Server::createClient(int socket) {
@@ -137,11 +166,11 @@ void    Server::runPoll() {
     
     std::cout << std::endl << GREEN << "Server waiting connections on FD "
         << _socketFd << RESET << std::endl;
-    while (1)
+    while (_run)
     {
         int ret = poll(_fds.data(), _fds.size(), 0);
-        if (ret < 0)
-            throw("Poll Error");
+        if (ret < 0 && _run)
+            throw(std::runtime_error("Poll Error"));
         if (_fds[0].revents & POLLIN)
         {
             
@@ -189,6 +218,7 @@ void    Server::runPoll() {
             }
         }
     }
+    std::cout << RED << "SERVER IS DOWN - free memory here" << RESET << std::endl;
 }
 
 void	Server::sendResponse(int socket, const std::string &response) const {
