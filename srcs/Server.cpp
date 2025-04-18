@@ -136,6 +136,12 @@ void	Server::privMsg(std::vector<std::string> &cmds, Client *client) {
 }
 
 void    Server::parseCommand(std::string cmd, int clientSocket) {
+    
+    std::string message;
+    size_t i = cmd.find(':');
+    if (i != std::string::npos)
+        message = cmd.substr(i, cmd.size());
+    std::cout << BLUE << message << RESET << std::endl;
     std::vector<std::string> lines;
     std::istringstream streamLine(cmd);
     std::string line;
@@ -156,6 +162,8 @@ void    Server::parseCommand(std::string cmd, int clientSocket) {
             setNick(cmds, client);
         else if (cmds[0] == "USER" || cmds[0] == "user")
             setUser(cmds, client);
+        else if (cmds[0] == "TOPIC" || cmds[0] == "topic")
+            topic(cmds, client);
         else if (!client->isAuth())
             sendResponse(client->getSocket(), ERR_NOTREGISTERED(client->getNick()));
         else if (cmds[0] == "JOIN")

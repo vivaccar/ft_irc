@@ -11,8 +11,12 @@
 #define ERR_NICKNAMEINUSE(nick, attempt) ": 433 " + nick + " " + attempt + " :Nickname in use.\r\n"
 #define ERR_ERRONEUSNICKNAME(nick, attempt) ": 432 " + nick + " " + attempt + ": Erroneus nickname\r\n"
 #define ERR_UNKNOWNCOMMAND(nick, cmd) ": 421 " + nick + " " + cmd + " :Unknown command\r\n"
+#define ERR_NOSUCHCHANNEL(nick, channel) ": 403 " + nick + " " + channel + " :No such Channel\r\n"
+#define ERR_NOTONCHANNEL(nick, channel) ": 442 " + nick + " " + channel + " :You're not in the channel\r\n"
 
-#define WELCOME(nick) ": 001 " + nick + " :Welcome " + nick + " to the ft_irc\r\n"
+#define RPL_WELCOME(nick) ": 001 " + nick + " :Welcome " + nick + " to the ft_irc\r\n"
+#define RPL_TOPIC(nick, channel ,topic) ": 332 " + nick + " " + channel + " :" + topic + "\r\n"
+#define RPL_NOTOPIC(nick, channel) ": 331 " + nick + " " + channel + " :No topic is set\r\n" 
 
 
 class Server {
@@ -56,6 +60,7 @@ class Server {
         void    setUser(std::vector<std::string> &cmds, Client *client);
         void    joinCommand(std::vector<std::string> &cmds, Client *client);
         void    privMsg(std::vector<std::string> &cmds, Client *client);
+        void    topic(std::vector<std::string> &cmds, Client *client);
 
         //RESPONSE
         void	sendResponse(int socket, const std::string &response) const;
@@ -67,5 +72,4 @@ class Server {
 #define ERR_BADCHANNELKEY "476 ERROR: Wrong password\n"
 #define ERR_CHANNELISFULL "471 ERROR: Channel is full\n"
 #define ERR_BADCHANMASK "476 ERROR: Bad Channel Mask\n"
-#define ERR_NOSUCHCHANNEL "403 ERROR: No such channel\n"
 #define ERR_TOOMANYCHANNELS "405 ERROR: You have joined too many channels\n"

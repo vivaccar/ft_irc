@@ -31,6 +31,7 @@ class Client {
             bool _insertPassword;
             std::string _nick;
             std::string _user;
+            std::string _realName;
             std::vector<Channel *> _channels;
         
         public:
@@ -42,17 +43,20 @@ class Client {
             int  getSocket() const;
             std::string getUser() const;
             std::string getNick() const;
+            std::string getRealName() const;
             std::vector<Channel *> getChannels() const;
             bool isAuth() const;
+            
 
             //SETTERS
             void setAuth(bool status);
             void setInsertPassword(bool status);
             void setNick(const std::string &nick);
             void setUser(const std::string &user);
+            void setRealName(const std::string &realName);
             
             Channel *createChannel(const std::string &name);
-            int	joinChannel(Channel *channel);
+            int	    joinChannel(Channel *channel);
 
 
             void	sendToChannel(Channel *channel, std::string &msg);
