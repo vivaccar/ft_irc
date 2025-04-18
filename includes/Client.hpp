@@ -51,12 +51,12 @@ class Client {
             void setNick(const std::string &nick);
             void setUser(const std::string &user);
             
-            Channel *createChannel(const std::string &name);
-            int	joinChannel(Channel *channel);
+            Channel *createChannel(const std::string &name, const std::string &key);
+            int	joinChannel(Channel *channel, const std::string &key);
 
 
             void	sendToChannel(Channel *channel, std::string &msg);
-            void	sendToClient(Client *client, std::string &msg);
+            void	sendToClient(Client *client, const std::string &msg);
             void	sendError(Client *client, const char *error);
             bool	isChannelMember(Channel *channel);
             bool	isChannelAdmin(Channel *channel);

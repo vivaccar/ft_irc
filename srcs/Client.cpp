@@ -48,8 +48,8 @@ bool    Client::isAuth() const {
     return this->_isAuth;
 }
 
-Channel *Client::createChannel(const std::string &name) {
-	Channel *c = new Channel(name);
+Channel *Client::createChannel(const std::string &name, const std::string &key) {
+	Channel *c = new Channel(name, key);
 	c->addClient(this);
 	c->addAdmin(this);
 	this->_channels.push_back(c);
@@ -65,7 +65,7 @@ void	Client::sendToChannel(Channel *channel, std::string &msg) {
 	}
 }
 
-void	Client::sendToClient(Client *client, std::string &msg) {
+void	Client::sendToClient(Client *client, const std::string &msg) {
 	send(client->getSocket(), msg.c_str(), msg.size(), 0);
 }
 
