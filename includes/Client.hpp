@@ -56,7 +56,7 @@ class Client {
 
 
             void	sendToChannel(Channel *channel, std::string &msg);
-            void	sendToClient(Client *client, std::string &msg);
+            void	sendToClient(Client *client, const std::string &msg);
             void	sendError(Client *client, const char *error);
             bool	isChannelMember(Channel *channel);
             bool	isChannelAdmin(Channel *channel);

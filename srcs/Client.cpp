@@ -65,7 +65,7 @@ void	Client::sendToChannel(Channel *channel, std::string &msg) {
 	}
 }
 
-void	Client::sendToClient(Client *client, std::string &msg) {
+void	Client::sendToClient(Client *client, const std::string &msg) {
 	send(client->getSocket(), msg.c_str(), msg.size(), 0);
 }
 

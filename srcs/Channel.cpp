@@ -28,6 +28,10 @@ std::vector<int> Channel::getAdmins() const {
 	return this->_channelAdmins;
 }
 
+std::vector<int> & Channel::getClientsRef(){
+	return (this->_channelClients);
+}
+
 void	Channel::setName(const std::string &newName) {
 	this->_name = newName;
 }

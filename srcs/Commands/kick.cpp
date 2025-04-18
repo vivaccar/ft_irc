@@ -1,103 +1,116 @@
 #include "../../includes/Server.hpp"
 #include "../../includes/tests.hpp"
 
-
-//Aqui a intencao eh buscar dentro da lista de todos os channels do server
-//e verificar se o server existe
-//tendo em consideracao o nome do servidor a ser procurado
-//(que eh o comando dado no KICK)
-static bool	IsAValidChannel(std::map<std::string, Channel*> channels, std::string name)
+//PROCURA O CANAL PELO NOME
+static Channel * ReturnChannel(std::map<std::string, Channel*> channels, std::string channel_name, Client * client)
 {
-	std::cout << "IsAValidChannel Method\n";
+	std::cout << "ReturnChannel \n";
+	std::map<std::string, Channel*>::iterator channel_found = channels.begin();
 	for (std::map<std::string, Channel*>::iterator it = channels.begin(); it != channels.end(); it ++)
 	{
-		if (name.substr(1).compare(it->first) == 0)
-			return (true);
+		if (channel_name.compare(it->first) == 0)
+			return (channel_found->second);
 	}
-	return (false);
+	client->sendToClient(client, ERR_NOSUCHCHANNEL_KICK(client->getNick(), channel_name));
+	return (NULL);
 }
 
-//Aqui a intencao eh buscar o channel por nome para verificar se o client que esta
-//tentando realizar a acao eh um admin ou nao
-static bool	isClientOperator(Client *client, std::map<std::string, Channel*> channels, std::string channel_name)
+//PROCURA PELO NICK
+static Client * ReturnClient(Client *client, std::map<int, Client*> clients, std::string target_user, std::string channel_name)
 {
-	std::map<std::string, Channel*>::iterator channel_found = channels.begin(); //iguala iterador ao comeco
-	for (std::map<std::string, Channel*>::iterator it = channels.begin(); it != channels.end(); it ++) //roda por todos os canais
+	std::cout << "ReturnClient \n";
+	for (std::map<int, Client*>::iterator it = clients.begin(); it != clients.end(); it ++)
 	{
-		if (channel_name.substr(1).compare(it->first) == 0) //se encontrar o canal
-		{
-			channel_found = it; // o iterador indicando que achou o canal aponta para ele
-			break;
-		}
+		if (it->second->getNick().compare(target_user) == 0)
+			return (it->second);
 	}
+	client->sendToClient(client, ERR_USERNOTINCHANNEL(client->getNick(), target_user, channel_name));
+	return (NULL);
+}
 
-	if (channel_found == channels.end()) // se rodar todos os canais e nao achar nada, canal invalido.
-		return (false);
-
-	std::vector<int> admins = channel_found->second->getAdmins(); //busca os admins do canal encontrado
-	if (std::find(admins.begin(), admins.end(), client->getSocket()) != admins.end()) //se achar o admin, retorna true
+//Aqui a intencao eh verificar se o cliente eh adm do channel
+static bool	isClientOperator(Client *client, Channel *channel)
+{
+	std::cout << "isClientOperator \n";
+	std::vector<int> admins = channel->getAdmins();
+	if (std::find(admins.begin(), admins.end(), client->getSocket()) != admins.end())
 		return (true);
-
+	client->sendToClient(client, ERR_CHANOPRIVSNEEDED(client->getNick(), channel->getName()));
 	return (false);
 }
 
 //Aqui a intencao eh procurar o user escrito pelo Operator e verificar se ele existe e esta no canal
+static bool	isTargetUserOnChannel(Channel *channel, Client *target)
+{	
+	std::cout << "isTargetUserOnChannel \n";
 
-bool	isTargetUserOnChannel(std::map<std::string, Channel*> channels, std::string channel_name, std::string Target)
-{
-	(void)channels;
-	(void)channel_name;
-	(void)Target;
-	return (true);
+	if (!channel || !target)
+		return (false);
+
+	std::vector<int> 	clients = channel->getClients();
+	int					client_fd = target->getSocket();
+
+	for (std::vector<int>::iterator it = clients.begin(); it != clients.end(); it ++)
+	{
+		if (*it == client_fd)
+			return (true);
+	}
+	//MENSAGEM DE ERRO!
+	return (false);
 }
 
+static void	BroadcastMsgKick(Channel *channel, const std::string &msg) {
+	std::cout << "BroadcastMsgKick \n";
+	std::vector<int> members = channel->getClients();
+	for (std::vector<int>::iterator it = members.begin(); it != members.end(); it++) {
+		send(*it, msg.c_str(), msg.size(), 0);
+	}
+}
+
+static void removeUserFromChannel(Channel *channel, int target_fd, std::string target_name, Client *client)
+{
+	std::cout << "removeUserFromChannel \n";
+
+	std::vector<int> &clients = channel->getClientsRef();
+	for (std::vector<int>::iterator it = clients.begin(); it != clients.end(); ++it)
+	{
+		if (*it == target_fd)
+		{
+			BroadcastMsgKick(channel, KICK_MSG(client->getNick(), target_name, channel->getName()));
+			clients.erase(it);
+			break;
+		}
+	}
+}
+
+//FORMAT ---> KICK #channel targetUser [:reason])
 int	Server::kickUser(std::vector<std::string> &cmds, Client *client)
 {
 	std::cout << "kickUser method \n";
 
-	(void)client;
-	//command validation
-	//if command is invalid (DOES NOT FOLLOW THIS -> KICK #channel targetUser [:reason])
-		//return (does not have correct arguments)
+	Channel *channel = ReturnChannel(this->_channels, cmds[1], client);
+	Client	*target = ReturnClient(client, this->_clients, cmds[2], cmds[1]);
+
 	if (cmds.size() < 3)
 	{
-		//print_container(cmds, "Size < 3");
-		//Broadcast here msg de kick invalido para todos os usuarios
-		std::cout << "Not a valid KICK command, try KICK #channel targetUser [:reason]" << std::endl;
+		client->sendToClient(client, ERR_NEEDMOREPARAMS(client->getNick(), cmds[0]));
 		return (EXIT_FAILURE);
 	}
-	//[:reason] is optional. Define a default generic reason in case where the user didnt define anything.
-	else if (cmds.size() == 3)
-	{
-		cmds.push_back("Default reason\n");
-		print_container(cmds, "cmds == 3 \n");
-	}
 
-	// AQUI verificar se quem esta querendo kickar eh operator
-	//check if channel exist
-	//cmds[1] em tese eh o nome do canal (seguindo isso KICK #channel targetUser [:reason])
-	if (IsAValidChannel(this->_channels, cmds[1]) && isClientOperator(client, this->_channels, cmds[1]))
+	else if (cmds.size() == 3) //in case where there is no reason, this will be defined here.
+		cmds.push_back("Default reason to kick someone\n");
+
+	if (channel && target && isClientOperator(client, channel) && isTargetUserOnChannel(channel, target))
 	{
-		std::cout << "ENTROU NO IF DE CANAL VALIDO, CLIENTE OPERATOR \n";
-		//if yes
-			//check if user to be expelled exists and is in channel
-				//if yes
-					//expell the target user from the channel
-					//remove it from channels list <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-						//send(seguindo aquela strin do rawlog)
-						//if user is the last of the channel
-							//delete channel??? maybe.
-					//broadcast a messate to the server
-				//if no
-					//error user not in the channel
+		removeUserFromChannel(channel, target->getSocket(), target->getNick(), client);
+		//if user is the last of the channel
+			//delete channel??? maybe.
+			//broadcast a message to the server
 	}
 	else
 	{
-		//if no
-		//return error msg "no channel"
-		std::cout << "NAO ENTROU NO IF DE CANAL VALIDO, CLIENTE OPERATOR\n";
+		std::cout << "NAO ENTROU NO IF DE CANAL VALIDO\n";
 	}
-		
-		
+
 	return (EXIT_SUCCESS);
 }
