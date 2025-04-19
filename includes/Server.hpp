@@ -55,6 +55,7 @@ class Server {
         void    joinCommand(std::vector<std::string> &cmds, Client *client);
         void    privMsg(std::vector<std::string> &cmds, Client *client);
         void    topic(std::vector<std::string> &cmds, Client *client, std::string cmd);
+        void    mode(std::vector<std::string> &cmds, Client *client, std::string cmd);
 
         //RESPONSE
         void	sendResponse(int socket, const std::string &response) const;

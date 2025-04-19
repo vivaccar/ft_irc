@@ -6,12 +6,13 @@ class Server;
 
 class Channel {
 	private:
-	std::string			_name;
-	std::string			_topic;
-	std::string			_key;
-	std::string 		_mode;
-	std::vector<int>	_channelClients;
-	std::vector<int>	_channelAdmins;
+	std::string				_name;
+	std::string				_topic;
+	std::string				_key;
+	std::string 			_mode;
+	std::map<char, bool>	_modes;
+	std::vector<int>		_channelClients;
+	std::vector<int>		_channelAdmins;
 /* 	bool				_hasUserLimit;
 	bool				_hasPassword;
 	int					_userLimit; */

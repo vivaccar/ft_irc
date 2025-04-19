@@ -39,7 +39,7 @@ void    Server::setNick(std::vector<std::string> &cmds, Client *client)
 		return sendResponse(client->getSocket(), ERR_NONICKNAMEGIVEN(client->getNick()));
 	if (validNickname(cmds[1]))
 	{
-		if (cmds.size() > 1) 
+		if (cmds.size() > 1)
 		{
 			std::string response = ":" + client->getNick() + std::string(" NICK ") + cmds[1] + "\n";
 			client->setNick(cmds[1]);
