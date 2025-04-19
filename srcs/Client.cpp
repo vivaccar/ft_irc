@@ -63,7 +63,7 @@ Channel *Client::createChannel(const std::string &name, const std::string &key) 
 	return c;
 }
 
-void	Client::sendToChannel(Channel *channel, std::string &msg) {
+void	Client::sendToChannel(Channel *channel, const std::string &msg) {
 	std::vector<int> members = channel->getClients();
 	for (std::vector<int>::iterator it = members.begin(); it != members.end(); it++) {
 		if (*it == this->getSocket())

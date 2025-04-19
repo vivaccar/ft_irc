@@ -20,7 +20,6 @@ std::string extractMessage(std::string cmd, int maxSpaces)
     }
     return cmd.substr(index + 1, cmd.size());
 }
-
 std::vector<std::string> splitString(std::string &str) {
 	size_t start = 0;
 	size_t end = 0;
