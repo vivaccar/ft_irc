@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   kick.cpp                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: aconceic <aconceic@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/04/19 15:06:34 by aconceic          #+#    #+#             */
+/*   Updated: 2025/04/19 15:06:37 by aconceic         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../../includes/Server.hpp"
 #include "../../includes/tests.hpp"
 
@@ -37,9 +49,7 @@ int	Server::kickUser(std::vector<std::string> &cmds, Client *client)
 			//broadcast a message to the server
 	}
 	else
-	{
-		std::cout << "NAO ENTROU NO IF DE CANAL VALIDo (MSG PARA DEBUG)\n";
-	}
+		return (EXIT_FAILURE);
 	return (EXIT_SUCCESS);
 }
 

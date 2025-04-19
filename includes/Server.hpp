@@ -61,6 +61,7 @@ class Server {
         void    setUser(std::vector<std::string> &cmds, Client *client);
 		//commands
 		int		kickUser(std::vector<std::string> &cmds, Client *client);
+		int		inviteUser(std::vector<std::string> &cmds, Client *client);
         void    joinCommand(std::vector<std::string> &cmds, Client *client);
         void    privMsg(std::vector<std::string> &cmds, Client *client);
 
