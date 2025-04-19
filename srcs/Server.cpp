@@ -201,7 +201,7 @@ void    Server::parseCommand(std::string cmd, int clientSocket) {
 }
 
 void    Server::runPoll() {
-    // CRIA A ESTRUTURADO DO SOCKET DO SERVIDOR PARA SER UTILIZADO NO POLL
+    // CRIA A ESTRUTURA DO DO SOCKET DO SERVIDOR PARA SER UTILIZADO NO POLL
     struct pollfd server;
     server.fd = _socketFd;
     server.events = POLLIN;

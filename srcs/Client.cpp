@@ -55,15 +55,15 @@ bool    Client::isAuth() const {
     return this->_isAuth;
 }
 
-Channel *Client::createChannel(const std::string &name) {
-	Channel *c = new Channel(name);
+Channel *Client::createChannel(const std::string &name, const std::string &key) {
+	Channel *c = new Channel(name, key);
 	c->addClient(this);
 	c->addAdmin(this);
 	this->_channels.push_back(c);
 	return c;
 }
 
-void	Client::sendToChannel(Channel *channel, std::string &msg) {
+void	Client::sendToChannel(Channel *channel, const std::string &msg) {
 	std::vector<int> members = channel->getClients();
 	for (std::vector<int>::iterator it = members.begin(); it != members.end(); it++) {
 		if (*it == this->getSocket())
