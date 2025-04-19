@@ -60,7 +60,7 @@ class Server {
         void    setUser(std::vector<std::string> &cmds, Client *client);
         void    joinCommand(std::vector<std::string> &cmds, Client *client);
         void    privMsg(std::vector<std::string> &cmds, Client *client);
-        void    topic(std::vector<std::string> &cmds, Client *client);
+        void    topic(std::vector<std::string> &cmds, Client *client, std::string cmd);
 
         //RESPONSE
         void	sendResponse(int socket, const std::string &response) const;
@@ -73,3 +73,8 @@ class Server {
 #define ERR_CHANNELISFULL "471 ERROR: Channel is full\n"
 #define ERR_BADCHANMASK "476 ERROR: Bad Channel Mask\n"
 #define ERR_TOOMANYCHANNELS "405 ERROR: You have joined too many channels\n"
+
+
+// UTILS
+
+std::string extractMessage(std::string cmd, int maxSpaces);

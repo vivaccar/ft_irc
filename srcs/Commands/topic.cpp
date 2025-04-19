@@ -1,17 +1,6 @@
 #include "../../includes/Server.hpp"
 
-std::string extractTopic(std::vector<std::string> &cmds)
-{
-    std::string topic = cmds[2];
-    
-    if (cmds[2][0] == ':')
-        topic = cmds[2].substr(1, cmds[2].size());
-    for (std::vector<std::string>::iterator it = cmds.begin() + 3; it != cmds.end(); it++)
-        topic = topic + " " + *it;
-    return topic;
-}
-
-void    Server::topic(std::vector<std::string> &cmds, Client *client)
+void    Server::topic(std::vector<std::string> &cmds, Client *client, std::string cmd)
 {
     if (cmds.size() < 2)
         return sendResponse(client->getSocket(), ERR_NEEDMOREPARAMS(client->getNick(), cmds[0]));
@@ -28,7 +17,8 @@ void    Server::topic(std::vector<std::string> &cmds, Client *client)
             return sendResponse(client->getSocket(), RPL_NOTOPIC(client->getNick(), cmds[1]));    
         return sendResponse(client->getSocket(), RPL_TOPIC(client->getNick(), cmds[1], channel->getTopic()));
     }
-    std::string newTopic = extractTopic(cmds);
+    std::string newTopic = extractMessage(cmd, 2);
+    std::cout << RED << "TOPIC IS --> " << newTopic << RESET << std::endl;
     channel->setTopic(newTopic);
     return;
 }
