@@ -15,7 +15,7 @@
 #define ERR_NOTONCHANNEL(nick, channel) ": 442 " + nick + " " + channel + " :You're not in the channel\r\n"
 
 #define RPL_WELCOME(nick) ": 001 " + nick + " :Welcome " + nick + " to the ft_irc\r\n"
-#define RPL_TOPIC(nick, channel ,topic) ": 332 " + nick + " " + channel + " :" + topic + "\r\n"
+#define RPL_TOPIC(nick, channel ,topic) ": 332 " + nick + " " + channel + " " + topic + "\r\n"
 #define RPL_NOTOPIC(nick, channel) ": 331 " + nick + " " + channel + " :No topic is set\r\n" 
 
 //KICK DEFINITIONS

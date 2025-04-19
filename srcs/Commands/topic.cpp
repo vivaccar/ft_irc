@@ -18,7 +18,9 @@ void    Server::topic(std::vector<std::string> &cmds, Client *client, std::strin
         return sendResponse(client->getSocket(), RPL_TOPIC(client->getNick(), cmds[1], channel->getTopic()));
     }
     std::string newTopic = extractMessage(cmd, 2);
-    std::cout << RED << "TOPIC IS --> " << newTopic << RESET << std::endl;
+    if (newTopic[0] == ':' && newTopic.size() == 1)
+        newTopic = "";
+    std::cout << RED << "TOPIC IS --> " << newTopic << " size: " << newTopic.size() << RESET << std::endl;
     channel->setTopic(newTopic);
     return;
 }

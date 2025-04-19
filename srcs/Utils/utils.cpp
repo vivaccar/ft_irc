@@ -18,5 +18,5 @@ std::string extractMessage(std::string cmd, int maxSpaces)
         else 
             index++;
     }
-    return cmd.substr(index + 1, cmd.size());
+    return cmd.substr(index, cmd.size());
 }
