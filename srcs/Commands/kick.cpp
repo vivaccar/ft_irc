@@ -6,7 +6,7 @@
 /*   By: aconceic <aconceic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/19 15:06:34 by aconceic          #+#    #+#             */
-/*   Updated: 2025/04/19 15:06:37 by aconceic         ###   ########.fr       */
+/*   Updated: 2025/04/19 16:01:14 by aconceic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ static void 	removeUserFromChannel(Channel *channel, Client *target, Client *cli
 /*             MAIN FUNTION           */
 /**************************************/
 //FORMAT OF MSG ---> KICK #channel targetUser [:reason])
+//FORMAT OF MSG CAN BE ---> KICK #channel targetUser,targetUser2,targetUser3 [:reason])
 //MAIN FUNCTION
 int	Server::kickUser(std::vector<std::string> &cmds, Client *client)
 {
@@ -37,6 +38,11 @@ int	Server::kickUser(std::vector<std::string> &cmds, Client *client)
 	}
 	else if (cmds.size() == 3) //in case where there is no reason, this will be defined here.
 		cmds.push_back("Default reason to kick someone\n");
+	else if (cmds.size() > 3)
+	{
+		//separar users para kickalos de uma vez
+		//eles sao separados por ,(virgula) sem espaco entre os nicks
+	}
 
 	Channel *channel = ReturnChannel(this->_channels, cmds[1], client);
 	Client	*target = ReturnClient(client, this->_clients, cmds[2], cmds[1]);
@@ -145,7 +151,7 @@ static void removeUserFromChannel(Channel *channel, Client *target, Client *clie
 	{
 		if (*it == target_fd)
 		{
-			BroadcastMsgKick(channel, KICK_MSG(client->getNick(), target_name, channel->getName(), reason_msg));
+			BroadcastMsgKick(channel, KICK_MSG(client->getNick(), channel->getName(), target_name, reason_msg));
 			clients.erase(it);
 			break;
 		}
