@@ -136,6 +136,12 @@ void	Server::privMsg(std::vector<std::string> &cmds, Client *client) {
 }
 
 void    Server::parseCommand(std::string cmd, int clientSocket) {
+    
+    std::string message;
+    size_t i = cmd.find(':');
+    if (i != std::string::npos)
+        message = cmd.substr(i, cmd.size());
+    std::cout << BLUE << message << RESET << std::endl;
     std::vector<std::string> lines;
     std::istringstream streamLine(cmd);
     std::string line;
@@ -156,6 +162,8 @@ void    Server::parseCommand(std::string cmd, int clientSocket) {
             setNick(cmds, client);
         else if (cmds[0] == "USER" || cmds[0] == "user")
             setUser(cmds, client);
+        else if (cmds[0] == "TOPIC" || cmds[0] == "topic")
+            topic(cmds, client, cmd);
         else if (!client->isAuth())
             sendResponse(client->getSocket(), ERR_NOTREGISTERED(client->getNick()));
         else if (cmds[0] == "JOIN")
@@ -166,6 +174,27 @@ void    Server::parseCommand(std::string cmd, int clientSocket) {
         }
         else if (cmds[0] == "PRIVMSG")
             privMsg(cmds, client);
+		else if (cmds[0] == "KICK") //TO START WORKING AT THE COMMANDS REQUIRED BY THE SUBJECT
+			kickUser(cmds, client);
+		else if (cmds[0] == "INVITE")
+			inviteUser(cmds, client);
+			/*
+			// (PASS, NICK, USER, JOIN, PART, TOPIC, INVITE, KICK, QUIT, MODE, and PRIVMSG)
+			else if (cmds[0] == "KICK") //TO START WORKING AT THE COMMANDS REQUIRED BY THE SUBJECT
+				//kick function
+				kickUser(cmds, client);
+			else if (cmds[0] == "INVITE")
+				//invite function
+			else if (cmds[0] == "TOPIC") 
+				//topic function
+			else if (cmds[0] == "MODE")
+				//mode function, where
+					//i: Set/Remove Invite-only channel
+					//t: set/remove the restrictions of the TOPIC command to channel operator
+					//k: set/remove the channel key (password)
+					//o: give/take channel operator(moderador) privilege
+					//l: set/remove the user limit to channel
+			*/
         else
             sendResponse(client->getSocket(), ERR_UNKNOWNCOMMAND(client->getNick(), cmds[0]));
     }

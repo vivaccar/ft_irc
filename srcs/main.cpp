@@ -2,6 +2,7 @@
  
 int main(int ac, char **av)
 {
+
     if (ac != 3)
     {
         std::cout << "Invalid arguments. Try ./ircserv <port> <password>" << std::endl;
@@ -16,7 +17,7 @@ int main(int ac, char **av)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+		std::cerr << e.what() << '\n';
     }
-    
+
 }

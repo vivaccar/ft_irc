@@ -27,6 +27,7 @@ class Channel {
 		std::string	getMode() const;
 		std::vector<int> getClients() const;
 		std::vector<int> getAdmins() const;
+		std::vector<int> &getClientsRef();
 
 		//SETTERS
 		void	setName(const std::string &newName);
