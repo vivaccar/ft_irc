@@ -9,20 +9,6 @@
 	ERR_NOSUCHCHANNEL (403)
 	ERR_TOOMANYCHANNELS (405)*/
 
-std::vector<std::string> splitString(std::string &str) {
-	size_t start = 0;
-	size_t end = 0;
-	std::vector<std::string> vec;
-	while(end != str.size()) {
-		end = str.find(",", start);
-		if (end == str.npos)
-			end = str.size();
-		vec.push_back(str.substr(start, end - start));
-		start = end + 1;
-	}
-	return vec;
-}
-
 std::map<std::string, std::string> parseJoinArgs(std::vector<std::string> &cmds) {
 	std::map<std::string, std::string> map;
 
@@ -37,11 +23,6 @@ std::map<std::string, std::string> parseJoinArgs(std::vector<std::string> &cmds)
 		else 
 			map.insert(std::make_pair(channels[i], keys[i]));
 		i++;
-	}
-	std::cout << " - - MAP CHANNEL/KEY- - " << std::endl;
-	std::map<std::string, std::string>::iterator it;
-	for(it = map.begin(); it != map.end(); it++) {
-		std::cout << "CHANNEL = " + it->first + " | KEY = " + it->second << std::endl;
 	}
 	return map;
 
