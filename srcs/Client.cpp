@@ -1,7 +1,7 @@
 #include "../includes/Client.hpp"
 
-Client::Client(const int socket) : _socket(socket), _isAuth(false), _insertPassword(false) {
-    std::cout << "New client created Socket " << _socket << std::endl; 
+Client::Client(int socket) : _socket(socket), _isAuth(false), _insertPassword(false) {
+    //std::cout << "New client created Socket " << _socket << std::endl; 
 }
 
 Client::~Client() {}
@@ -9,6 +9,10 @@ Client::~Client() {}
 // - - - - - - - GETTERS - - - - - - - 
 int     Client::getSocket() const {
     return this->_socket;
+}
+
+bool    Client::passInserted() const {
+    return this->_insertPassword;
 }
 
 std::string     Client::getUser() const {
@@ -19,6 +23,9 @@ std::string     Client::getNick() const {
     return this->_nick;
 }
 
+std::string		Client::getRealName() const {
+	return this->_realName;
+}
 std::vector<Channel *> Client::getChannels() const {
 	return this->_channels;
 }
@@ -40,16 +47,16 @@ void    Client::setUser(const std::string &user) {
     this->_user = user;
 }
 
+void	Client::setRealName(const std::string &realName) {
+	this->_realName = realName;
+}
+
 bool    Client::isAuth() const {
     return this->_isAuth;
 }
 
-bool    Client::insertPassword() const {
-    return this->_insertPassword;
-}
-
-Channel *Client::createChannel(const std::string &name) {
-	Channel *c = new Channel(name);
+Channel *Client::createChannel(const std::string &name, const std::string &key) {
+	Channel *c = new Channel(name, key);
 	c->addClient(this);
 	c->addAdmin(this);
 	this->_channels.push_back(c);
@@ -65,7 +72,7 @@ void	Client::sendToChannel(Channel *channel, std::string &msg) {
 	}
 }
 
-void	Client::sendToClient(Client *client, std::string &msg) {
+void	Client::sendToClient(Client *client, const std::string &msg) {
 	send(client->getSocket(), msg.c_str(), msg.size(), 0);
 }
 

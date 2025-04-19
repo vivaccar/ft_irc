@@ -1,16 +1,26 @@
 #include "../includes/Server.hpp"
 
+Server *Server::instance = NULL;
+
 Server::Server(const std::string &port, const std::string &password) {
     this->_port = atoi(port.c_str());
     this->_password = password;
+    this->_run = 1;
 }
 
 Server::~Server() {
     std::cout << "Server Destroyed!" << std::endl;
+    for (std::map<int, Client*>::iterator it = _clients.begin(); it != _clients.end(); it++)
+        delete it->second;
+    close(_socketFd);
 }
 
 int Server::getPort() const {
     return this->_port;
+}
+
+int Server::servRunning() const {
+    return this->_run;
 }
 
 const std::string& Server::getPassword() const {
@@ -37,6 +47,18 @@ Client* Server::getClientByNick(const std::string &nick) {
 	return NULL;
 } 
 
+void Server::signalHandler(int signal) {
+    (void)signal;
+    std::cout << "ctrl-c received" << std::endl;
+    instance->_run = 0;
+}
+
+void Server::recSignal() {
+    instance = this;
+    signal(SIGINT, Server::signalHandler);
+    signal(SIGQUIT, SIG_IGN);
+}
+
 Channel *Server::getChannelByName(const std::string &name) {
 	std::map<std::string, Channel *>::iterator it = this->_channels.find(name);
 	if (it != this->_channels.end())
@@ -47,64 +69,33 @@ Channel *Server::getChannelByName(const std::string &name) {
 
 void    Server::createSocket() {
     // CRIA O SOCKET DO SERVIDOR
-    std::cout << "Creating socket" <<std::endl;
-    _socketFd = socket(AF_INET, SOCK_STREAM, 0);
+    std::cout << "Creating Server Socket and preparing for receive connections..." <<std::endl;
+    _socketFd = socket(AF_INET, SOCK_STREAM, 0); //AF_INET = IPV4, SOCK_STREAM = TCP, 0 = PADRAO
     if (_socketFd <= 0)
         throw("Server Socket Fail");
     _sockAddr.sin_family = AF_INET;
     _sockAddr.sin_port = htons(_port);
     _sockAddr.sin_addr.s_addr = INADDR_ANY;
 
+    int en = 1;
+    if (setsockopt(_socketFd, SOL_SOCKET, SO_REUSEADDR, &en, sizeof(en)) == -1) //HABILITAR A REUTILIZACAO DA PORTA ASSIM QUE FOR FECHADO
+        throw(std::runtime_error("faild to set option (SO_REUSEADDR) on socket"));
+    
+    if (fcntl(_socketFd, F_SETFL, O_NONBLOCK) == -1)
+        throw(std::runtime_error("faild to set option (O_NONBLOCK) on socket"));
+    
     // FAZ O SOCKET ESCUTAR NA PORTA E IP DESEJADOS
     if (bind(_socketFd, (struct sockaddr *)&_sockAddr, sizeof(_sockAddr)) < 0)
-        throw ("Bind Fail");
+        throw (std::runtime_error("Bind Fail"));
     
     // COLOCA O SOCKET DO SERVIDOR EM MODO ESCUTA
     if (listen(_socketFd, __INT_MAX__) < 0)
-        throw("Listen Fail");
+        throw(std::runtime_error("Listen Fail"));
 }
 
 void    Server::createClient(int socket) {
     Client *newClient = new Client(socket);
     this->_clients.insert(std::make_pair(socket, newClient));
-}
-
-
-void    Server::checkPassword(std::vector<std::string> &cmds, Client *client)
-{
-    if (cmds.size() == 2)
-    {
-        if (cmds[1] == _password)
-        {
-            std::cout << "Client " << client->getSocket() << " type the correct password!" << std::endl;
-            client->setInsertPassword(true);
-			std::string msg = "Correct password! You are connected to the server\nNow insert your nickname\n";
-            client->sendToClient(client, msg);
-        }
-        else {
-            std::cout << "Client " << client->getSocket() << " type the incorrect password!" << std::endl;
-			std::string msg = "Incorrect password!\nTry again\n";
-            client->sendToClient(client, msg);
-		}
-    }
-}
-
-void    Server::setNick(std::vector<std::string> &cmds, Client *client)
-{
-	if (cmds.size() > 1) {
-		client->setNick(cmds[1]);
-		std::cout << "Client " << client->getSocket() << " :" << " set new NICKNAME :" << client->getNick() << std::endl;
-		std::string msg = "Nickname set!\nWelcome " + client->getNick() + " to the IRC server!\n";
-		client->sendToClient(client, msg);
-	}
-}
-
-void    Server::setUser(std::vector<std::string> &cmds, Client *client)
-{
-	client->setUser(cmds[1]);
-	std::cout << "Client " << client->getSocket() << " :" << " set new USERNAME :" << client->getUser() << std::endl;
-	std::string msg = "Username set!\nNow you are able to join/create a channel\n";
-	client->sendToClient(client, msg);
 }
 
 void	Server::privMsg(std::vector<std::string> &cmds, Client *client) {
@@ -113,7 +104,7 @@ void	Server::privMsg(std::vector<std::string> &cmds, Client *client) {
 		Channel *channel = getChannelByName(cmds[1]); // verificar se o nome do canal esta sendo armazenado com '#'
 		if (channel && client->isChannelMember(channel)) {
 			if (channel != NULL && cmds[2][0] == ':') {
-				std::string msg = "@" + client->getNick() + " sent a message to the channel " + channel->getName();
+                std::string msg = ":" + client->getNick() + " PRIVMSG " + channel->getName() + " ";
 				for (size_t i = 2; i < cmds.size(); i++)
 					msg+= cmds[i] + " ";
 				msg += "\n";
@@ -124,7 +115,9 @@ void	Server::privMsg(std::vector<std::string> &cmds, Client *client) {
 	else {
 		Client *dest = this->getClientByNick(cmds[1]);
 		if (dest != NULL && cmds[2][0] == ':') { //O USER DESTINO EXISTE
-			std::string msg = "@" + client->getNick() + " sent a private message to you";
+            std::string msg = ":" + client->getNick() + " PRIVMSG " + dest->getNick() + " ";
+            //:Angel PRIVMSG Wiz :Hello are you receiving this message ?
+			//std::string msg = "@" + client->getNick() + " sent a private message to you";
 			for (size_t i = 2; i < cmds.size(); i++)
 				msg+= cmds[i] + " ";
 			msg+= "\n";
@@ -143,41 +136,85 @@ void	Server::privMsg(std::vector<std::string> &cmds, Client *client) {
 }
 
 void    Server::parseCommand(std::string cmd, int clientSocket) {
-    std::vector<std::string> cmds;
-    std::istringstream stream(cmd);
-    std::string word;
     
-    while (stream >> word)
-        cmds.push_back(word);
-
+    std::string message;
+    size_t i = cmd.find(':');
+    if (i != std::string::npos)
+        message = cmd.substr(i, cmd.size());
+    std::cout << BLUE << message << RESET << std::endl;
+    std::vector<std::string> lines;
+    std::istringstream streamLine(cmd);
+    std::string line;
+    
+    while (std::getline(streamLine, line))
+        lines.push_back(line);
     Client *client = getClientBySocket(clientSocket);
-	if (cmds.size() > 1) {
-		if (cmds[0] == "PASS")
-			checkPassword(cmds, client);
-		else if (cmds[0] == "NICK")
-			setNick(cmds, client);
-		else if (cmds[0] == "USER")
-			setUser(cmds, client);
-		else if (cmds[0] == "JOIN")
-			joinCommand(cmds, client);
-		else if (cmds[0] == "PRIVMSG")
-			privMsg(cmds, client);
-	}
+    for (std::vector<std::string>::iterator it = lines.begin(); it != lines.end(); it++) 
+    {
+        std::vector<std::string> cmds;
+        std::string word;
+        std::istringstream streamCmd(*it);
+        while (streamCmd >> word)
+            cmds.push_back(word);
+        if (cmds[0] == "PASS" || cmds[0] == "pass")
+            checkPassword(cmds, client);
+        else if (cmds[0] == "NICK" || cmds[0] == "nick")
+            setNick(cmds, client);
+        else if (cmds[0] == "USER" || cmds[0] == "user")
+            setUser(cmds, client);
+        else if (cmds[0] == "TOPIC" || cmds[0] == "topic")
+            topic(cmds, client, cmd);
+        else if (!client->isAuth())
+            sendResponse(client->getSocket(), ERR_NOTREGISTERED(client->getNick()));
+        else if (cmds[0] == "JOIN")
+        {
+            joinCommand(cmds, client);
+            /* std::string joinresp = ":" + client->getNick() + " JOIN " + cmds[1] + "\n";
+            send(clientSocket, joinresp.c_str(), strlen(joinresp.c_str()), 0); */
+        }
+        else if (cmds[0] == "PRIVMSG")
+            privMsg(cmds, client);
+		else if (cmds[0] == "KICK") //TO START WORKING AT THE COMMANDS REQUIRED BY THE SUBJECT
+			kickUser(cmds, client);
+		else if (cmds[0] == "INVITE")
+			inviteUser(cmds, client);
+			/*
+			// (PASS, NICK, USER, JOIN, PART, TOPIC, INVITE, KICK, QUIT, MODE, and PRIVMSG)
+			else if (cmds[0] == "KICK") //TO START WORKING AT THE COMMANDS REQUIRED BY THE SUBJECT
+				//kick function
+				kickUser(cmds, client);
+			else if (cmds[0] == "INVITE")
+				//invite function
+			else if (cmds[0] == "TOPIC") 
+				//topic function
+			else if (cmds[0] == "MODE")
+				//mode function, where
+					//i: Set/Remove Invite-only channel
+					//t: set/remove the restrictions of the TOPIC command to channel operator
+					//k: set/remove the channel key (password)
+					//o: give/take channel operator(moderador) privilege
+					//l: set/remove the user limit to channel
+			*/
+        else
+            sendResponse(client->getSocket(), ERR_UNKNOWNCOMMAND(client->getNick(), cmds[0]));
+    }
 }
 
 void    Server::runPoll() {
-    // CRIA A ESTRUTURADO DO SOCKET DO SERVIDOR PARA SER UTILIZADO NO POLL
+    // CRIA A ESTRUTURA DO DO SOCKET DO SERVIDOR PARA SER UTILIZADO NO POLL
     struct pollfd server;
     server.fd = _socketFd;
     server.events = POLLIN;
     server.revents = 0;
     _fds.push_back(server);
     
-    while (1)
+    std::cout << std::endl << GREEN << "Server waiting connections on FD "
+        << _socketFd << RESET << std::endl;
+    while (_run)
     {
         int ret = poll(_fds.data(), _fds.size(), 0);
-        if (ret < 0)
-            throw("Poll Error");
+        if (ret < 0 && _run)
+            throw(std::runtime_error("Poll Error"));
         if (_fds[0].revents & POLLIN)
         {
             
@@ -195,7 +232,8 @@ void    Server::runPoll() {
             _fds.push_back(newClient);
             const char *login = "To authenticate, follow the steps\n1 - PASS [password]\n2 - NICK [nickname]\n3 - USER [username]\n";
             send(newClientSock, login, strlen(login), 0);
-            std::cout << "New client connected on FD: " << newClient.fd << std::endl;
+            std::cout << GREEN << std::endl << "New client connected on FD: "
+                << newClient.fd << RESET << std::endl;
         }
         for (size_t i = 1; i < _fds.size(); i++)
         {  // Começa no índice 1, já que o índice 0 é o servidor
@@ -207,19 +245,26 @@ void    Server::runPoll() {
                 if (bytes_read == 0)
                 {
                     // Cliente desconectou
-                    std::cout << "Client desconected on FD" << _fds[i].fd << std::endl;
+                    Client *toDelete = getClientBySocket(client_socket);
+                    if (toDelete)
+                        delete toDelete;
+                    std::cout << RED << std::endl << "Client desconected on FD" << _fds[i].fd << RESET << std::endl;
                     close(client_socket);
                     _fds.erase(_fds.begin() + i);  // Remove o cliente da lista
+                    _clients.erase(client_socket);
                     --i;  // Ajusta o índice após a remoção
                 } else
                 {
                     // Envia resposta ao cliente
-                    std::cout << "Client " << client_socket << " say:" << buffer << std::endl;
+                    std::cout << "\nClient " << client_socket << " say: " << buffer << std::endl;
                     parseCommand(std::string(buffer), client_socket);
-                    const char* response = "Message received by the server!\n";
-                    send(client_socket, response, strlen(response), 0);
                 }
             }
         }
     }
+    std::cout << RED << "SERVER IS DOWN - free memory here" << RESET << std::endl;
+}
+
+void	Server::sendResponse(int socket, const std::string &response) const {
+    send(socket, response.c_str(), strlen(response.c_str()), 0);
 }

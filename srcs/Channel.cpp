@@ -1,6 +1,6 @@
 #include "../includes/Channel.hpp"
 
-Channel::Channel(const std::string &name): _name(name), _mode("t") {}
+Channel::Channel(const std::string &name, const std::string &key): _name(name), _key(key), _mode("t")/*  _hasPassword(0), _hasUserLimit(0), _userLimit(0) */ {}
 
 Channel::~Channel() {}
 
@@ -12,8 +12,8 @@ std::string	Channel::getTopic() const {
 	return this->_topic;
 }
 
-std::string	Channel::getPassword() const {
-	return this->_password;
+std::string	Channel::getKey() const {
+	return this->_key;
 }
 
 std::string	Channel::getMode() const {
@@ -28,6 +28,10 @@ std::vector<int> Channel::getAdmins() const {
 	return this->_channelAdmins;
 }
 
+std::vector<int> & Channel::getClientsRef(){
+	return (this->_channelClients);
+}
+
 void	Channel::setName(const std::string &newName) {
 	this->_name = newName;
 }
@@ -36,8 +40,8 @@ void	Channel::setTopic(const std::string &newTopic) {
 	this->_topic = newTopic;
 }
 
-void	Channel::setPassword(const std::string &newPass) {
-	this->_password = newPass;
+void	Channel::setKey(const std::string &newKey) {
+	this->_key = newKey;
 }
 
 void	Channel::setMode(const std::string &newMode) {
