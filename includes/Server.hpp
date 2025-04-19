@@ -20,6 +20,12 @@
 #define ERR_CHANOPRIVSNEEDED(nick, channel_name) ": 482 " + nick + " " + channel_name + " : You're not channel operator\r\n"
 #define ERR_USERNOTINCHANNEL(nick, target, channel_name) ": 441 " + nick + " "  + target + " " + channel_name + " :They aren't on that channel"
 
+//INVITE DEFINITION
+//#define ERR_CHANOPRIVSNEEDED
+//#define ERR_NOTONCHANNEL
+//#define ERR_NOSUCHCHANNEL
+//#define ERR_USERONCHANNEL
+//#define RPL_INVITING
 class Server {
     private:
 
