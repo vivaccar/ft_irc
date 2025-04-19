@@ -74,7 +74,7 @@ static Channel * ReturnChannel(std::map<std::string, Channel*> &channels, std::s
 		if (channel_name.compare(it->first) == 0)
 			return (it->second);
 	}
-	client->sendToClient(client, ERR_NOSUCHCHANNEL);
+	client->sendToClient(client, ERR_NOSUCHCHANNEL(client->getNick(), channel_name));
 	return (NULL);
 }
 

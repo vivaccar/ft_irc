@@ -23,6 +23,9 @@ std::string     Client::getNick() const {
     return this->_nick;
 }
 
+std::string		Client::getRealName() const {
+	return this->_realName;
+}
 std::vector<Channel *> Client::getChannels() const {
 	return this->_channels;
 }
@@ -42,6 +45,10 @@ void    Client::setNick(const std::string &nick) {
 
 void    Client::setUser(const std::string &user) {
     this->_user = user;
+}
+
+void	Client::setRealName(const std::string &realName) {
+	this->_realName = realName;
 }
 
 bool    Client::isAuth() const {
