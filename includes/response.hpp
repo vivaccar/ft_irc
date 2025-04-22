@@ -28,3 +28,5 @@
 #define RPL_NOTOPIC(nick, channel) ": 331 " + nick + " " + channel + " :No topic is set\r\n" 
 #define KICK_MSG(nick, channel_name, target, reason) ":"+ nick + " KICK " + channel_name + " " + target + reason + "\r\n"
 #define TOPIC_CHANGE(nick, channel, topic) ":" + nick + " TOPIC " + channel + " " + topic + "\r\n"
+
+#define INVITE_ONLY(nick, channel, status) ":" + nick + " MODE " + channel + " :" + status + "\r\n"

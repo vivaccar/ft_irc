@@ -13,6 +13,9 @@ class Channel {
 	std::map<char, bool>	_modes;
 	std::vector<int>		_channelClients;
 	std::vector<int>		_channelAdmins;
+	bool					_inviteOnly;
+	bool					_topicRestricted;
+	int						_userLimit;
 /* 	bool				_hasUserLimit;
 	bool				_hasPassword;
 	int					_userLimit; */
@@ -29,12 +32,17 @@ class Channel {
 		std::vector<int> getClients() const;
 		std::vector<int> getAdmins() const;
 		std::vector<int> &getClientsRef();
+		bool			getInviteOnly() const;
+		bool			getTopicRestricted() const;
 
+	
 		//SETTERS
 		void	setName(const std::string &newName);
 		void	setTopic(const std::string &newTopic);
 		void	setKey(const std::string &newKey);
 		void	setMode(const std::string &newMode);
+		void	setInviteOnly(bool status);
+		void	setTopicRestricted(bool status);
 
 		void	addClient(const Client *client);
 		void	addAdmin(const Client *client);

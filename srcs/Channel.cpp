@@ -1,6 +1,7 @@
 #include "../includes/Channel.hpp"
 
-Channel::Channel(const std::string &name, const std::string &key): _name(name), _key(key), _mode("t")/*  _hasPassword(0), _hasUserLimit(0), _userLimit(0) */ {}
+Channel::Channel(const std::string &name, const std::string &key): _name(name), _key(key), _mode("t"),
+_inviteOnly(false), _topicRestricted(false), _userLimit(-1)/*  _hasPassword(0), _hasUserLimit(0), _userLimit(0) */ {}
 
 Channel::~Channel() {}
 
@@ -32,6 +33,14 @@ std::vector<int> & Channel::getClientsRef(){
 	return (this->_channelClients);
 }
 
+bool	Channel::getInviteOnly() const {
+	return this->_inviteOnly;
+}
+
+bool	Channel::getTopicRestricted() const {
+	return this->_topicRestricted;
+}
+
 void	Channel::setName(const std::string &newName) {
 	this->_name = newName;
 }
@@ -46,6 +55,14 @@ void	Channel::setKey(const std::string &newKey) {
 
 void	Channel::setMode(const std::string &newMode) {
 	this->_mode = newMode;
+}
+
+void	Channel::setInviteOnly(bool status) {
+	this->_inviteOnly = status;
+}
+
+void	Channel::setTopicRestricted(bool status) {
+	this->_topicRestricted = status;
 }
 
 void	Channel::addClient(const Client *client) {
