@@ -55,7 +55,7 @@ class Client {
             void setUser(const std::string &user);
             void setRealName(const std::string &realName);
             
-            Channel *createChannel(const std::string &name, const std::string &key);
+            Channel *createChannel(const std::string &name);
             int	joinChannel(Channel *channel, const std::string &key);
 
 

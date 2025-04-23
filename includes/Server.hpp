@@ -53,7 +53,7 @@ class Server {
 		int		kickUser(std::vector<std::string> &cmds, Client *client);
 		int		inviteUser(std::vector<std::string> &cmds, Client *client);
         void    joinCommand(std::vector<std::string> &cmds, Client *client);
-        void    privMsg(std::vector<std::string> &cmds, Client *client);
+        void    privMsg(std::vector<std::string> &cmds, Client *client, const std::string cmdLine);
         void    topic(std::vector<std::string> &cmds, Client *client, std::string cmd);
 
         //RESPONSE

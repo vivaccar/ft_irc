@@ -14,11 +14,12 @@
 #define ERR_CHANNELISFULL "471 ERROR: Channel is full\n"
 #define ERR_BADCHANMASK(channel) ": 476 " + channel + " :Bad Channel Mask\n"
 #define ERR_TOOMANYCHANNELS "405 ERROR: You have joined too many channels\n"
-#define ERR_NOSUCHCHANNEL(nick, channel) ": 403 " + nick + " " + channel + " :No such Channel\r\n"
+#define ERR_NOSUCHCHANNEL(nick, channel) ": 403 " + nick + " " + channel + " :No such channel\r\n"
 #define ERR_NOTONCHANNEL(nick, channel) ": 442 " + nick + " " + channel + " :You're not in the channel\r\n"
+#define ERR_CANNOTSENDTOCHAN(nick, channel) ": 404 " + nick + " " + channel + " :Cannot send to channel\r\n"
 
 //KICK DEFINITIONS
-#define ERR_NOSUCHNICK(nick, channel_name) ": 401 " + nick + " " + channel_name + " : No such channel\r\n"
+#define ERR_NOSUCHNICK(nick, noexist) ": 401 " + nick + " " + noexist + " :No such nick\r\n"
 #define ERR_CHANOPRIVSNEEDED(nick, channel_name) ": 482 " + nick + " " + channel_name + " : You're not channel operator\r\n"
 #define ERR_USERNOTINCHANNEL(nick, target, channel_name) ": 441 " + nick + " "  + target + " " + channel_name + " :They aren't on that channel"
 
@@ -28,3 +29,5 @@
 #define RPL_NOTOPIC(nick, channel) ": 331 " + nick + " " + channel + " :No topic is set\r\n" 
 #define KICK_MSG(nick, channel_name, target, reason) ":"+ nick + " KICK " + channel_name + " " + target + reason + "\r\n"
 #define RPL_JOIN(nick, channel) ":" + nick + " JOIN " + channel + "\r\n"
+#define RPL_PRIVMSG(nick, target, msg) ":" + nick + " PRIVMSG " + target + " :" + msg + "\r\n"
+

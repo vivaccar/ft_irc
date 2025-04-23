@@ -17,7 +17,7 @@ class Channel {
 	int					_userLimit; */
 
 	public:
-		Channel(const std::string &name, const std::string &key);
+		Channel(const std::string &name);
 		~Channel();
 
 		//GETTERS

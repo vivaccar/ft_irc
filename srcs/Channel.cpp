@@ -1,6 +1,6 @@
 #include "../includes/Channel.hpp"
 
-Channel::Channel(const std::string &name, const std::string &key): _name(name), _key(key), _mode("t")/*  _hasPassword(0), _hasUserLimit(0), _userLimit(0) */ {}
+Channel::Channel(const std::string &name): _name(name), _key(""), _mode("t")/*  _hasPassword(0), _hasUserLimit(0), _userLimit(0) */ {}
 
 Channel::~Channel() {}
 

@@ -98,50 +98,8 @@ void    Server::createClient(int socket) {
     this->_clients.insert(std::make_pair(socket, newClient));
 }
 
-void	Server::privMsg(std::vector<std::string> &cmds, Client *client) {
-	//verificar se eh para canal ou user
-	if (cmds[1][0] == '#') {
-		Channel *channel = getChannelByName(cmds[1]); // verificar se o nome do canal esta sendo armazenado com '#'
-		if (channel && client->isChannelMember(channel)) {
-			if (channel != NULL && cmds[2][0] == ':') {
-                std::string msg = ":" + client->getNick() + " PRIVMSG " + channel->getName() + " ";
-				for (size_t i = 2; i < cmds.size(); i++)
-					msg+= cmds[i] + " ";
-				msg += "\n";
-				client->sendToChannel(channel, msg);
-			}
-		}
-	}	
-	else {
-		Client *dest = this->getClientByNick(cmds[1]);
-		if (dest != NULL && cmds[2][0] == ':') { //O USER DESTINO EXISTE
-            std::string msg = ":" + client->getNick() + " PRIVMSG " + dest->getNick() + " ";
-            //:Angel PRIVMSG Wiz :Hello are you receiving this message ?
-			//std::string msg = "@" + client->getNick() + " sent a private message to you";
-			for (size_t i = 2; i < cmds.size(); i++)
-				msg+= cmds[i] + " ";
-			msg+= "\n";
-			client->sendToClient(dest, msg);
-		}
-		else if (dest == NULL) {
-			std::string msg = "User @" + cmds[1] + " not found!\n";
-			client->sendToClient(client, msg);
-		}
-		else {
-			std::string msg = "Invalid Synthax\nThe command must be \"PRIVMSG <nickname> : <message>\"\n";
-			client->sendToClient(client, msg);
-		}
-	}
-
-}
-
 void    Server::parseCommand(std::string cmd, int clientSocket) {
     
-    std::string message;
-    size_t i = cmd.find(':');
-    if (i != std::string::npos)
-        message = cmd.substr(i, cmd.size());
-    std::cout << BLUE << message << RESET << std::endl;
     std::vector<std::string> lines;
     std::istringstream streamLine(cmd);
     std::string line;
@@ -169,11 +127,9 @@ void    Server::parseCommand(std::string cmd, int clientSocket) {
         else if (cmds[0] == "JOIN")
         {
             joinCommand(cmds, client);
-            /* std::string joinresp = ":" + client->getNick() + " JOIN " + cmds[1] + "\n";
-            send(clientSocket, joinresp.c_str(), strlen(joinresp.c_str()), 0); */
         }
         else if (cmds[0] == "PRIVMSG")
-            privMsg(cmds, client);
+            privMsg(cmds, client, cmd);
 		else if (cmds[0] == "KICK") //TO START WORKING AT THE COMMANDS REQUIRED BY THE SUBJECT
 			kickUser(cmds, client);
 		else if (cmds[0] == "INVITE")
