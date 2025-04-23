@@ -72,6 +72,13 @@ void	Client::sendToChannel(Channel *channel, const std::string &msg) {
 	}
 }
 
+void	Client::sendToAllChannel(Channel *channel, const std::string &msg) {
+	std::vector<int> members = channel->getClients();
+	for (std::vector<int>::iterator it = members.begin(); it != members.end(); it++) {
+		send(*it, msg.c_str(), msg.size(), 0);
+	}
+}
+
 void	Client::sendToClient(Client *client, const std::string &msg) {
 	send(client->getSocket(), msg.c_str(), msg.size(), 0);
 }

@@ -2,51 +2,61 @@
 
 void    inviteOnlyMode(std::string &cmd, Client *client, Channel *channel)
 {
-    if (cmd == "i")
+    if (cmd == "+i" && !channel->getInviteOnly())
     {
-        if (channel->getInviteOnly() == true)
-            cmd = "-i";
-        else
-            cmd = "+i";
-    }
-    if (cmd == "+i")
-    {
+        std::cout << "entrou no +i if" << std::endl;
         channel->setInviteOnly(true);
-        client->sendToChannel(channel, INVITE_ONLY(client->getNick(), channel->getName(), "+i"));
+        client->sendToAllChannel(channel, MODE(client->getNick(), channel->getName(), "+i"));
+    }
+    else if (cmd == "-i" && channel->getInviteOnly())
+    {
+        std::cout << "entrou no -i if" << std::endl;
+        channel->setInviteOnly(false);
+        client->sendToAllChannel(channel, MODE(client->getNick(), channel->getName(), "-i"));
         return;
     }
-    channel->setInviteOnly(false);
-    client->sendToChannel(channel, INVITE_ONLY(client->getNick(), channel->getName(), "-i"));
 }
 
 void    topicMode(std::string &cmd, Client *client, Channel *channel)
 {
-    if (cmd == "t")
+    if (cmd == "+t" && !channel->getTopicRestricted())
     {
-        if (channel->getTopicRestricted() == true)
-            cmd = "-t";
-        else
-            cmd = "+t";
-    }
-    if (cmd == "+t")
-    {
+        std::cout << "entrou no +t if" << std::endl;
         channel->setTopicRestricted(true);
-        client->sendToChannel(channel, INVITE_ONLY(client->getNick(), channel->getName(), "+t"));
-        return;
+        client->sendToAllChannel(channel, MODE(client->getNick(), channel->getName(), "+t"));
     }
-    channel->setTopicRestricted(false);
-    client->sendToChannel(channel, INVITE_ONLY(client->getNick(), channel->getName(), "-t"));
+    else if (cmd == "-t" && channel->getTopicRestricted())
+    {
+        std::cout << "entrou no -t if" << std::endl;
+        channel->setTopicRestricted(false);
+        client->sendToAllChannel(channel, MODE(client->getNick(), channel->getName(), "-t"));
+    }
 }
 
-void executeModeCommands(std::string action, std::vector<std::string>& cmds, int parameter, Client* client)
+/* void    changePassword(std::string &cmd, std::vector<std::string>& cmds, Client *client, Channel *channel, int &parameter)
 {
-    (void)cmds;
-    (void)parameter;
-    (void)client;
+
+    if (cmds.size() <= parameter)
+    {
+        //lancar erro
+    }
+    //LOGICA DE TROCA DE SENHA...
+} */
+
+void executeModeCommands(std::string action, std::vector<std::string>& cmds, int &parameter, Client* client, Channel *channel)
+{
+    (void) parameter;
+    
     std::cout << action << std::endl;
+    if (action == "+i" || action == "-i")
+        return inviteOnlyMode(cmds[2], client, channel);
+    if (action == "+t" || action == "-t")
+        return topicMode(cmds[2], client, channel);
+/*     if (action == "+k" || action == "-k")
+        return changePassword(action, cmds,client, channel, parameter); */
 }
 
-void parseModeCommands(std::vector<std::string>& cmds, Client* client)
+void parseModeCommands(std::vector<std::string>& cmds, Client* client, Channel *channel)
 {
     std::string modes = cmds[2];
     char signal = '+';
@@ -57,21 +67,22 @@ void parseModeCommands(std::vector<std::string>& cmds, Client* client)
         if (modes[i] == '+')
         {
             signal = '+';
-            continue;  // Não é necessário incrementar 'i' manualmente aqui
+            continue;
         }
         else if (modes[i] == '-')
         {
             signal = '-';
-            continue;  // Não é necessário incrementar 'i' manualmente aqui
+            continue;
         }
 
         if (modes[i] && modes[i] != '+' && modes[i] != '-')
         {
-            std::string action = "";  // Usando std::string para armazenar a ação
-            action += signal;  // Adiciona o sinal
-            action += modes[i];  // Adiciona o caractere correspondente
-
-            executeModeCommands(action, cmds, curParameter, client);
+            std::string action = "";
+            action += signal;
+            action += modes[i];
+            executeModeCommands(action, cmds, curParameter, client, channel);
+            if (modes[i] == 'k' || modes[i] == 'l' || modes[i] == 'o')
+                curParameter++;
         }
     }
 }
@@ -92,14 +103,7 @@ void    Server::mode(std::vector<std::string> &cmds, Client *client, std::string
         return sendResponse(client->getSocket(), ERR_NOTONCHANNEL(client->getNick(), channel->getName()));
     if (!client->isChannelAdmin(channel))
         return sendResponse(client->getSocket(), ERR_CHANOPRIVSNEEDED(client->getNick(), channel->getName()));
-    parseModeCommands(cmds, client);
-    
-/*     if (cmds[2] == "+i" || cmds[2] == "-i" || cmds[2] == "i")
-        return inviteOnlyMode(cmds[2], client, channel);
-    if (cmds[2] == "+t" || cmds[2] == "-t" || cmds[2] == "t")
-        return topicMode(cmds[2], client, channel);
-    if (cmds[2] == "+k" || cmds[2] == "-k" || cmds[2] == "k")
-        return topicMode(cmds[2], client, channel) */;
+    parseModeCommands(cmds, client, channel);
 }
 
 //VERIFICAR SE TEM MAIS DE UM PARAMETRO;
