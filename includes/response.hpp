@@ -9,14 +9,15 @@
 #define ERR_UNKNOWNCOMMAND(nick, cmd) ": 421 " + nick + " " + cmd + " :Unknown command\r\n"
 
 #define ERR_BANNEDFROMCHAN(nick) ": 474 " + nick + " :You are banned from this channel\n"
-#define ERR_INVITEONLYCHAN ": 473 :Invite-only channel\n"
-#define ERR_BADCHANNELKEY(client, channel) ": 476 " + client + " " + channel + " :Cannot join channel\n"
-#define ERR_CHANNELISFULL "471 ERROR: Channel is full\n"
+#define ERR_INVITEONLYCHAN (nick, channel) ": 473 " + nick + " " + channel + " :Cannot join channel (+i)\r\n"
+#define ERR_BADCHANNELKEY(client, channel) ": 476 " + client + " " + channel + " :Cannot join channel (+k)\r\n"
+#define ERR_CHANNELISFULL(nick, channel) ": 471 " + nick + " " + channel + " :Cannot join channel (+l)\r\n"
 #define ERR_BADCHANMASK(channel) ": 476 " + channel + " :Bad Channel Mask\n"
 #define ERR_TOOMANYCHANNELS "405 ERROR: You have joined too many channels\n"
 #define ERR_NOSUCHCHANNEL(nick, channel) ": 403 " + nick + " " + channel + " :No such channel\r\n"
 #define ERR_NOTONCHANNEL(nick, channel) ": 442 " + nick + " " + channel + " :You're not in the channel\r\n"
 #define ERR_CANNOTSENDTOCHAN(nick, channel) ": 404 " + nick + " " + channel + " :Cannot send to channel\r\n"
+#define ERR_NOTEXTTOSEND(nick) ": 412 " + nick + " :No text to send\r\n"
 
 //KICK DEFINITIONS
 #define ERR_NOSUCHNICK(nick, noexist) ": 401 " + nick + " " + noexist + " :No such nick\r\n"

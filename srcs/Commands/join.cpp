@@ -46,11 +46,15 @@ void    Server::joinCommand(std::vector<std::string> &cmds, Client *client) {
 		}
 		else if (channelFound) {
 			std::string key = it->second;
-			//checar limite de users do canal
-			//checar se o canal eh modo invite-only
-			//client->joinChannel(channelFound, key); 
+			//checar limite de users do canal -> ERR_CHANNELISFULL (471)
+			//checar se o canal eh modo invite-only -> ERR_INVITEONLYCHAN (473)
 			//channel is full, 
 			if (!client->isChannelMember(channelFound)) {
+				if (channelFound->getUserLimit() != -1 && (static_cast<int>(channelFound->getClients().size()) == channelFound->getUserLimit()))
+					sendResponse(client->getSocket(), ERR_CHANNELISFULL(client->getNick(), channelFound->getName()));
+				/* if (channelFound->_isInviteOnly) ->ESPERAR FLAG DE INVITE ONLY DO VINICIUSSSSS
+					sendResponse(client->getSocket(), ERR_INVITEONLYCHAN(client->getNick(), channelFound->getName()));
+					 */				
 				if (key == channelFound->getKey() || channelFound->getKey().empty()) {
 					channelFound->addClient(client);
 					sendResponse(client->getSocket(), RPL_JOIN(client->getNick(), channelFound->getName()));
@@ -62,9 +66,6 @@ void    Server::joinCommand(std::vector<std::string> &cmds, Client *client) {
 					sendResponse(client->getSocket(), ERR_BADCHANNELKEY(client->getNick(), channelFound->getName()));
 				}
 			}
-			//mensagens de erro serao tratadas aqui, dependendo do retorno de joinChannel
-
-				//ESTAVA ARRUMANDO ESTA FUNCAO PARA RETIRAR A SEND TO CLIENT E SEND TO CHANNEL DA CLASSE "CLIENT"; ESTA MEIO CAMINHO ANDADO
 		}
 	}	
 }

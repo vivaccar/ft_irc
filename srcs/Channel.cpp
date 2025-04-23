@@ -28,8 +28,8 @@ std::vector<int> Channel::getAdmins() const {
 	return this->_channelAdmins;
 }
 
-std::vector<int> & Channel::getClientsRef(){
-	return (this->_channelClients);
+int	Channel::getUserLimit() const {
+	return this->_userLimit;
 }
 
 void	Channel::setName(const std::string &newName) {

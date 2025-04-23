@@ -128,7 +128,7 @@ void    Server::parseCommand(std::string cmd, int clientSocket) {
         {
             joinCommand(cmds, client);
         }
-        else if (cmds[0] == "PRIVMSG")
+        else if (cmds[0] == "PRIVMSG" || cmds[0] == "privmsg")
             privMsg(cmds, client, cmd);
 		else if (cmds[0] == "KICK") //TO START WORKING AT THE COMMANDS REQUIRED BY THE SUBJECT
 			kickUser(cmds, client);

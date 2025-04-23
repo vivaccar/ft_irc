@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   kick.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aconceic <aconceic@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mfassbin <mfassbin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/19 15:06:34 by aconceic          #+#    #+#             */
-/*   Updated: 2025/04/19 16:01:14 by aconceic         ###   ########.fr       */
+/*   Updated: 2025/04/23 19:33:51 by mfassbin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,7 +125,7 @@ static bool	isTargetUserOnChannel(Channel *channel, Client *target, Client *clie
 //Broadcast MSG to all the clients in the channel
 static void	BroadcastMsgKick(Channel *channel, const std::string &msg) {
 
-	std::vector<int> &members = channel->getClientsRef();
+	std::vector<int> members = channel->getClients();
 	for (std::vector<int>::iterator it = members.begin(); it != members.end(); it++) {
 		send(*it, msg.c_str(), msg.size(), 0);
 	}
@@ -146,7 +146,7 @@ static void removeUserFromChannel(Channel *channel, Client *target, Client *clie
 	}
 	reason_msg = reason_msg + "\n";
 
-	std::vector<int> &clients = channel->getClientsRef();
+	std::vector<int> clients = channel->getClients();
 	for (std::vector<int>::iterator it = clients.begin(); it != clients.end(); ++it)
 	{
 		if (*it == target_fd)
