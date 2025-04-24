@@ -30,3 +30,5 @@
 #define TOPIC_CHANGE(nick, channel, topic) ":" + nick + " TOPIC " + channel + " " + topic + "\r\n"
 
 #define MODE(nick, channel, status) ":" + nick + " MODE " + channel + " :" + status + "\r\n"
+#define SET_KEY(nick, channel, cmd, key) ":" + nick + " MODE " + channel + " " + cmd + " :" + key + "\r\n"
+#define KEY_MISS_PARAM(nick, channel) ":" + nick + " " + channel + " k * :You must specify a parameter for the key mode. Syntax: <key>.\r\n"  

@@ -2,6 +2,7 @@
 
 void    inviteOnlyMode(std::string &cmd, Client *client, Channel *channel)
 {
+    std::cout << "CMD is: " << cmd << std::endl;
     if (cmd == "+i" && !channel->getInviteOnly())
     {
         std::cout << "entrou no +i if" << std::endl;
@@ -33,34 +34,46 @@ void    topicMode(std::string &cmd, Client *client, Channel *channel)
     }
 }
 
-/* void    changePassword(std::string &cmd, std::vector<std::string>& cmds, Client *client, Channel *channel, int &parameter)
+void    changePassword(std::string &cmd, std::vector<std::string>& cmds, Client *client, Channel *channel, unsigned int &parameter)
 {
-
-    if (cmds.size() <= parameter)
+    if (cmd == "-k" && !channel->getKey().empty())
     {
-        //lancar erro
+        channel->setKey("");
+        client->sendToAllChannel(channel, MODE(client->getNick(), channel->getName(), "-k"));
+    }
+    else if (cmd == "+k" && channel->getKey().empty())
+    {
+        if (cmds.size() <= parameter)
+        {
+            client->sendToClient(client, KEY_MISS_PARAM(client->getNick(), channel->getName()));
+            return ;
+        }
+        channel->setKey(cmds[parameter]);
+        client->sendToAllChannel(channel, SET_KEY(client->getNick(), channel->getName(), "+k", cmds[parameter]));
     }
     //LOGICA DE TROCA DE SENHA...
-} */
+}
 
-void executeModeCommands(std::string action, std::vector<std::string>& cmds, int &parameter, Client* client, Channel *channel)
+void executeModeCommands(std::string action, std::vector<std::string>& cmds, unsigned int &parameter, Client* client, Channel *channel)
 {
     (void) parameter;
+    (void) cmds;
     
-    std::cout << action << std::endl;
+    
+    std::cout << action << " Size: " << action.size() <<  std::endl;
     if (action == "+i" || action == "-i")
-        return inviteOnlyMode(cmds[2], client, channel);
+        return inviteOnlyMode(action, client, channel);
     if (action == "+t" || action == "-t")
-        return topicMode(cmds[2], client, channel);
-/*     if (action == "+k" || action == "-k")
-        return changePassword(action, cmds,client, channel, parameter); */
+        return topicMode(action, client, channel);
+    if (action == "+k" || action == "-k")
+        return changePassword(action, cmds, client, channel, parameter);
 }
 
 void parseModeCommands(std::vector<std::string>& cmds, Client* client, Channel *channel)
 {
     std::string modes = cmds[2];
     char signal = '+';
-    int curParameter = 3;
+    unsigned int curParameter = 3;
 
     for (size_t i = 0; i < modes.size(); i++)
     {
