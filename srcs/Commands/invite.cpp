@@ -6,7 +6,7 @@
 /*   By: aconceic <aconceic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/19 15:06:24 by aconceic          #+#    #+#             */
-/*   Updated: 2025/04/24 12:59:02 by aconceic         ###   ########.fr       */
+/*   Updated: 2025/04/24 13:38:08 by aconceic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ int		Server::inviteUser(std::vector<std::string> &cmds, Client *client)
 	/* || !isClientOperator(client, channel) */
 	//Apenas operators podem mandar invite ou todos os membros??
 	//Explicacao muito aberta no horse...
-	if (!channel || !target)
+	if (!channel || !target || !isClientOnChannel(client, channel))
 		return (EXIT_FAILURE);
 	
 

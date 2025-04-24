@@ -6,7 +6,7 @@
 /*   By: aconceic <aconceic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/19 15:06:34 by aconceic          #+#    #+#             */
-/*   Updated: 2025/04/24 13:22:01 by aconceic         ###   ########.fr       */
+/*   Updated: 2025/04/24 13:24:52 by aconceic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,10 +53,6 @@ int	Server::kickUser(std::vector<std::string> &cmds, Client *client)
 	
 	return (EXIT_SUCCESS);
 }
-
-/**************************************/
-/*              AUXILIARS             */
-/**************************************/
 
 //Check if target user is on the channel
 //send error msg if not.
