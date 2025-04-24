@@ -6,14 +6,12 @@
 /*   By: aconceic <aconceic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/19 15:06:34 by aconceic          #+#    #+#             */
-/*   Updated: 2025/04/24 13:24:52 by aconceic         ###   ########.fr       */
+/*   Updated: 2025/04/24 13:39:19 by aconceic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/Server.hpp"
 #include "../../includes/utils.hpp"
-
-//AUXILIARS FUNCTIONS DECLARATION
 
 static bool		isTargetUserOnChannel(Channel *channel, Client *target, Client *client);
 

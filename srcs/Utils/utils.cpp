@@ -6,7 +6,7 @@
 /*   By: aconceic <aconceic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 13:12:43 by aconceic          #+#    #+#             */
-/*   Updated: 2025/04/24 13:22:10 by aconceic         ###   ########.fr       */
+/*   Updated: 2025/04/24 14:55:11 by aconceic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,20 +83,22 @@ bool	isClientOperator(Client *client, Channel *channel)
 
 //used on invite.cpp
 //Check on the list of all clients of a channel if a target is there.
-bool	isClientOnChannel(Client *target, Channel *channel)
+//if not, send msg to target client saying that is not on channel.
+bool	isClientOnChannel(Client *client, Channel *channel, std::string msg)
 {
-	if (!target || !channel)
+	if (!client || !channel)
 		return (false);
 
-	int	target_fd = target->getSocket();
+	int	client_fd = client->getSocket();
 	std::vector<int> clients_on_channel = channel->getClients();
 
 	for (std::vector<int>::iterator it = clients_on_channel.begin(); 
 			it != clients_on_channel.end(); it ++)
 	{
-		if ((*it) == target_fd)
+		if ((*it) == client_fd)
 			return (true);
 	}
+	client->sendToClient(client, msg);
 	return (false);
 }
 

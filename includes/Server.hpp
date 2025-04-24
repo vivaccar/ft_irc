@@ -28,14 +28,15 @@
 //KICK DEFINITIONS
 #define KICK_MSG(nick, channel_name, target, reason) ":"+ nick + " KICK " + channel_name + " " + target + reason + "\r\n"
 #define ERR_NOSUCHNICK(nick, channel_name) ": 401 " + nick + " " + channel_name + " : No such channel\r\n"
-#define ERR_CHANOPRIVSNEEDED(nick, channel_name) ": 482 " + nick + " " + channel_name + " : You're not channel operator\r\n"
-#define ERR_USERNOTINCHANNEL(nick, target, channel_name) ": 441 " + nick + " "  + target + " " + channel_name + " :They aren't on that channel"
+#define ERR_CHANOPRIVSNEEDED(nick, channel_name) ": 482 " + nick + " " + channel_name + " :You're not channel operator\r\n"
+#define ERR_USERNOTINCHANNEL(nick, target, channel_name) ": 441 " + nick + " "  + target + " " + channel_name + " :They aren't on that channel\r\n"
+
 
 //INVITE DEFINITION
 //#define ERR_CHANOPRIVSNEEDED
 //#define ERR_NOTONCHANNEL
 //#define ERR_NOSUCHCHANNEL
-//#define ERR_USERONCHANNEL
+#define ERR_USERONCHANNEL(nick, channel_name) ": 443 " + nick + " " + channel_name + " :is already on channel\r\n"
 //#define RPL_INVITING
 class Server {
     private:
