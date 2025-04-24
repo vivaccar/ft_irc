@@ -6,23 +6,33 @@
 /*   By: aconceic <aconceic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/19 15:06:24 by aconceic          #+#    #+#             */
-/*   Updated: 2025/04/19 15:19:20 by aconceic         ###   ########.fr       */
+/*   Updated: 2025/04/24 12:59:02 by aconceic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/Server.hpp"
-#include "../../includes/tests.hpp"
+#include "../../includes/utils.hpp"
 
 //Command: INVITE
+// /invite <nicK> <#channel>
+
 //Parameters: <nickname> <channel>
 int		Server::inviteUser(std::vector<std::string> &cmds, Client *client)
 {
-	(void)cmds;
-	(void)client;
 	std::cout << "INVITE USER \n" << std::endl;
+	std::string target_name = cmds[1];
+	std::string channel_name = cmds[2];
 	
-	//Verify if target channel exist, IF NOT, the server SHOULD reject
-	// the command with ERR_NOSUCHCHANNEL
+	Client *target = ReturnClient(client, this->_clients, target_name, channel_name);
+	Channel *channel = ReturnChannel(this->_channels, channel_name, client);
+
+	//Aqui, devo verificar se o Client eh operator????
+	/* || !isClientOperator(client, channel) */
+	//Apenas operators podem mandar invite ou todos os membros??
+	//Explicacao muito aberta no horse...
+	if (!channel || !target)
+		return (EXIT_FAILURE);
+	
 
 	//Only members of the channel are allowed to invite other users. 
 	//Otherwise, the server MUST reject the command with the ERR_NOTONCHANNEL numeric.
