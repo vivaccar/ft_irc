@@ -44,13 +44,17 @@ class Server {
         void    setNick(std::vector<std::string> &cmds, Client *client);
         bool	nickColission(std::string &nick);
         void    setUser(std::vector<std::string> &cmds, Client *client);
-		//commands
+		
+        //commands
 		int		kickUser(std::vector<std::string> &cmds, Client *client);
 		int		inviteUser(std::vector<std::string> &cmds, Client *client);
         void    joinCommand(std::vector<std::string> &cmds, Client *client);
         void    privMsg(std::vector<std::string> &cmds, Client *client);
         void    topic(std::vector<std::string> &cmds, Client *client, std::string cmd);
         void    mode(std::vector<std::string> &cmds, Client *client, std::string cmd);
+        void    parseModeCommands(std::vector<std::string>& cmds, Client* client, Channel *channel);
+        void    executeModeCommands(std::string action, std::vector<std::string>& cmds, unsigned int &parameter, Client* client, Channel *channel);
+
 
         //RESPONSE
         void	sendResponse(int socket, const std::string &response) const;

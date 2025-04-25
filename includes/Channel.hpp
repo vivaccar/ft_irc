@@ -10,7 +10,6 @@ class Channel {
 	std::string				_topic;
 	std::string				_key;
 	std::string 			_mode;
-	std::map<char, bool>	_modes;
 	std::vector<int>		_channelClients;
 	std::vector<int>		_channelAdmins;
 	std::vector<int>		_channelInvites;
@@ -49,4 +48,5 @@ class Channel {
 
 		void	addClient(const Client *client);
 		void	addAdmin(const Client *client);
+		void	removeAdmin(int socket);
 };

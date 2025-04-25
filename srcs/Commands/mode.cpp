@@ -90,13 +90,39 @@ void    changeUserLimit(std::string &cmd, std::vector<std::string>& cmds, Client
     }
 }
 
-void    executeModeCommands(std::string action, std::vector<std::string>& cmds, unsigned int &parameter, Client* client, Channel *channel)
+void    operatorMode(std::string &cmd, std::vector<std::string>& cmds, Client *client, Channel *channel, unsigned int &parameter, Server *server)
 {
-    (void) parameter;
-    (void) cmds;
-    
-    
-    std::cout << action << " Size: " << action.size() <<  std::endl;
+    if (cmds.size() <= parameter)
+    {
+        std::string msg = "The " + cmd + " mode needs a parameter <nickname>";
+        client->sendToClient(client, ERR_INVALIDEMODEPARAM(client->getNick(), channel->getName(), msg));
+        return;
+    }
+    Client *target = server->getClientByNick(cmds[parameter]);
+    if (!target)
+        return client->sendToClient(client, ERR_NOSUCHNICK(cmds[parameter], channel->getName()));
+    if (!client->isChannelMember(channel))
+        return client->sendToClient(client, ERR_USERNOTINCHANNEL(client->getNick(), cmds[parameter], channel->getName()));
+    if (cmd == "+o" && !target->isChannelAdmin(channel))
+    {
+        channel->addAdmin(target);
+        client->sendToAllChannel(channel, MODE_OPERATOR(client->getNick(), channel->getName(), cmd, target->getNick()));
+        return;
+    }
+    else if (cmd == "-o" && target->isChannelAdmin(channel))
+    {
+        channel->removeAdmin(target->getSocket());
+        client->sendToAllChannel(channel, MODE_OPERATOR(client->getNick(), channel->getName(), cmd, target->getNick()));
+        return;
+    }
+}
+// VERIFICAR SE O NICK PARA SER OU RETIRAR OP ESTA NO CANAL
+// SE FOR +O VERIFICAR SE JA E OP
+// SE FOR -0 VERIFICAR SE JA NAO E OP
+
+void    Server::executeModeCommands(std::string action, std::vector<std::string>& cmds, unsigned int &parameter, Client* client, Channel *channel)
+{
+
     if (action == "+i" || action == "-i")
         return inviteOnlyMode(action, client, channel);
     if (action == "+t" || action == "-t")
@@ -105,9 +131,11 @@ void    executeModeCommands(std::string action, std::vector<std::string>& cmds, 
         return changePassword(action, cmds, client, channel, parameter);
     if (action == "+l" || action == "-l")
         return changeUserLimit(action, cmds, client, channel, parameter);
+    if (action == "+o" || action == "-o")
+        return operatorMode(action, cmds, client, channel, parameter, this);
 }
 
-void parseModeCommands(std::vector<std::string>& cmds, Client* client, Channel *channel)
+void Server::parseModeCommands(std::vector<std::string>& cmds, Client* client, Channel *channel)
 {
     std::string modes = cmds[2];
     char signal = '+';

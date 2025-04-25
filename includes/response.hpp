@@ -32,3 +32,5 @@
 
 #define MODE(nick, channel, status) ":" + nick + " MODE " + channel + " :" + status + "\r\n"
 #define SET_KEY(nick, channel, cmd, key) ":" + nick + " MODE " + channel + " " + cmd + " :" + key + "\r\n"
+#define MODE_OPERATOR(nick, channel, cmd, target) ":" + nick + " MODE " + channel + " " + cmd + " :" + target + "\r\n"
+//MODE #42 +o :vinicius
