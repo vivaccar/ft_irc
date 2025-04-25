@@ -2,16 +2,13 @@
 
 void    inviteOnlyMode(std::string &cmd, Client *client, Channel *channel)
 {
-    std::cout << "CMD is: " << cmd << std::endl;
     if (cmd == "+i" && !channel->getInviteOnly())
     {
-        std::cout << "entrou no +i if" << std::endl;
         channel->setInviteOnly(true);
         client->sendToAllChannel(channel, MODE(client->getNick(), channel->getName(), "+i"));
     }
     else if (cmd == "-i" && channel->getInviteOnly())
     {
-        std::cout << "entrou no -i if" << std::endl;
         channel->setInviteOnly(false);
         client->sendToAllChannel(channel, MODE(client->getNick(), channel->getName(), "-i"));
         return;
@@ -22,13 +19,11 @@ void    topicMode(std::string &cmd, Client *client, Channel *channel)
 {
     if (cmd == "+t" && !channel->getTopicRestricted())
     {
-        std::cout << "entrou no +t if" << std::endl;
         channel->setTopicRestricted(true);
         client->sendToAllChannel(channel, MODE(client->getNick(), channel->getName(), "+t"));
     }
     else if (cmd == "-t" && channel->getTopicRestricted())
     {
-        std::cout << "entrou no -t if" << std::endl;
         channel->setTopicRestricted(false);
         client->sendToAllChannel(channel, MODE(client->getNick(), channel->getName(), "-t"));
     }
@@ -41,20 +36,61 @@ void    changePassword(std::string &cmd, std::vector<std::string>& cmds, Client 
         channel->setKey("");
         client->sendToAllChannel(channel, MODE(client->getNick(), channel->getName(), "-k"));
     }
-    else if (cmd == "+k" && channel->getKey().empty())
+    else if (cmd == "+k")
     {
         if (cmds.size() <= parameter)
         {
-            client->sendToClient(client, KEY_MISS_PARAM(client->getNick(), channel->getName()));
+            std::string msg = "The <+k> mode needs a parameter <password>!";
+            client->sendToClient(client, ERR_INVALIDEMODEPARAM(client->getNick(), channel->getName(), msg));
             return ;
         }
         channel->setKey(cmds[parameter]);
         client->sendToAllChannel(channel, SET_KEY(client->getNick(), channel->getName(), "+k", cmds[parameter]));
     }
-    //LOGICA DE TROCA DE SENHA...
 }
 
-void executeModeCommands(std::string action, std::vector<std::string>& cmds, unsigned int &parameter, Client* client, Channel *channel)
+bool    onlyNumbers(std::string &str)
+{
+    for (size_t i = 0; i < str.size(); i++)
+    {
+        if (!std::isdigit(str[i]))
+            return false;
+    }
+    return true;
+}
+
+void    changeUserLimit(std::string &cmd, std::vector<std::string>& cmds, Client *client, Channel *channel, unsigned int &parameter)
+{
+    if (cmd == "-l" && channel->getUserLimit() != -1)
+    {
+        channel->setUserLimit(-1);
+        client->sendToAllChannel(channel, MODE(client->getNick(), channel->getName(), "-l"));
+        return;
+    }
+    else if (cmd == "+l")
+    {
+        if (cmds.size() <= parameter)
+        {            
+            std::string msg = "The <+l> mode needs a parameter <number>";
+            client->sendToClient(client, ERR_INVALIDEMODEPARAM(client->getNick(), channel->getName(), msg));
+            return;
+        }
+        long limit = std::atol(cmds[parameter].c_str());
+        if (limit < 1 || limit > std::numeric_limits<int>::max() || limit < std::numeric_limits<int>::min() || !onlyNumbers(cmds[parameter]))
+        {
+            std::string msg = "The <+l> parameter is invalid";
+            client->sendToClient(client, ERR_INVALIDEMODEPARAM(client->getNick(), channel->getName(), msg));
+            return;
+        }
+        else
+        {
+            channel->setUserLimit((int)limit);
+            client->sendToAllChannel(channel, SET_KEY(client->getNick(), channel->getName(), "+l", cmds[parameter]));
+        }
+    }
+}
+
+void    executeModeCommands(std::string action, std::vector<std::string>& cmds, unsigned int &parameter, Client* client, Channel *channel)
 {
     (void) parameter;
     (void) cmds;
@@ -67,6 +103,8 @@ void executeModeCommands(std::string action, std::vector<std::string>& cmds, uns
         return topicMode(action, client, channel);
     if (action == "+k" || action == "-k")
         return changePassword(action, cmds, client, channel, parameter);
+    if (action == "+l" || action == "-l")
+        return changeUserLimit(action, cmds, client, channel, parameter);
 }
 
 void parseModeCommands(std::vector<std::string>& cmds, Client* client, Channel *channel)

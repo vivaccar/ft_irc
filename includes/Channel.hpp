@@ -34,6 +34,7 @@ class Channel {
 		std::vector<int> &getClientsRef();
 		bool			getInviteOnly() const;
 		bool			getTopicRestricted() const;
+		int				getUserLimit() const;
 
 	
 		//SETTERS
@@ -43,6 +44,7 @@ class Channel {
 		void	setMode(const std::string &newMode);
 		void	setInviteOnly(bool status);
 		void	setTopicRestricted(bool status);
+		void	setUserLimit(int limit);
 
 		void	addClient(const Client *client);
 		void	addAdmin(const Client *client);

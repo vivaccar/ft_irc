@@ -16,6 +16,7 @@
 #define ERR_TOOMANYCHANNELS "405 ERROR: You have joined too many channels\n"
 #define ERR_NOSUCHCHANNEL(nick, channel) ": 403 " + nick + " " + channel + " :No such Channel\r\n"
 #define ERR_NOTONCHANNEL(nick, channel) ": 442 " + nick + " " + channel + " :You're not in the channel\r\n"
+#define ERR_INVALIDEMODEPARAM(nick, channel, mode) ": 696 " + nick + " " + channel + " :" + msg + "\r\n"
 
 //KICK DEFINITIONS
 #define ERR_NOSUCHNICK(nick, channel_name) ": 401 " + nick + " " + channel_name + " : No such channel\r\n"
@@ -31,4 +32,3 @@
 
 #define MODE(nick, channel, status) ":" + nick + " MODE " + channel + " :" + status + "\r\n"
 #define SET_KEY(nick, channel, cmd, key) ":" + nick + " MODE " + channel + " " + cmd + " :" + key + "\r\n"
-#define KEY_MISS_PARAM(nick, channel) ":" + nick + " " + channel + " k * :You must specify a parameter for the key mode. Syntax: <key>.\r\n"  

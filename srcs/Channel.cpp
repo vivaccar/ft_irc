@@ -43,6 +43,10 @@ bool	Channel::getTopicRestricted() const {
 	return this->_topicRestricted;
 }
 
+int		Channel::getUserLimit() const {
+	return this->_userLimit;
+}
+
 void	Channel::setName(const std::string &newName) {
 	this->_name = newName;
 }
@@ -65,6 +69,10 @@ void	Channel::setInviteOnly(bool status) {
 
 void	Channel::setTopicRestricted(bool status) {
 	this->_topicRestricted = status;
+}
+
+void	Channel::setUserLimit(int limit) {
+	this->_userLimit = limit;
 }
 
 void	Channel::addClient(const Client *client) {

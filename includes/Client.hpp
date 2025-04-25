@@ -12,6 +12,8 @@
 #include <algorithm>
 #include "Channel.hpp"
 #include <fcntl.h>
+#include <stdlib.h>
+#include <limits>
 
 #define RED "\e[31m"
 #define BLUE "\e[34m"
