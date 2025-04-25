@@ -6,7 +6,7 @@
 /*   By: aconceic <aconceic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/19 15:06:24 by aconceic          #+#    #+#             */
-/*   Updated: 2025/04/24 15:16:48 by aconceic         ###   ########.fr       */
+/*   Updated: 2025/04/25 14:25:19 by aconceic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,34 +22,16 @@ int		Server::inviteUser(std::vector<std::string> &cmds, Client *client)
 	std::cout << "INVITE USER \n" << std::endl;
 	std::string target_name = cmds[1];
 	std::string channel_name = cmds[2];
-
-	//debug
-	//aqui verificar o nome do target
-	//std::cout << "TARGET NAME : " << target_name << std::endl;
-	//aqui verificar o channel do target
-	//std::cout << "channel_name NAME : " << channel_name << std::endl;
-
-	
 	Client *target = ReturnClient(client, this->_clients, target_name, channel_name);
-	//debug
-	/* if (!target)
-		std::cout << "SEM TARGET" << std::endl; */
 	Channel *channel = ReturnChannel(this->_channels, channel_name, client);
-	//debug
-	/* if (!channel)
-		std::cout << "SEM CHANNEL" << std::endl; */
-	
-	
-	//Aqui, devo verificar se o Client eh operator????
-	/* || !isClientOperator(client, channel) */
-	//Apenas operators podem mandar invite ou todos os membros??
-	//Explicacao muito aberta no horse...
-	if (!channel || !target || !isClientOnChannel(client, channel, ERR_NOTONCHANNEL(target->getNick(), channel->getName())))
+
+	if (!channel || !target || !isClientOnChannel(client, channel))
 	{
-		std::cout << "ENTROU INVALIDO" << std::endl;
+		client->sendToClient(client, ERR_NOTONCHANNEL(target_name, channel_name));
 		return (EXIT_FAILURE);
 	}
-	else if (isClientOnChannel(target, channel, ERR_USERONCHANNEL(target_name, channel_name))) //If the user is already on the target channel, the server MUST reject the command with the ERR_USERONCHANNEL numeric.
+	//If the user is already on the target channel, the server MUST reject the command with the ERR_USERONCHANNEL numeric.
+	else if (isClientOnChannel(target, channel))
 	{
 		client->sendToClient(client, ERR_USERONCHANNEL(target_name, channel_name));
 		return (EXIT_FAILURE);
@@ -58,10 +40,15 @@ int		Server::inviteUser(std::vector<std::string> &cmds, Client *client)
 	std::cout << "MODE :" << channel->getMode() << std::endl;
 	//Servers MAY reject the command with the ERR_CHANOPRIVSNEEDED numeric.
 	//In particular, they SHOULD reject it when the channel has invite-only mode set, and the user is not a channel operator
+	//Aqui, devo verificar se o mode do canal eh -i, se for, apenas operator pode enviar invites...
 	
-	
-	//When the invite is successful, the server MUST send a RPL_INVITING numeric to the command issuer, and an INVITE message, 
+	//When the invite is successful, the server MUST send a RPL_INVITING numeric to the command issuer, and an INVITE message,
 	//with the issuer as <source>, to the target user. Other channel members SHOULD NOT be notified.
-	
+	std::string msg =  "You have been invited to " + channel_name + " by " + client->getNick() + "\r\n";
+	target->sendToClient(target, msg);
+	client->sendToClient(client, RPL_INVITING(target_name, channel_name, client->getNick()));
 	return (EXIT_SUCCESS);
 };
+//std::vector<int>	_channelInvites;
+
+//CHECAR USER LIMITS TAMBEM ANTES DE ADICIONAR USERS

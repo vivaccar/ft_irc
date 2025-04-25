@@ -33,11 +33,10 @@
 
 
 //INVITE DEFINITION
-//#define ERR_CHANOPRIVSNEEDED
-//#define ERR_NOTONCHANNEL
-//#define ERR_NOSUCHCHANNEL
 #define ERR_USERONCHANNEL(nick, channel_name) ": 443 " + nick + " " + channel_name + " :is already on channel\r\n"
-//#define RPL_INVITING
+#define RPL_INVITING(target, channel_name, client) ": 341 " + client + " " + target + " " + channel_name + " : VINICIUS TESTS\r\n"
+
+
 class Server {
     private:
 

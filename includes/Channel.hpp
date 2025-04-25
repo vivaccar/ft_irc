@@ -12,6 +12,7 @@ class Channel {
 	std::string 		_mode;
 	std::vector<int>	_channelClients;
 	std::vector<int>	_channelAdmins;
+	std::vector<int>	_channelInvites;
 /* 	bool				_hasUserLimit;
 	bool				_hasPassword;
 	int					_userLimit; */
