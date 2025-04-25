@@ -162,10 +162,12 @@ void    Server::parseCommand(std::string cmd, int clientSocket) {
             setNick(cmds, client);
         else if (cmds[0] == "USER" || cmds[0] == "user")
             setUser(cmds, client);
-        else if (cmds[0] == "TOPIC" || cmds[0] == "topic")
-            topic(cmds, client, cmd);
         else if (!client->isAuth())
             sendResponse(client->getSocket(), ERR_NOTREGISTERED(client->getNick()));
+        else if (cmds[0] == "TOPIC" || cmds[0] == "topic")
+                topic(cmds, client, cmd);
+        else if (cmds[0] == "MODE" || cmds[0] == "mode")
+                mode(cmds, client, cmd);
         else if (cmds[0] == "JOIN")
         {
             joinCommand(cmds, client);
@@ -212,7 +214,7 @@ void    Server::runPoll() {
         << _socketFd << RESET << std::endl;
     while (_run)
     {
-        int ret = poll(_fds.data(), _fds.size(), 0);
+        int ret = poll(_fds.data(), _fds.size(), 0);   
         if (ret < 0 && _run)
             throw(std::runtime_error("Poll Error"));
         if (_fds[0].revents & POLLIN)
@@ -256,7 +258,8 @@ void    Server::runPoll() {
                 } else
                 {
                     // Envia resposta ao cliente
-                    std::cout << "\nClient " << client_socket << " say: " << buffer << std::endl;
+                    std::string msg(buffer);
+                    std::cout << "\nClient " << client_socket << " say: " << buffer << " size: " << msg.size()  << std::endl;
                     parseCommand(std::string(buffer), client_socket);
                 }
             }

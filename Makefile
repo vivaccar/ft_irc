@@ -1,8 +1,8 @@
 SRCS = srcs/main.cpp srcs/Server.cpp srcs/Client.cpp srcs/Channel.cpp \
 		srcs/Commands/pass.cpp srcs/Commands/nick.cpp srcs/Commands/user.cpp srcs/Commands/join.cpp \
-		srcs/Commands/topic.cpp \
+		srcs/Commands/topic.cpp srcs/Commands/mode.cpp \
 		srcs/Utils/utils.cpp \
-		srcs/Commands/kick.cpp srcs/tests.cpp srcs/Commands/invite.cpp
+		srcs/Commands/kick.cpp srcs/Commands/invite.cpp
  
 OBJS = $(SRCS:.cpp=.o)
 
