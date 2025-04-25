@@ -33,6 +33,7 @@ class Channel {
 		std::vector<int> getClients() const;
 		std::vector<int> getAdmins() const;
 		std::vector<int> &getClientsRef();
+		std::vector<int> &getChannelInvites();
 		bool			getInviteOnly() const;
 		bool			getTopicRestricted() const;
 		int				getUserLimit() const;
@@ -49,4 +50,5 @@ class Channel {
 
 		void	addClient(const Client *client);
 		void	addAdmin(const Client *client);
+		void	addChannelInvite(const Client *client);
 };

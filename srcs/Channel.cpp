@@ -31,9 +31,14 @@ std::vector<int> Channel::getAdmins() const {
 	return this->_channelAdmins;
 }
 
-std::vector<int> & Channel::getClientsRef(){
+std::vector<int> &Channel::getClientsRef(){
 	return (this->_channelClients);
 }
+
+std::vector<int> &Channel::getChannelInvites(){
+	return (this->_channelInvites);
+}
+
 
 bool	Channel::getInviteOnly() const {
 	return this->_inviteOnly;
@@ -83,3 +88,7 @@ void	Channel::addClient(const Client *client) {
 void	Channel::addAdmin(const Client *client) {
 	this->_channelAdmins.push_back(client->getSocket());
 }
+
+void	Channel::addChannelInvite(const Client *client){
+	this->_channelInvites.push_back(client->getSocket());
+};
