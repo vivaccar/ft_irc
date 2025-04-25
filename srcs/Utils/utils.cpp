@@ -6,7 +6,7 @@
 /*   By: aconceic <aconceic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 13:12:43 by aconceic          #+#    #+#             */
-/*   Updated: 2025/04/25 13:53:15 by aconceic         ###   ########.fr       */
+/*   Updated: 2025/04/25 14:36:46 by aconceic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,4 +163,18 @@ void removeUserFromChannel(Channel *channel, Client *target, Client *client, std
 			break;
 		}
 	}
+}
+
+std::vector<std::string> splitString(std::string &str) {
+	size_t start = 0;
+	size_t end = 0;
+	std::vector<std::string> vec;
+	while(end != str.size()) {
+		end = str.find(",", start);
+		if (end == str.npos)
+			end = str.size();
+		vec.push_back(str.substr(start, end - start));
+		start = end + 1;
+	}
+	return vec;
 }

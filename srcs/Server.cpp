@@ -162,10 +162,12 @@ void    Server::parseCommand(std::string cmd, int clientSocket) {
             setNick(cmds, client);
         else if (cmds[0] == "USER" || cmds[0] == "user")
             setUser(cmds, client);
-        else if (cmds[0] == "TOPIC" || cmds[0] == "topic")
-            topic(cmds, client, cmd);
         else if (!client->isAuth())
             sendResponse(client->getSocket(), ERR_NOTREGISTERED(client->getNick()));
+        else if (cmds[0] == "TOPIC" || cmds[0] == "topic")
+                topic(cmds, client, cmd);
+        else if (cmds[0] == "MODE" || cmds[0] == "mode")
+                mode(cmds, client, cmd);
         else if (cmds[0] == "JOIN")
         {
             joinCommand(cmds, client);
