@@ -133,6 +133,7 @@ void    Server::executeModeCommands(std::string action, std::vector<std::string>
         return changeUserLimit(action, cmds, client, channel, parameter);
     if (action == "+o" || action == "-o")
         return operatorMode(action, cmds, client, channel, parameter, this);
+    return sendResponse(client->getSocket(), ERR_UNKNOWNMODE(client->getNick(), action[1]));
 }
 
 void Server::parseModeCommands(std::vector<std::string>& cmds, Client* client, Channel *channel)

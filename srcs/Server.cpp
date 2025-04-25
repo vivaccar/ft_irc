@@ -258,7 +258,8 @@ void    Server::runPoll() {
                 } else
                 {
                     // Envia resposta ao cliente
-                    std::cout << "\nClient " << client_socket << " say: " << buffer << std::endl;
+                    std::string msg(buffer);
+                    std::cout << "\nClient " << client_socket << " say: " << buffer << " size: " << msg.size()  << std::endl;
                     parseCommand(std::string(buffer), client_socket);
                 }
             }

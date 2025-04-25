@@ -21,6 +21,7 @@
 #define ERR_NOSUCHNICK(nick, channel_name) ": 401 " + nick + " " + channel_name + " : No such channel\r\n"
 #define ERR_CHANOPRIVSNEEDED(nick, channel_name) ": 482 " + nick + " " + channel_name + " : You're not channel operator\r\n"
 #define ERR_USERNOTINCHANNEL(nick, target, channel_name) ": 441 " + nick + " "  + target + " " + channel_name + " :They aren't on that channel"
+#define ERR_UNKNOWNMODE(nick, cmd) ": 472 " + nick + " " + cmd + ": is unknown mode\r\n"
 
 //// - - - - - - REPLIES - - - - - - 
 #define RPL_WELCOME(nick) ": 001 " + nick + " :Welcome " + nick + " to the ft_irc\r\n"
@@ -33,4 +34,4 @@
 #define MODE(nick, channel, status) ":" + nick + " MODE " + channel + " :" + status + "\r\n"
 #define SET_KEY(nick, channel, cmd, key) ":" + nick + " MODE " + channel + " " + cmd + " :" + key + "\r\n"
 #define MODE_OPERATOR(nick, channel, cmd, target) ":" + nick + " MODE " + channel + " " + cmd + " :" + target + "\r\n"
-//MODE #42 +o :vinicius
+
