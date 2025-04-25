@@ -214,7 +214,7 @@ void    Server::runPoll() {
         << _socketFd << RESET << std::endl;
     while (_run)
     {
-        int ret = poll(_fds.data(), _fds.size(), 0);
+        int ret = poll(_fds.data(), _fds.size(), 0);   
         if (ret < 0 && _run)
             throw(std::runtime_error("Poll Error"));
         if (_fds[0].revents & POLLIN)
