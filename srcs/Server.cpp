@@ -228,30 +228,33 @@ void    Server::disconnectClient(int fd, size_t &poolIdx)
     _fds.erase(_fds.begin() + poolIdx);  // Remove o cliente da lista
     _clients.erase(poolIdx);
     --poolIdx;
+    std::cout << RED << std::endl << "Client Disconected on FD: "
+        << fd << RESET << std::endl;
 }
 
-void    Server::readNewMessage(size_t &pollIdx) 
+void Server::readNewMessage(size_t &pollIdx)
 {
-    char    buffer[1024];
-    bzero(buffer, 1024);
-    int fd = _fds[0].fd;
+    char buffer[1024];
+    bzero(buffer, sizeof(buffer));
+    int fd = _fds[pollIdx].fd;
 
-    std::string msg = "";
-    while (!strstr(buffer, "\n"))
+    std::string msg;
+    ssize_t bytesRead;
+
+    while (true)
     {
-        bzero(buffer, 1024);
-        int bytesRead = recv(fd, buffer, 1024, 0);
+        bytesRead = recv(fd, buffer, sizeof(buffer) - 1, 0);
         if (bytesRead < 0)
             throw std::runtime_error("Recv Error");
         if (bytesRead == 0)
             return disconnectClient(fd, pollIdx);
-        else
-            msg.append(buffer);
+        buffer[bytesRead] = '\0';
+        msg.append(buffer);
+        if (msg.find('\n') != std::string::npos)
+            break;
     }
-    msg.append(buffer);
     parseCommand(msg, fd);
 }
-
 void    Server::runPoll() {
     // CRIA A ESTRUTURA DO DO SOCKET DO SERVIDOR PARA SER UTILIZADO NO POLL
     struct pollfd server;
