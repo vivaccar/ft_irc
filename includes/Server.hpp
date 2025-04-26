@@ -34,7 +34,10 @@ class Server {
 
         void    createSocket();
         void    runPoll();
+        void    connectNewClient();
+        void    readNewMessage(size_t &pollIdx);
         void	createClient(int socket);
+        void    disconnectClient(int fd, size_t &pollIdx);
         void    recSignal();
         static void    signalHandler(int signal);
 

@@ -202,6 +202,56 @@ void    Server::parseCommand(std::string cmd, int clientSocket) {
     }
 }
 
+void    Server::connectNewClient() {
+    int newClientSocket = accept(_socketFd, NULL, NULL);
+    if (newClientSocket < 0)
+    {
+        std::cout << "Fail to accept connection" << std::endl;
+        return;
+    }
+    createClient(newClientSocket);
+    struct pollfd newClient;
+    newClient.fd = newClientSocket;
+    newClient.events = POLLIN;
+    newClient.revents = 0;
+    _fds.push_back(newClient);
+    std::cout << GREEN << std::endl << "New client connected on FD: "
+        << newClient.fd << RESET << std::endl;
+}
+
+void    Server::disconnectClient(int fd, size_t &poolIdx)
+{
+    Client  *toDelete = getClientBySocket(fd);
+    if (toDelete)
+        delete toDelete;
+    close(fd);
+    _fds.erase(_fds.begin() + poolIdx);  // Remove o cliente da lista
+    _clients.erase(poolIdx);
+    --poolIdx;
+}
+
+void    Server::readNewMessage(size_t &pollIdx) 
+{
+    char    buffer[1024];
+    bzero(buffer, 1024);
+    int fd = _fds[0].fd;
+
+    std::string msg = "";
+    while (!strstr(buffer, "\n"))
+    {
+        bzero(buffer, 1024);
+        int bytesRead = recv(fd, buffer, 1024, 0);
+        if (bytesRead < 0)
+            throw std::runtime_error("Recv Error");
+        if (bytesRead == 0)
+            return disconnectClient(fd, pollIdx);
+        else
+            msg.append(buffer);
+    }
+    msg.append(buffer);
+    parseCommand(msg, fd);
+}
+
 void    Server::runPoll() {
     // CRIA A ESTRUTURA DO DO SOCKET DO SERVIDOR PARA SER UTILIZADO NO POLL
     struct pollfd server;
@@ -209,7 +259,7 @@ void    Server::runPoll() {
     server.events = POLLIN;
     server.revents = 0;
     _fds.push_back(server);
-    
+
     std::cout << std::endl << GREEN << "Server waiting connections on FD "
         << _socketFd << RESET << std::endl;
     while (_run)
@@ -218,51 +268,11 @@ void    Server::runPoll() {
         if (ret < 0 && _run)
             throw(std::runtime_error("Poll Error"));
         if (_fds[0].revents & POLLIN)
-        {
-            
-            int newClientSock = accept (_socketFd, NULL, NULL);
-            if (newClientSock < 0)
-            {
-                std::cout << "Fail to accept connection" << std::endl;
-                continue;
-            }
-            createClient(newClientSock);
-            struct pollfd newClient;
-            newClient.fd = newClientSock;
-            newClient.events = POLLIN;
-            newClient.revents = 0;
-            _fds.push_back(newClient);
-            const char *login = "To authenticate, follow the steps\n1 - PASS [password]\n2 - NICK [nickname]\n3 - USER [username]\n";
-            send(newClientSock, login, strlen(login), 0);
-            std::cout << GREEN << std::endl << "New client connected on FD: "
-                << newClient.fd << RESET << std::endl;
-        }
+            connectNewClient();
         for (size_t i = 1; i < _fds.size(); i++)
         {  // Começa no índice 1, já que o índice 0 é o servidor
             if (_fds[i].revents & POLLIN)
-            {
-                char buffer[1024] = {0};
-                int client_socket = _fds[i].fd;
-                int bytes_read = recv(client_socket, buffer, 1024, 0);
-                if (bytes_read == 0)
-                {
-                    // Cliente desconectou
-                    Client *toDelete = getClientBySocket(client_socket);
-                    if (toDelete)
-                        delete toDelete;
-                    std::cout << RED << std::endl << "Client desconected on FD" << _fds[i].fd << RESET << std::endl;
-                    close(client_socket);
-                    _fds.erase(_fds.begin() + i);  // Remove o cliente da lista
-                    _clients.erase(client_socket);
-                    --i;  // Ajusta o índice após a remoção
-                } else
-                {
-                    // Envia resposta ao cliente
-                    std::string msg(buffer);
-                    std::cout << "\nClient " << client_socket << " say: " << buffer << " size: " << msg.size()  << std::endl;
-                    parseCommand(std::string(buffer), client_socket);
-                }
-            }
+                readNewMessage(i);
         }
     }
     std::cout << RED << "SERVER IS DOWN - free memory here" << RESET << std::endl;
