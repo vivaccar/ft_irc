@@ -50,12 +50,20 @@ void    Server::joinCommand(std::vector<std::string> &cmds, Client *client) {
 			//checar se o canal eh modo invite-only -> ERR_INVITEONLYCHAN (473)
 			//channel is full, 
 			if (!client->isChannelMember(channelFound)) {
-				if (channelFound->getUserLimit() != -1 && (static_cast<int>(channelFound->getClients().size()) == channelFound->getUserLimit()))
+				std::cout << " GET USER LIMIT -> " << channelFound->getUserLimit() << std::endl;
+				std::cout << " GET CLIENTS SIZE -> " << channelFound->getClients().size() << std::endl;
+				if (channelFound->getUserLimit() != -1 && (static_cast<int>(channelFound->getClients().size()) >= channelFound->getUserLimit()))
 					sendResponse(client->getSocket(), ERR_CHANNELISFULL(client->getNick(), channelFound->getName()));
-				/* if (channelFound->_isInviteOnly) ->ESPERAR FLAG DE INVITE ONLY DO VINICIUSSSSS
-					sendResponse(client->getSocket(), ERR_INVITEONLYCHAN(client->getNick(), channelFound->getName()));
-					 */				
-				if (key == channelFound->getKey() || channelFound->getKey().empty()) {
+				if (channelFound->getInviteOnly()) {
+					if (client->isChannelInvited(channelFound)) {
+						channelFound->addClient(client);
+						sendResponse(client->getSocket(), RPL_JOIN(client->getNick(), channelFound->getName()));
+						//remover cliente do invited
+					}
+					else
+						sendResponse(client->getSocket(), ERR_INVITEONLYCHAN(client->getNick(), channelFound->getName()));
+				}				
+				else if (key == channelFound->getKey() || channelFound->getKey().empty()) {
 					channelFound->addClient(client);
 					sendResponse(client->getSocket(), RPL_JOIN(client->getNick(), channelFound->getName()));
 					client->sendToChannel(channelFound, RPL_JOIN(client->getNick(), channelFound->getName()));

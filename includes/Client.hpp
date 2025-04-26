@@ -12,6 +12,8 @@
 #include <algorithm>
 #include "Channel.hpp"
 #include <fcntl.h>
+#include <stdlib.h>
+#include <limits>
 
 #define RED "\e[31m"
 #define BLUE "\e[34m"
@@ -60,8 +62,10 @@ class Client {
 
 
             void	sendToChannel(Channel *channel, const std::string &msg);
+            void	sendToAllChannel(Channel *channel, const std::string &msg);
             void	sendToClient(Client *client, const std::string &msg);
             void	sendError(Client *client, const char *error);
             bool	isChannelMember(Channel *channel);
             bool	isChannelAdmin(Channel *channel);
+			bool 	isChannelInvited(Channel *channel);
 };

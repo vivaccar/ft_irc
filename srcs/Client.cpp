@@ -72,6 +72,13 @@ void	Client::sendToChannel(Channel *channel, const std::string &msg) {
 	}
 }
 
+void	Client::sendToAllChannel(Channel *channel, const std::string &msg) {
+	std::vector<int> members = channel->getClients();
+	for (std::vector<int>::iterator it = members.begin(); it != members.end(); it++) {
+		send(*it, msg.c_str(), msg.size(), 0);
+	}
+}
+
 void	Client::sendToClient(Client *client, const std::string &msg) {
 	send(client->getSocket(), msg.c_str(), msg.size(), 0);
 }
@@ -87,9 +94,17 @@ bool	Client::isChannelMember(Channel *channel) {
 	return false;
 }
 
+
 bool	Client::isChannelAdmin(Channel *channel) {
 	std::vector<int> admins = channel->getAdmins();
 	if (std::find(admins.begin(), admins.end(), this->getSocket()) != admins.end())
+		return true;
+	return false;
+}
+
+bool	Client::isChannelInvited(Channel *channel) {
+	std::vector<int> members = channel->getChannelInvites();
+	if (std::find(members.begin(), members.end(), this->getSocket()) != members.end())
 		return true;
 	return false;
 }

@@ -11,11 +11,9 @@ void	Server::privMsg(std::vector<std::string> &cmds, Client *client, const std::
 	std::string msg = extractMessage(cmdLine, 2);
 	for(std::vector<std::string>::iterator it = dest.begin(); it != dest.end(); it++) {
 		if (it->at(0) == '#') {
-			Channel *channelDest = getChannelByName(*it); // verificar se o nome do canal esta sendo armazenado com '#'
-			if (channelDest && client->isChannelMember(channelDest)) {
+			Channel *channelDest = getChannelByName(*it);
+			if (channelDest && client->isChannelMember(channelDest))
 				client->sendToChannel(channelDest, RPL_PRIVMSG(client->getNick(), channelDest->getName(), msg));
-				//sendResponse(client->getSocket(), RPL_PRIVMSG(client->getNick(), channelDest->getName(), msg));
-			}
 			else if (channelDest && !client->isChannelMember(channelDest))
 				sendResponse(client->getSocket(), ERR_CANNOTSENDTOCHAN(client->getNick(), channelDest->getName()));
 		}
