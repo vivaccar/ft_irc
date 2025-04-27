@@ -1,4 +1,5 @@
 #include "../includes/Server.hpp"
+#include "../includes/utils.hpp"
 
 Server *Server::instance = NULL;
 
@@ -156,6 +157,8 @@ void    Server::parseCommand(std::string cmd, int clientSocket) {
         std::istringstream streamCmd(*it);
         while (streamCmd >> word)
             cmds.push_back(word);
+		
+		std::cout << cmds[0] << std::endl;
         if (cmds[0] == "PASS" || cmds[0] == "pass")
             checkPassword(cmds, client);
         else if (cmds[0] == "NICK" || cmds[0] == "nick")
@@ -180,23 +183,18 @@ void    Server::parseCommand(std::string cmd, int clientSocket) {
 			kickUser(cmds, client);
 		else if (cmds[0] == "INVITE")
 			inviteUser(cmds, client);
-			/*
-			// (PASS, NICK, USER, JOIN, PART, TOPIC, INVITE, KICK, QUIT, MODE, and PRIVMSG)
-			else if (cmds[0] == "KICK") //TO START WORKING AT THE COMMANDS REQUIRED BY THE SUBJECT
-				//kick function
-				kickUser(cmds, client);
-			else if (cmds[0] == "INVITE")
-				//invite function
-			else if (cmds[0] == "TOPIC") 
-				//topic function
-			else if (cmds[0] == "MODE")
-				//mode function, where
-					//i: Set/Remove Invite-only channel
-					//t: set/remove the restrictions of the TOPIC command to channel operator
-					//k: set/remove the channel key (password)
-					//o: give/take channel operator(moderador) privilege
-					//l: set/remove the user limit to channel
-			*/
+		else if (cmds[0] == "trivia" || cmds[0] == "math" || cmds[0] == "year")
+		{
+			if (cmds.size() < 2 || cmds[1].empty()) //precisa necessariamente ter o nome do canal
+				continue ;
+			
+			Channel *channel = ReturnChannel(this->_channels, cmds[1], client);
+			if (!channel)
+				continue;
+			numbersAPI(cmds, client, channel);
+			//client->sendToClient(client, to_send);
+			//client->sendToAllChannel();
+		}
         else
             sendResponse(client->getSocket(), ERR_UNKNOWNCOMMAND(client->getNick(), cmds[0]));
     }

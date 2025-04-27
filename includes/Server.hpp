@@ -54,6 +54,9 @@ class Server {
 
         //RESPONSE
         void	sendResponse(int socket, const std::string &response) const;
+
+		//API (BONUS)
+		int	numbersAPI(std::vector<std::string> &cmds, Client *client, Channel *channel);
 };
 
 // UTILS
