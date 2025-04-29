@@ -6,7 +6,7 @@
 /*   By: aconceic <aconceic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/27 16:08:27 by aconceic          #+#    #+#             */
-/*   Updated: 2025/04/29 15:10:21 by aconceic         ###   ########.fr       */
+/*   Updated: 2025/04/29 16:32:11 by aconceic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,11 @@
 #include "../../includes/utils.hpp"
 #include <cstring> //std::memset
 #include <netdb.h>
+#include <cerrno> 
 
 static std::string getNumbersApiCategory(std::vector<std::string> &cmds);
 
-static int createSocketBOT(addrinfo *res);
+static int createAndConnectSocketBOT(addrinfo *res);
 static int prepareHost(addrinfo &hints, addrinfo *&res, const char* host, const char* port);
 static int doAndSendHttpRequest(int socket, std::string path, const char *host);
 static std::string receiveResponseFromAPI(int socket);
@@ -44,7 +45,7 @@ int	Server::numbersAPI(std::vector<std::string> &cmds, Client *client, Channel *
 		return (sendToClientError(client, err_msg));
 
 	//2. create socket
-	int sock = createSocketBOT(res);
+	int sock = createAndConnectSocketBOT(res);
 	if (sock == -1)
 		return (sendToClientError(client, err_msg));
 
@@ -54,7 +55,7 @@ int	Server::numbersAPI(std::vector<std::string> &cmds, Client *client, Channel *
 	
 	//4. Receive response from API and convert to string
 	APIresponse = receiveResponseFromAPI(sock);
-	if (APIresponse.empty())
+	if (APIresponse.size() < 1)
 		return (sendToClientError(client, err_msg));
 
 	//PRIVMSG #escola :boa tarde
@@ -93,7 +94,7 @@ static int prepareHost(addrinfo &hints, addrinfo *&res, const char* host, const 
 }
 
 //second step is to create the BOT socket
-static int createSocketBOT(addrinfo *res)
+static int createAndConnectSocketBOT(addrinfo *res)
 {
 	int sock = socket(res->ai_family, res->ai_socktype, 0);
 	if (sock < 0)
@@ -102,13 +103,66 @@ static int createSocketBOT(addrinfo *res)
 		return (-1);
 	}
 	
-	if (connect(sock, res->ai_addr, res->ai_addrlen) < 0)
+	//AQUI PRECISO TORNAR NON BLOCKING
+	if (fcntl(sock, F_SETFL, O_NONBLOCK) == -1) //make non blocking
+	{
+		std::cout << "PAROU AQUI \n";
+		close(sock);
+		return (-1);
+	}
+
+	int status = connect(sock, res->ai_addr, res->ai_addrlen);
+	if (status < 0 && errno != EINPROGRESS)
 	{
 		close(sock);
 		freeaddrinfo(res);
 		return (-1);
 	}
+
+	struct pollfd pfd;
+	pfd.fd = sock;
+	pfd.events = POLLOUT;
+	pfd.revents = 0;
+	int	ret;
+
+	while (true)
+	{
+		ret = poll(&pfd, 1, 5000);
+		if (ret < 0)
+		{
+			if (errno == EINTR)
+				continue;
+			close(sock);
+			freeaddrinfo(res);
+			return (-1);
+		}
+		if (ret == 0)
+		{
+			std::cerr << "Timeout no connect()\n";
+            close(sock);
+            freeaddrinfo(res);
+            return -1;
+		}
+		break ;
+	}
+	
+	int err = 0;
+    socklen_t len = sizeof(err);
+    if (getsockopt(sock, SOL_SOCKET, SO_ERROR, &err, &len) < 0) {
+        close(sock);
+        freeaddrinfo(res);
+        return -1;
+    }
+    if (err != 0) {
+        std::cerr << "Erro no connect(): " << std::strerror(err) << "\n";
+        close(sock);
+        freeaddrinfo(res);
+        return -1;
+    }
+
+    // Conexão estabelecida com sucesso!
 	freeaddrinfo(res);
+	std::cout << "CONEXAO FEITA!\n";
 	return (sock);
 }
 
@@ -141,10 +195,11 @@ static std::string receiveResponseFromAPI(int socket)
 	}
 	close(socket);
 
+	std::cout << "RESPOSTA : " << resposta << "\n";
 	//5. separar cabecalhos do corpo
 	size_t sep = resposta.find("\r\n\r\n");
 	if (sep == std::string::npos)
-		return (NULL);
+		return ("");
 
 	ret = resposta.substr(sep + 4);
 	return (ret);
