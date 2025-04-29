@@ -187,7 +187,7 @@ void    Server::parseCommand(std::string cmd, int clientSocket) {
 		{
 			if (cmds.size() < 2 || cmds[1].empty()) //precisa necessariamente ter o nome do canal
 				continue ;
-			
+
 			Channel *channel = ReturnChannel(this->_channels, cmds[1], client);
 			if (!channel)
 				continue;
