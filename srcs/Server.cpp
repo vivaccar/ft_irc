@@ -136,12 +136,6 @@ void	Server::privMsg(std::vector<std::string> &cmds, Client *client) {
 }
 
 void    Server::parseCommand(std::string cmd, int clientSocket) {
-    
-    std::string message;
-    size_t i = cmd.find(':');
-    if (i != std::string::npos)
-        message = cmd.substr(i, cmd.size());
-    std::cout << BLUE << message << RESET << std::endl;
     std::vector<std::string> lines;
     std::istringstream streamLine(cmd);
     std::string line;
@@ -168,17 +162,17 @@ void    Server::parseCommand(std::string cmd, int clientSocket) {
                 topic(cmds, client, cmd);
         else if (cmds[0] == "MODE" || cmds[0] == "mode")
                 mode(cmds, client, cmd);
-        else if (cmds[0] == "JOIN")
+        else if (cmds[0] == "JOIN" || cmds[0] == "join")
         {
             joinCommand(cmds, client);
             /* std::string joinresp = ":" + client->getNick() + " JOIN " + cmds[1] + "\n";
             send(clientSocket, joinresp.c_str(), strlen(joinresp.c_str()), 0); */
         }
-        else if (cmds[0] == "PRIVMSG")
+        else if (cmds[0] == "PRIVMSG" || cmds[0] == "privmsg")
             privMsg(cmds, client);
-		else if (cmds[0] == "KICK") //TO START WORKING AT THE COMMANDS REQUIRED BY THE SUBJECT
+		else if (cmds[0] == "KICK" || cmds[0] == "kick") //TO START WORKING AT THE COMMANDS REQUIRED BY THE SUBJECT
 			kickUser(cmds, client);
-		else if (cmds[0] == "INVITE")
+		else if (cmds[0] == "INVITE" || cmds[0] == "invite")
 			inviteUser(cmds, client);
 			/*
 			// (PASS, NICK, USER, JOIN, PART, TOPIC, INVITE, KICK, QUIT, MODE, and PRIVMSG)
@@ -253,6 +247,18 @@ void Server::readNewMessage(size_t &pollIdx)
         if (msg.find('\n') != std::string::npos)
             break;
     }
+    size_t find = msg.find('\r');
+    if (find != std::string::npos)
+        msg = msg.substr(0, find);
+    else
+    {
+        find = msg.find('\n');
+        if (find != std::string::npos)
+            msg = msg.substr(0, find);
+    }
+    std::cout << "a mensagem eh " << msg << std::endl;
+    if (msg.empty())
+        return;
     parseCommand(msg, fd);
 }
 void    Server::runPoll() {

@@ -22,7 +22,7 @@ void    Server::topic(std::vector<std::string> &cmds, Client *client, std::strin
         newTopic = "";
     std::cout << RED << "TOPIC IS --> " << newTopic << " size: " << newTopic.size() << RESET << std::endl;
     channel->setTopic(newTopic);
-    client->sendToChannel(channel, TOPIC_CHANGE(client->getNick(), channel->getName(), newTopic)); // MUDAR PARA A FUNCAO QUE MANDA PARA TODOS DO CANAL;
+    client->sendToAllChannel(channel, TOPIC_CHANGE(client->getNick(), channel->getName(), newTopic)); // MUDAR PARA A FUNCAO QUE MANDA PARA TODOS DO CANAL;
     return;
 }
 

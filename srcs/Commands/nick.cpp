@@ -44,7 +44,8 @@ void    Server::setNick(std::vector<std::string> &cmds, Client *client)
 			std::string response = ":" + client->getNick() + std::string(" NICK ") + cmds[1] + "\n";
 			client->setNick(cmds[1]);
 			std::cout << "Client " << client->getSocket() << " :" << " set new NICKNAME :" << client->getNick() << std::endl;
-			send(client->getSocket(), response.c_str(), response.size(), 0);
+			if (client->isAuth())
+				send(client->getSocket(), response.c_str(), response.size(), 0);
 			if (!client->getUser().empty() && !client->isAuth())
 			{
 				sendResponse(client->getSocket(), RPL_WELCOME(client->getNick()));

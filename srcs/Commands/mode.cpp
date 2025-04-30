@@ -161,7 +161,7 @@ void Server::parseModeCommands(std::vector<std::string>& cmds, Client* client, C
             action += signal;
             action += modes[i];
             executeModeCommands(action, cmds, curParameter, client, channel);
-            if (modes[i] == 'k' || modes[i] == 'l' || modes[i] == 'o')
+            if (action == "+k" || action == "+l" || modes[i] == 'o')
                 curParameter++;
         }
     }
