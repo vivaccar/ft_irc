@@ -1,0 +1,4 @@
+1 - server listening
+2 - cliente conectou
+3 - cliente autenticou
+4 - cliente desconectou

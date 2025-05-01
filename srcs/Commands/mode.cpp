@@ -49,16 +49,6 @@ void    changePassword(std::string &cmd, std::vector<std::string>& cmds, Client 
     }
 }
 
-bool    onlyNumbers(std::string &str)
-{
-    for (size_t i = 0; i < str.size(); i++)
-    {
-        if (!std::isdigit(str[i]))
-            return false;
-    }
-    return true;
-}
-
 void    changeUserLimit(std::string &cmd, std::vector<std::string>& cmds, Client *client, Channel *channel, unsigned int &parameter)
 {
     if (cmd == "-l" && channel->getUserLimit() != -1)

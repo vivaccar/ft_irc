@@ -8,9 +8,9 @@ int main(int ac, char **av)
         std::cout << "Invalid arguments. Try ./ircserv <port> <password>" << std::endl;
         return 0;
     }
-    Server server(av[1], av[2]);
     try
     {
+        Server server(av[1], av[2]);
         server.recSignal();
         server.createSocket();
         server.runPoll();

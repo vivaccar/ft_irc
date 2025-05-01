@@ -2,7 +2,9 @@
 #include "Client.hpp"
 #include "Channel.hpp"
 #include "response.hpp"
+#include "utils.hpp"
 #include <csignal>
+#include <ctime>
 
 
 class Server {
@@ -36,7 +38,7 @@ class Server {
         void    runPoll();
         void    connectNewClient();
         void    readNewMessage(size_t &pollIdx);
-        void	createClient(int socket);
+        void	createClient(int socket, std::string &hostname);
         void    disconnectClient(int fd, size_t &pollIdx);
         void    recSignal();
         static void    signalHandler(int signal);
@@ -61,6 +63,8 @@ class Server {
 
         //RESPONSE
         void	sendResponse(int socket, const std::string &response) const;
+
+        void    log(const std::string &logMessage) const;
 };
 
 // UTILS

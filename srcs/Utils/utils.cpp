@@ -13,6 +13,16 @@
 #include "../../includes/Channel.hpp"
 #include "../../includes/utils.hpp"
 
+bool    onlyNumbers(const std::string &str)
+{
+    for (size_t i = 0; i < str.size(); i++)
+    {
+        if (!std::isdigit(str[i]))
+            return false;
+    }
+    return true;
+}
+
 //This one is declared on Server.hpp
 std::string extractMessage(std::string cmd, int maxSpaces)
 {
