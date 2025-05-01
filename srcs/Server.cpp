@@ -247,19 +247,19 @@ void Server::readNewMessage(size_t &pollIdx)
         if (msg.find('\n') != std::string::npos)
             break;
     }
-    size_t find = msg.find('\r');
-    if (find != std::string::npos)
-        msg = msg.substr(0, find);
-    else
-    {
-        find = msg.find('\n');
-        if (find != std::string::npos)
-            msg = msg.substr(0, find);
+
+    // Aqui dividimos a string por linhas (tratando \r\n e \n)
+    std::istringstream iss(msg);
+    std::string line;
+    while (std::getline(iss, line)) {
+        // remove \r se vier no final (de \r\n)
+        if (line.empty())
+            continue;
+        if (!line.empty() && line[line.size()] == '\r')
+            line = line.substr(0, line.size() - 1);
+        std::cout << "a mensagem eh " << line << std::endl;
+        parseCommand(line, fd);
     }
-    std::cout << "a mensagem eh " << msg << std::endl;
-    if (msg.empty())
-        return;
-    parseCommand(msg, fd);
 }
 void    Server::runPoll() {
     // CRIA A ESTRUTURA DO DO SOCKET DO SERVIDOR PARA SER UTILIZADO NO POLL
