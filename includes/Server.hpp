@@ -54,6 +54,7 @@ class Server {
         void    mode(std::vector<std::string> &cmds, Client *client, std::string cmd);
         void    parseModeCommands(std::vector<std::string>& cmds, Client* client, Channel *channel);
         void    executeModeCommands(std::string action, std::vector<std::string>& cmds, unsigned int &parameter, Client* client, Channel *channel);
+		void	who(std::vector<std::string> &cmds, Client *client);
 
 
         //RESPONSE

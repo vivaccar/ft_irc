@@ -28,10 +28,8 @@ std::map<std::string, std::string> parseJoinArgs(std::vector<std::string> &cmds)
 }
 
 void    Server::joinCommand(std::vector<std::string> &cmds, Client *client) {
-	if (cmds.size() < 2) {
-		sendResponse(client->getSocket(), ERR_NEEDMOREPARAMS(client->getNick(), cmds[0]));
-		return;
-	}
+	if (cmds.size() < 2)
+		return(sendResponse(client->getSocket(), ERR_NEEDMOREPARAMS(client->getNick(), cmds[0])));
 	std::map<std::string, std::string> mapChannelKey = parseJoinArgs(cmds);
 	for(std::map<std::string, std::string>::iterator it = mapChannelKey.begin(); it != mapChannelKey.end(); it++) {
 		Channel *channelFound = this->getChannelByName(it->first);
@@ -48,7 +46,7 @@ void    Server::joinCommand(std::vector<std::string> &cmds, Client *client) {
 			std::string key = it->second;
 			//checar limite de users do canal -> ERR_CHANNELISFULL (471)
 			//checar se o canal eh modo invite-only -> ERR_INVITEONLYCHAN (473)
-			//channel is full, 
+			//channel is full
 			if (!client->isChannelMember(channelFound)) {
 				std::cout << " GET USER LIMIT -> " << channelFound->getUserLimit() << std::endl;
 				std::cout << " GET CLIENTS SIZE -> " << channelFound->getClients().size() << std::endl;

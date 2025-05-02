@@ -132,6 +132,8 @@ void    Server::parseCommand(std::string cmd, int clientSocket) {
         }
         else if (cmds[0] == "PRIVMSG" || cmds[0] == "privmsg")
             privMsg(cmds, client, cmd);
+		/* else if (cmds[0] == "WHO" || cmds[0] == "who")
+            who(cmds, client, cmd); */
 		else if (cmds[0] == "KICK") //TO START WORKING AT THE COMMANDS REQUIRED BY THE SUBJECT
 			kickUser(cmds, client);
 		else if (cmds[0] == "INVITE")

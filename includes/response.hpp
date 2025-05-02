@@ -13,7 +13,6 @@
 #define ERR_INVITEONLYCHAN(nick, channel) ": 473 " + nick + " " + channel + " :Cannot join channel (+i)\r\n"
 #define ERR_CHANNELISFULL(nick, channel) ": 471 " + nick + " " + channel + " :Cannot join channel (+l)\r\n"
 #define ERR_BADCHANMASK(channel) ": 476 " + channel + " :Bad Channel Mask\n"
-#define ERR_TOOMANYCHANNELS "405 ERROR: You have joined too many channels\n"
 #define ERR_NOSUCHCHANNEL(nick, channel) ": 403 " + nick + " " + channel + " :No such channel\r\n"
 #define ERR_NOTONCHANNEL(nick, channel) ": 442 " + nick + " " + channel + " :You're not in the channel\r\n"
 #define ERR_CANNOTSENDTOCHAN(nick, channel) ": 404 " + nick + " " + channel + " :Cannot send to channel\r\n"
@@ -29,6 +28,7 @@
 #define RPL_WELCOME(nick) ": 001 " + nick + " :Welcome " + nick + " to the ft_irc\r\n"
 #define RPL_TOPIC(nick, channel ,topic) ": 332 " + nick + " " + channel + " " + topic + "\r\n"
 #define RPL_NOTOPIC(nick, channel) ": 331 " + nick + " " + channel + " :No topic is set\r\n" 
+#define RPL_WHOREPLY (client, channel, username, host, server, nick, flags, realname) ": 352 " + client + " " + channel + " " + username + " " + host + " " + server + " " + nick + " H :0 " +  realname + "\r\n"
 #define KICK_MSG(nick, channel_name, target, reason) ":"+ nick + " KICK " + channel_name + " " + target + reason + "\r\n"
 #define TOPIC_CHANGE(nick, channel, topic) ":" + nick + " TOPIC " + channel + " " + topic + "\r\n"
 #define RPL_INVITING(target, channel_name, client) ": 341 " + client + " " + target + " " + channel_name + " : \r\n" //TALVEZ PRECISE DE MSG (AMAURI)
