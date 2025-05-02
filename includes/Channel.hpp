@@ -7,7 +7,7 @@ class Server;
 class Channel {
 	private:
 	std::string				_name;
-	std::string				_topic;
+	std::string				_topic[3];
 	std::string				_key;
 	std::string 			_mode;
 	std::vector<int>		_channelClients;
@@ -27,7 +27,7 @@ class Channel {
 		//GETTERS
 		std::string	getName() const;
 		std::string	getKey() const;
-		std::string	getTopic() const;
+		std::string	getTopic(unsigned int index) const;
 		std::string	getMode() const;
 		std::vector<int> getClients() const;
 		std::vector<int> getAdmins() const;
@@ -39,7 +39,7 @@ class Channel {
 	
 		//SETTERS
 		void	setName(const std::string &newName);
-		void	setTopic(const std::string &newTopic);
+		void	setTopic(const std::string &newTopic, std::string client, std::string time);
 		void	setKey(const std::string &newKey);
 		void	setMode(const std::string &newMode);
 		void	setInviteOnly(bool status);

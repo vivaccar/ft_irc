@@ -5,6 +5,7 @@
 #include "utils.hpp"
 #include <csignal>
 #include <ctime>
+#include <errno.h>
 
 
 class Server {

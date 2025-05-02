@@ -11,8 +11,8 @@ std::string	Channel::getName() const {
 	return this->_name;
 }
 
-std::string	Channel::getTopic() const {
-	return this->_topic;
+std::string	Channel::getTopic(unsigned int index) const {
+	return this->_topic[index];
 }
 
 std::string	Channel::getKey() const {
@@ -51,8 +51,10 @@ void	Channel::setName(const std::string &newName) {
 	this->_name = newName;
 }
 
-void	Channel::setTopic(const std::string &newTopic) {
-	this->_topic = newTopic;
+void	Channel::setTopic(const std::string &newTopic, std::string client, std::string time) {
+	this->_topic[0] = newTopic;
+	this->_topic[1] = client;
+	this->_topic[2] = time;
 }
 
 void	Channel::setKey(const std::string &newKey) {

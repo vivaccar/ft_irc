@@ -25,9 +25,10 @@
 
 //// - - - - - - REPLIES - - - - - - 
 #define RPL_WELCOME(nick, prefix) ":" + prefix + " 001 " + nick + " :Welcome " + nick + " to the ft_irc\r\n"
+#define RPL_NOTOPIC(nick, channel) ": 331 " + nick + " " + channel + " :No topic is set\r\n"
 #define RPL_TOPIC(nick, channel ,topic) ": 332 " + nick + " " + channel + " " + topic + "\r\n"
-#define RPL_NOTOPIC(nick, channel) ": 331 " + nick + " " + channel + " :No topic is set\r\n" 
-#define KICK_MSG(nick, channel_name, target, reason) ":"+ nick + " KICK " + channel_name + " " + target + reason + "\r\n"
+#define RPL_TOPICWHOTIME(client, channel, nick, setat) ": 333 " + client + " " + channel + " " + nick + " :" + setat + "\r\n"
+#define KICK_MSG(nick, channel_name, target, reason) ":" + nick + " KICK " + channel_name + " " + target + reason + "\r\n"
 #define TOPIC_CHANGE(nick, channel, topic) ":" + nick + " TOPIC " + channel + " " + topic + "\r\n"
 #define RPL_INVITING(target, channel_name, client) ": 341 " + client + " " + target + " " + channel_name + " : \r\n" //TALVEZ PRECISE DE MSG (AMAURI)
 
