@@ -38,15 +38,13 @@ void    Server::joinCommand(std::vector<std::string> &cmds, Client *client) {
 				Channel *newChannel = client->createChannel(it->first);
 				this->_channels.insert(std::make_pair(newChannel->getName(), newChannel));
 				sendResponse(client->getSocket(), RPL_JOIN(client->getNick(), newChannel->getName()));
+				namesCommand(newChannel, client);
 			}
 			else
 				sendResponse(client->getSocket(), ERR_BADCHANMASK(it->first));
 		}
 		else if (channelFound) {
 			std::string key = it->second;
-			//checar limite de users do canal -> ERR_CHANNELISFULL (471)
-			//checar se o canal eh modo invite-only -> ERR_INVITEONLYCHAN (473)
-			//channel is full
 			if (!client->isChannelMember(channelFound)) {
 				std::cout << " GET USER LIMIT -> " << channelFound->getUserLimit() << std::endl;
 				std::cout << " GET CLIENTS SIZE -> " << channelFound->getClients().size() << std::endl;
@@ -55,16 +53,17 @@ void    Server::joinCommand(std::vector<std::string> &cmds, Client *client) {
 				if (channelFound->getInviteOnly()) {
 					if (client->isChannelInvited(channelFound)) {
 						channelFound->addClient(client);
-						sendResponse(client->getSocket(), RPL_JOIN(client->getNick(), channelFound->getName()));
-						//remover cliente do invited
+						client->sendToAllChannel(channelFound, RPL_JOIN(client->getNick(), channelFound->getName()));
+						namesCommand(channelFound, client);
+						//remover cliente do invited ou nao?
 					}
 					else
 						sendResponse(client->getSocket(), ERR_INVITEONLYCHAN(client->getNick(), channelFound->getName()));
 				}				
 				else if (key == channelFound->getKey() || channelFound->getKey().empty()) {
 					channelFound->addClient(client);
-					sendResponse(client->getSocket(), RPL_JOIN(client->getNick(), channelFound->getName()));
-					client->sendToChannel(channelFound, RPL_JOIN(client->getNick(), channelFound->getName()));
+					client->sendToAllChannel(channelFound, RPL_JOIN(client->getNick(), channelFound->getName()));
+					namesCommand(channelFound, client);
 					if (!channelFound->getTopic().empty())
 						sendResponse(client->getSocket(), RPL_TOPIC(client->getNick(), channelFound->getName(), channelFound->getTopic()));
 				}

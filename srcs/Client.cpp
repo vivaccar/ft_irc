@@ -1,6 +1,6 @@
 #include "../includes/Client.hpp"
 
-Client::Client(int socket) : _socket(socket), _isAuth(false), _insertPassword(false) {
+Client::Client(int socket, std::string &hostname) : _socket(socket), _isAuth(false), _insertPassword(false), _hostname(hostname) {
     //std::cout << "New client created Socket " << _socket << std::endl; 
 }
 
@@ -26,10 +26,19 @@ std::string     Client::getNick() const {
 std::string		Client::getRealName() const {
 	return this->_realName;
 }
+
+std::string		Client::getHostname() const {
+	return this->_hostname;
+}
+
 std::vector<Channel *> Client::getChannels() const {
 	return this->_channels;
 }
 
+const std::string Client::getPrefix() const {
+	return _nick + "!" + _user + "@" + _hostname;
+}
+//:dan!d@localhost
 // - - - - - - - SETTERS - - - - - - - 
 void    Client::setInsertPassword(bool status) {
     _insertPassword = status;

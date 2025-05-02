@@ -49,7 +49,6 @@ Client* Server::getClientByNick(const std::string &nick) {
 
 void Server::signalHandler(int signal) {
     (void)signal;
-    std::cout << "ctrl-c received" << std::endl;
     instance->_run = 0;
 }
 
@@ -69,7 +68,6 @@ Channel *Server::getChannelByName(const std::string &name) {
 
 void    Server::createSocket() {
     // CRIA O SOCKET DO SERVIDOR
-    std::cout << "Creating Server Socket and preparing for receive connections..." <<std::endl;
     _socketFd = socket(AF_INET, SOCK_STREAM, 0); //AF_INET = IPV4, SOCK_STREAM = TCP, 0 = PADRAO
     if (_socketFd <= 0)
         throw("Server Socket Fail");
@@ -93,73 +91,119 @@ void    Server::createSocket() {
         throw(std::runtime_error("Listen Fail"));
 }
 
-void    Server::createClient(int socket) {
-    Client *newClient = new Client(socket);
+void    Server::createClient(int socket, std::string &hostname) {
+    Client *newClient = new Client(socket, hostname);
     this->_clients.insert(std::make_pair(socket, newClient));
 }
 
 void    Server::parseCommand(std::string cmd, int clientSocket) {
-    
-    std::vector<std::string> lines;
     std::istringstream streamLine(cmd);
-    std::string line;
-    
-    while (std::getline(streamLine, line))
-        lines.push_back(line);
+
     Client *client = getClientBySocket(clientSocket);
-    for (std::vector<std::string>::iterator it = lines.begin(); it != lines.end(); it++) 
-    {
-        std::vector<std::string> cmds;
-        std::string word;
-        std::istringstream streamCmd(*it);
-        while (streamCmd >> word)
-            cmds.push_back(word);
-        if (cmds[0] == "PASS" || cmds[0] == "pass")
-            checkPassword(cmds, client);
-        else if (cmds[0] == "NICK" || cmds[0] == "nick")
-            setNick(cmds, client);
-        else if (cmds[0] == "USER" || cmds[0] == "user")
-            setUser(cmds, client);
-        else if (!client->isAuth())
-            sendResponse(client->getSocket(), ERR_NOTREGISTERED(client->getNick()));
-        else if (cmds[0] == "TOPIC" || cmds[0] == "topic")
-                topic(cmds, client, cmd);
-        else if (cmds[0] == "MODE" || cmds[0] == "mode")
-                mode(cmds, client, cmd);
-        else if (cmds[0] == "JOIN")
-        {
-            joinCommand(cmds, client);
-        }
-        else if (cmds[0] == "PRIVMSG" || cmds[0] == "privmsg")
-            privMsg(cmds, client, cmd);
-		/* else if (cmds[0] == "WHO" || cmds[0] == "who")
-            who(cmds, client, cmd); */
-		else if (cmds[0] == "KICK") //TO START WORKING AT THE COMMANDS REQUIRED BY THE SUBJECT
-			kickUser(cmds, client);
-		else if (cmds[0] == "INVITE")
-			inviteUser(cmds, client);
-			/*
-			// (PASS, NICK, USER, JOIN, PART, TOPIC, INVITE, KICK, QUIT, MODE, and PRIVMSG)
-			else if (cmds[0] == "KICK") //TO START WORKING AT THE COMMANDS REQUIRED BY THE SUBJECT
-				//kick function
-				kickUser(cmds, client);
-			else if (cmds[0] == "INVITE")
-				//invite function
-			else if (cmds[0] == "TOPIC") 
-				//topic function
-			else if (cmds[0] == "MODE")
-				//mode function, where
-					//i: Set/Remove Invite-only channel
-					//t: set/remove the restrictions of the TOPIC command to channel operator
-					//k: set/remove the channel key (password)
-					//o: give/take channel operator(moderador) privilege
-					//l: set/remove the user limit to channel
-			*/
-        else
-            sendResponse(client->getSocket(), ERR_UNKNOWNCOMMAND(client->getNick(), cmds[0]));
-    }
+    std::vector<std::string> cmds;
+    std::string word;
+    std::istringstream streamCmd(cmd);
+    while (streamCmd >> word)
+        cmds.push_back(word);
+    if (cmds.size() == 0)
+        return ;
+    if (cmds[0] == "PASS" || cmds[0] == "pass")
+        checkPassword(cmds, client);
+    else if (cmds[0] == "NICK" || cmds[0] == "nick")
+        setNick(cmds, client);
+    else if (cmds[0] == "USER" || cmds[0] == "user")
+        setUser(cmds, client);
+    else if (!client->isAuth())
+        sendResponse(client->getSocket(), ERR_NOTREGISTERED(client->getNick()));
+    else if (cmds[0] == "TOPIC" || cmds[0] == "topic")
+        topic(cmds, client, cmd);
+    else if (cmds[0] == "MODE" || cmds[0] == "mode")
+        mode(cmds, client, cmd);
+    else if (cmds[0] == "JOIN" || cmds[0] == "join")
+        joinCommand(cmds, client);
+    else if (cmds[0] == "PRIVMSG" || cmds[0] == "privmsg")
+        privMsg(cmds, client, cmd);
+	else if (cmds[0] == "WHO" || cmds[0] == "who")
+        who(cmds, client);
+    else if (cmds[0] == "KICK" || cmds[0] == "kick") //TO START WORKING AT THE COMMANDS REQUIRED BY THE SUBJECT
+        kickUser(cmds, client);
+    else if (cmds[0] == "INVITE" || cmds[0] == "invite")
+        inviteUser(cmds, client);
+    else
+        sendResponse(client->getSocket(), ERR_UNKNOWNCOMMAND(client->getNick(), cmds[0]));
+    
 }
 
+void    Server::connectNewClient() {
+    struct sockaddr_in clientAddr;
+    socklen_t           clientAddrLen = sizeof(clientAddr);
+    
+    int newClientSocket = accept(_socketFd, (struct sockaddr *)&clientAddr, &clientAddrLen);
+    if (newClientSocket < 0)
+    {
+        log("Fail to accept connection");
+        return;
+    }
+    std::string hostname = inet_ntoa(clientAddr.sin_addr);
+    createClient(newClientSocket, hostname);
+    struct pollfd newClient;
+    newClient.fd = newClientSocket;
+    newClient.events = POLLIN;
+    newClient.revents = 0;
+    _fds.push_back(newClient);
+    
+    std::stringstream message;
+    message << "New client succesfully connected on Socket: " << newClientSocket;
+    log(message.str());
+}
+
+void    Server::disconnectClient(int fd, size_t &poolIdx)
+{
+    Client  *toDelete = getClientBySocket(fd);
+    if (toDelete)
+        delete toDelete;
+    _clients.erase(fd);
+    close(fd);
+    _fds.erase(_fds.begin() + poolIdx);  // Remove o cliente da lista
+    _clients.erase(poolIdx);
+    --poolIdx;
+    std::stringstream message;
+    message << "Client disconnected Socket: " << fd;
+    log(message.str());
+}
+
+void Server::readNewMessage(size_t &pollIdx)
+{
+    char buffer[1024];
+    bzero(buffer, sizeof(buffer));
+    int fd = _fds[pollIdx].fd;
+
+    std::string msg;
+    ssize_t bytesRead;
+    while (true)
+    {
+        bytesRead = recv(fd, buffer, sizeof(buffer) - 1, 0);
+        if (bytesRead < 0)
+            throw std::runtime_error("Recv Error");
+        if (bytesRead == 0)
+            return disconnectClient(fd, pollIdx);
+        buffer[bytesRead] = '\0';
+        msg.append(buffer);
+        if (msg.find('\n') != std::string::npos)
+            break;
+    }
+    std::istringstream iss(msg);
+    std::string line;
+    while (std::getline(iss, line)) 
+    {
+        // remove \r se vier no final (de \r\n)
+        if (line.empty() || (line[0] == '\r' && line.size() == 1))
+            continue;
+        if (!line.empty() && line[line.size() -1] == '\r')
+            line = line.substr(0, line.size() - 1);
+        parseCommand(line, fd);
+    }
+}
 void    Server::runPoll() {
     // CRIA A ESTRUTURA DO DO SOCKET DO SERVIDOR PARA SER UTILIZADO NO POLL
     struct pollfd server;
@@ -167,65 +211,32 @@ void    Server::runPoll() {
     server.events = POLLIN;
     server.revents = 0;
     _fds.push_back(server);
-    
-    std::cout << std::endl << GREEN << "Server waiting connections on FD "
-        << _socketFd << RESET << std::endl;
+
+    log("Server ready and waiting for connections");
     while (_run)
     {
         int ret = poll(_fds.data(), _fds.size(), 0);   
         if (ret < 0 && _run)
             throw(std::runtime_error("Poll Error"));
         if (_fds[0].revents & POLLIN)
-        {
-            
-            int newClientSock = accept (_socketFd, NULL, NULL);
-            if (newClientSock < 0)
-            {
-                std::cout << "Fail to accept connection" << std::endl;
-                continue;
-            }
-            createClient(newClientSock);
-            struct pollfd newClient;
-            newClient.fd = newClientSock;
-            newClient.events = POLLIN;
-            newClient.revents = 0;
-            _fds.push_back(newClient);
-            const char *login = "To authenticate, follow the steps\n1 - PASS [password]\n2 - NICK [nickname]\n3 - USER [username]\n";
-            send(newClientSock, login, strlen(login), 0);
-            std::cout << GREEN << std::endl << "New client connected on FD: "
-                << newClient.fd << RESET << std::endl;
-        }
+            connectNewClient();
         for (size_t i = 1; i < _fds.size(); i++)
         {  // Começa no índice 1, já que o índice 0 é o servidor
             if (_fds[i].revents & POLLIN)
-            {
-                char buffer[1024] = {0};
-                int client_socket = _fds[i].fd;
-                int bytes_read = recv(client_socket, buffer, 1024, 0);
-                if (bytes_read == 0)
-                {
-                    // Cliente desconectou
-                    Client *toDelete = getClientBySocket(client_socket);
-                    if (toDelete)
-                        delete toDelete;
-                    std::cout << RED << std::endl << "Client desconected on FD" << _fds[i].fd << RESET << std::endl;
-                    close(client_socket);
-                    _fds.erase(_fds.begin() + i);  // Remove o cliente da lista
-                    _clients.erase(client_socket);
-                    --i;  // Ajusta o índice após a remoção
-                } else
-                {
-                    // Envia resposta ao cliente
-                    std::string msg(buffer);
-                    std::cout << "\nClient " << client_socket << " say: " << buffer << " size: " << msg.size()  << std::endl;
-                    parseCommand(std::string(buffer), client_socket);
-                }
-            }
+                readNewMessage(i);
         }
     }
-    std::cout << RED << "SERVER IS DOWN - free memory here" << RESET << std::endl;
+    log("Shutting down Server");
 }
 
 void	Server::sendResponse(int socket, const std::string &response) const {
     send(socket, response.c_str(), strlen(response.c_str()), 0);
+}
+
+void    Server::log(const std::string &logMessage) const {
+    time_t timenow = time(NULL);
+    tm*      localTime = localtime(&timenow);
+
+    std::cout << GREEN << "[" << localTime->tm_mday << "-" << localTime->tm_mon + 1 << "-" << localTime->tm_year + 1900
+    << " - " << localTime->tm_hour << ":" << localTime->tm_min << ":" << localTime->tm_sec << "]" << RESET << " * " << logMessage  << std::endl;
 }

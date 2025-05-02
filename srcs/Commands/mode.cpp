@@ -49,16 +49,6 @@ void    changePassword(std::string &cmd, std::vector<std::string>& cmds, Client 
     }
 }
 
-bool    onlyNumbers(std::string &str)
-{
-    for (size_t i = 0; i < str.size(); i++)
-    {
-        if (!std::isdigit(str[i]))
-            return false;
-    }
-    return true;
-}
-
 void    changeUserLimit(std::string &cmd, std::vector<std::string>& cmds, Client *client, Channel *channel, unsigned int &parameter)
 {
     if (cmd == "-l" && channel->getUserLimit() != -1)
@@ -162,7 +152,7 @@ void Server::parseModeCommands(std::vector<std::string>& cmds, Client* client, C
             action += signal;
             action += modes[i];
             executeModeCommands(action, cmds, curParameter, client, channel);
-            if (modes[i] == 'k' || modes[i] == 'l' || modes[i] == 'o')
+            if (action == "+k" || action == "+l" || modes[i] == 'o')
                 curParameter++;
         }
     }

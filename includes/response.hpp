@@ -2,7 +2,7 @@
 #define ERR_NEEDMOREPARAMS(nick, cmd) ": 461 " + nick + " " + cmd + " :Need more parameters\r\n"
 #define ERR_PASSWDMISMATCH(nick) ": 464 " + nick + " :Invalid password\r\n"
 #define ERR_ALREADYREGISTERED(nick) ": 462 " + nick + " :You may not reregister\r\n"
-#define ERR_NOTREGISTERED(nick) ": 451 " + nick + " :You have not Registered\r\n"
+#define ERR_NOTREGISTERED(nick) ": 451 :You have not Registered\r\n"
 #define ERR_NONICKNAMEGIVEN(nick) ": 431 " + nick + " :No Nickname Given\r\n"
 #define ERR_NICKNAMEINUSE(nick, attempt) ": 433 " + nick + " " + attempt + " :Nickname in use.\r\n"
 #define ERR_ERRONEUSNICKNAME(nick, attempt) ": 432 " + nick + " " + attempt + ":Erroneus nickname\r\n"
@@ -25,10 +25,12 @@
 #define ERR_UNKNOWNMODE(nick, cmd) ": 472 " + nick + " " + cmd + ": is unknown mode\r\n"
 
 //// - - - - - - REPLIES - - - - - - 
-#define RPL_WELCOME(nick) ": 001 " + nick + " :Welcome " + nick + " to the ft_irc\r\n"
+#define RPL_WELCOME(nick, prefix) ":" + prefix + " 001 " + nick + " :Welcome " + nick + " to the ft_irc\r\n"
 #define RPL_TOPIC(nick, channel ,topic) ": 332 " + nick + " " + channel + " " + topic + "\r\n"
 #define RPL_NOTOPIC(nick, channel) ": 331 " + nick + " " + channel + " :No topic is set\r\n" 
-#define RPL_WHOREPLY (client, channel, username, host, server, nick, flags, realname) ": 352 " + client + " " + channel + " " + username + " " + host + " " + server + " " + nick + " H :0 " +  realname + "\r\n"
+#define RPL_WHOREPLY(client, channel, username, host, nick, realname) ": 352 " + client + " " + channel + " " + username + " " + host + " my net " + nick + " H@ :0 " + realname + "\r\n"
+#define RPL_ENDOFWHO(client, channel) ": 315 " + client + " " + channel + " :End of WHO list\r\n"
+
 #define KICK_MSG(nick, channel_name, target, reason) ":"+ nick + " KICK " + channel_name + " " + target + reason + "\r\n"
 #define TOPIC_CHANGE(nick, channel, topic) ":" + nick + " TOPIC " + channel + " " + topic + "\r\n"
 #define RPL_INVITING(target, channel_name, client) ": 341 " + client + " " + target + " " + channel_name + " : \r\n" //TALVEZ PRECISE DE MSG (AMAURI)
