@@ -87,3 +87,7 @@ void	Channel::removeAdmin(int socket) {
 	if (it != _channelAdmins.end())	
 		_channelAdmins.erase(it);
 }
+
+void	Channel::addChannelInvite(const Client *client){
+	this->_channelInvites.push_back(client->getSocket());
+};
