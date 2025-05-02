@@ -32,6 +32,7 @@ class Channel {
 		std::vector<int> getClients() const;
 		std::vector<int> getAdmins() const;
 		std::vector<int> &getClientsRef();
+
 		bool			getInviteOnly() const;
 		bool			getTopicRestricted() const;
 		int				getUserLimit() const;
