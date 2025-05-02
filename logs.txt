@@ -2,3 +2,8 @@
 2 - cliente conectou
 3 - cliente autenticou
 4 - cliente desconectou
+
+// O QUE MELHORAR 
+
+1 - MODE LISTAR COMANDO MODE #CHANNEL
+2 - TOPIC ADICIONAR QUEM MUDOU O TOPICO E A TIME;

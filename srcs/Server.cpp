@@ -141,10 +141,9 @@ void    Server::connectNewClient() {
     
     int newClientSocket = accept(_socketFd, (struct sockaddr *)&clientAddr, &clientAddrLen);
     if (newClientSocket < 0)
-    {
-        log("Fail to accept connection");
-        return;
-    }
+        return log("Fail to accept connection");
+    if (fcntl(newClientSocket, F_SETFL, O_NONBLOCK) == -1)
+        return log("Fail to set client FD Non Blocking");
     std::string hostname = inet_ntoa(clientAddr.sin_addr);
     createClient(newClientSocket, hostname);
     struct pollfd newClient;
@@ -184,9 +183,14 @@ void Server::readNewMessage(size_t &pollIdx)
     while (true)
     {
         bytesRead = recv(fd, buffer, sizeof(buffer) - 1, 0);
-        if (bytesRead < 0)
-            throw std::runtime_error("Recv Error");
-        if (bytesRead == 0)
+        if (bytesRead == -1)
+        {
+            if (errno == EWOULDBLOCK)
+                continue;
+            else
+                throw std::runtime_error("Recv Error");
+        }
+        else if (bytesRead == 0)
             return disconnectClient(fd, pollIdx);
         buffer[bytesRead] = '\0';
         msg.append(buffer);
