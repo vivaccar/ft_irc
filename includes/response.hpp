@@ -5,7 +5,7 @@
 #define ERR_NOTREGISTERED(nick) ": 451 :You have not Registered\r\n"
 #define ERR_NONICKNAMEGIVEN(nick) ": 431 " + nick + " :No Nickname Given\r\n"
 #define ERR_NICKNAMEINUSE(nick, attempt) ": 433 " + nick + " " + attempt + " :Nickname in use.\r\n"
-#define ERR_ERRONEUSNICKNAME(nick, attempt) ": 432 " + nick + " " + attempt + ":Erroneus nickname\r\n"
+#define ERR_ERRONEUSNICKNAME(nick, attempt) ": 432 " + nick + " " + attempt + " :Erroneus nickname\r\n"
 #define ERR_UNKNOWNCOMMAND(nick, cmd) ": 421 " + nick + " " + cmd + " :Unknown command\r\n"
 
 #define ERR_BANNEDFROMCHAN(nick) ": 474 " + nick + " :You are banned from this channel\n"
@@ -32,11 +32,10 @@
 #define RPL_UMODEIS(client, modes) " : 221"
 #define RPL_WHOREPLY(client, channel, username, host, nick, realname) ": 352 " + client + " " + channel + " " + username + " " + host + " my net " + nick + " H@ :0 " + realname + "\r\n"
 #define RPL_ENDOFWHO(client, channel) ": 315 " + client + " " + channel + " :End of WHO list\r\n"
-
 #define KICK_MSG(nick, channel_name, target, reason) ":" + nick + " KICK " + channel_name + " " + target + reason + "\r\n"
 #define TOPIC_CHANGE(nick, channel, topic) ":" + nick + " TOPIC " + channel + " " + topic + "\r\n"
 #define RPL_INVITING(target, channel_name, client) ": 341 " + client + " " + target + " " + channel_name + " : \r\n" //TALVEZ PRECISE DE MSG (AMAURI)
-
+#define RPL_CHANNELMODEIS(nick, channel, modes) ": 324 " + nick + " " + channel + " " + modes + "\r\n"
 #define MODE(nick, channel, status) ":" + nick + " MODE " + channel + " :" + status + "\r\n"
 #define SET_KEY(nick, channel, cmd, key) ":" + nick + " MODE " + channel + " " + cmd + " :" + key + "\r\n"
 #define MODE_OPERATOR(nick, channel, cmd, target) ":" + nick + " MODE " + channel + " " + cmd + " :" + target + "\r\n"

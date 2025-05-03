@@ -8,9 +8,6 @@ void    Server::setUser(std::vector<std::string> &cmds, Client *client)
 		return sendResponse(client->getSocket(), ERR_NEEDMOREPARAMS(client->getNick(), cmds[0]));
 	if (client->isAuth() || !client->getUser().empty())
 		return sendResponse(client->getSocket(), ERR_ALREADYREGISTERED(client->getNick()));
-	for (std::vector<std::string>::iterator it = cmds.begin(); it != cmds.end(); it++) {
-		std::cout << *it << std::endl;
-	}
 	client->setUser(cmds[1]);
 	std::string realName = cmds[4];
 	if (cmds[4][0] == ':')

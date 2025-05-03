@@ -158,39 +158,35 @@ void Server::parseModeCommands(std::vector<std::string>& cmds, Client* client, C
     }
 }
 
-// +ilt
-// separa o mode em primeiro lugar da string e depois coloca o parametro nos modes caso necessario
-
-//324 nene #ola +knt :senha
-void    describeModes(Client *client, Channel *channel)
+std::string    describeModes(Client *client, Channel *channel)
 {
     (void) client;
     std::string modes = "";
 
     if (!channel->getKey().empty())
-        modes += "+k";
+        modes += "k";
     if (channel->getInviteOnly())
-    {
-        if (modes.empty())
-            modes += "+i";
-        else
-            modes += "i";
-    }
+        modes += "i";
     if (channel->getUserLimit() != -1)
-    {
-        if (modes.empty())
-            modes += "+l";
-        else
-            modes += "l";
-    }
+        modes += "l";
     if (channel->getTopicRestricted())
-    {
-        if (modes.empty())
-            modes += "+t";
-        else
-            modes += "t";
-    }
+        modes += "t";
 
+    if (modes.size() >= 1)
+        modes = "+" + modes;
+    if (modes.find('k') != std::string::npos || modes.find('l') != std::string::npos)
+    {
+        modes += ":";
+        if (modes.find('k') != std::string::npos)
+            modes += " " + channel->getKey();
+        if (modes.find('l') != std::string::npos)
+        {
+            std::stringstream n;
+            n << channel->getUserLimit();
+            modes += " " + n.str();
+        }
+    }
+    return modes;
 }
 
 void    Server::mode(std::vector<std::string> &cmds, Client *client, std::string cmd)
@@ -204,7 +200,10 @@ void    Server::mode(std::vector<std::string> &cmds, Client *client, std::string
     if (!client->isChannelMember(channel))
         return sendResponse(client->getSocket(), ERR_NOTONCHANNEL(client->getNick(), channel->getName()));
     if (cmds.size() == 2)
-        return describeModes(client, channel);
+    {
+        std::string modes = describeModes(client, channel);
+        return sendResponse(client->getSocket(), RPL_CHANNELMODEIS(client->getNick(), channel->getName(), modes));
+    }
     if (!client->isChannelAdmin(channel))
         return sendResponse(client->getSocket(), ERR_CHANOPRIVSNEEDED(client->getNick(), channel->getName()));
     parseModeCommands(cmds, client, channel);
