@@ -6,7 +6,7 @@
 /*   By: aconceic <aconceic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/27 16:08:27 by aconceic          #+#    #+#             */
-/*   Updated: 2025/04/29 16:32:11 by aconceic         ###   ########.fr       */
+/*   Updated: 2025/05/03 18:21:18 by aconceic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -153,6 +153,7 @@ static int createAndConnectSocketBOT(addrinfo *res)
         freeaddrinfo(res);
         return -1;
     }
+	
     if (err != 0) {
         std::cerr << "Erro no connect(): " << std::strerror(err) << "\n";
         close(sock);
@@ -186,10 +187,20 @@ static std::string receiveResponseFromAPI(int socket)
 	std::string resposta;
 	std::string ret;
 	char	buffer[1024];
-	int		n;
 
-	while ((n = recv(socket, buffer, sizeof(buffer)-1, 0)) > 0)
+	while (true)
 	{
+		int n = recv(socket, buffer, sizeof(buffer)-1, 0);
+		if (n == 0)
+			break;
+		if (n == -1)
+		{
+			if (errno == EWOULDBLOCK)
+				continue;
+			else
+				break;	
+		}
+		std::cout << "TESTE \n";
 		buffer[n] = '\0';
 		resposta += buffer;	
 	}
