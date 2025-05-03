@@ -1,13 +1,12 @@
 #include "../../includes/Server.hpp"
 
-	/* ERR_NEEDMOREPARAMS (461) 
+	/* ERR_NEEDMOREPARAMS (461) x
 	ERR_BANNEDFROMCHAN (474)
 	ERR_INVITEONLYCHAN (473)
-	ERR_BADCHANNELKEY (475)
+	ERR_BADCHANNELKEY (475) x
 	ERR_CHANNELISFULL (471)
-	ERR_BADCHANMASK (476)
-	ERR_NOSUCHCHANNEL (403)
-	ERR_TOOMANYCHANNELS (405)*/
+	ERR_BADCHANMASK (476) x
+	*/
 
 std::map<std::string, std::string> parseJoinArgs(std::vector<std::string> &cmds) {
 	std::map<std::string, std::string> map;
@@ -29,60 +28,51 @@ std::map<std::string, std::string> parseJoinArgs(std::vector<std::string> &cmds)
 }
 
 void    Server::joinCommand(std::vector<std::string> &cmds, Client *client) {
-	//colocar dentro de um loop
+	if (cmds.size() < 2)
+		return(sendResponse(client->getSocket(), ERR_NEEDMOREPARAMS(client->getNick(), cmds[0])));
 	std::map<std::string, std::string> mapChannelKey = parseJoinArgs(cmds);
-	std::map<std::string, Channel *>::iterator itC;
-	for(std::map<std::string, std::string>::iterator itM = mapChannelKey.begin(); itM != mapChannelKey.end(); itM++) {
-		itC = this->_channels.find(itM->first);
-		if (itC == _channels.end()) {
-			if (itM->first[0] != '#')
-				client->sendError(client, ERR_BADCHANMASK);
-			else {
-				Channel *newChannel = client->createChannel(itM->first, itM->second);
+	for(std::map<std::string, std::string>::iterator it = mapChannelKey.begin(); it != mapChannelKey.end(); it++) {
+		Channel *channelFound = this->getChannelByName(it->first);
+		if (!channelFound) {
+			if (it->first[0] == '#') {
+				Channel *newChannel = client->createChannel(it->first);
 				this->_channels.insert(std::make_pair(newChannel->getName(), newChannel));
-				std::string msg = ":" + client->getNick() + " JOIN " + newChannel->getName() + "\n";
-				client->sendToClient(client, msg);
+				sendResponse(client->getSocket(), RPL_JOIN(client->getNick(), newChannel->getName()));
+				namesCommand(newChannel, client);
+			}
+			else
+				sendResponse(client->getSocket(), ERR_BADCHANMASK(it->first));
+		}
+		else if (channelFound) {
+			std::string key = it->second;
+			if (!client->isChannelMember(channelFound)) {
+				std::cout << " GET USER LIMIT -> " << channelFound->getUserLimit() << std::endl;
+				std::cout << " GET CLIENTS SIZE -> " << channelFound->getClients().size() << std::endl;
+				if (channelFound->getUserLimit() != -1 && (static_cast<int>(channelFound->getClients().size()) >= channelFound->getUserLimit()))
+					sendResponse(client->getSocket(), ERR_CHANNELISFULL(client->getNick(), channelFound->getName()));
+				if (channelFound->getInviteOnly()) {
+					if (client->isChannelInvited(channelFound)) {
+						channelFound->addClient(client);
+						client->sendToAllChannel(channelFound, RPL_JOIN(client->getNick(), channelFound->getName()));
+						namesCommand(channelFound, client);
+						std::vector<int>::iterator it = std::find(channelFound->getChannelInvites().begin(), channelFound->getChannelInvites().end(), client->getSocket());
+						channelFound->getChannelInvites().erase(it);
+						//remover cliente do invited ou nao?
+					}
+					else
+						sendResponse(client->getSocket(), ERR_INVITEONLYCHAN(client->getNick(), channelFound->getName()));
+				}				
+				else if (key == channelFound->getKey() || channelFound->getKey().empty()) {
+					channelFound->addClient(client);
+					client->sendToAllChannel(channelFound, RPL_JOIN(client->getNick(), channelFound->getName()));
+					namesCommand(channelFound, client);
+					if (!channelFound->getTopic(1).empty())
+						sendResponse(client->getSocket(), RPL_TOPIC(client->getNick(), channelFound->getName(), channelFound->getTopic(1)));
+				}
+				else {
+					sendResponse(client->getSocket(), ERR_BADCHANNELKEY(client->getNick(), channelFound->getName()));
+				}
 			}
 		}
-		else {
-			Channel *channel = itC->second;
-			std::string key = itM->second;
-			//checar limite de users do canal
-			//checar se o canal eh modo invite-only
-			int ret = client->joinChannel(channel, key);
-			//mensagens de erro serao tratadas aqui, dependendo do retorno de joinChannel
-			(void) ret;
-
-
-		}
-
-	}
-	
-}
-
-int	Client::joinChannel(Channel *channel, const std::string &key) {
-	//SE O CLIENTE JA FIZER PARTE DO CANAL, NADA ACONTECE
-	if (!isChannelMember(channel)) {
-		if (key == channel->getKey()) {
-			channel->addClient(this);
-			//MENSAGEM DE BOAS VINDAS
-			std::string msg = ":" + this->getNick() + " JOIN " + channel->getName() + "\n";
-			//std::string msg = "Welcome to the channel " + channel->getName() + "\nTopic: " + channel->getTopic() + "\n"; 
-			this->sendToClient(this, msg);
-			//msg = "@" + this->getNick() + " joined the channel " + channel->getName() + "\n";
-			this->sendToChannel(channel, msg);
-			return 1;
-		}
-		else {
-			this->sendToClient(this, ERR_BADCHANNELKEY(this->getNick(), channel->getName()));
-		}
-	}
-	//desenvolver outras possibilidades, como:
-	//tentar entrar num canal que esta mode invite-only, sem convite;
-	//verificar se canal tem password;
-	//verificar se o canal tem users limit;
-	return 0;
-		
-	
-
+	}	
 }

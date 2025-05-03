@@ -2,7 +2,10 @@
 #include "Client.hpp"
 #include "Channel.hpp"
 #include "response.hpp"
+#include "utils.hpp"
 #include <csignal>
+#include <ctime>
+#include <errno.h>
 
 
 class Server {
@@ -34,7 +37,10 @@ class Server {
 
         void    createSocket();
         void    runPoll();
-        void	createClient(int socket);
+        void    connectNewClient();
+        void    readNewMessage(size_t &pollIdx);
+        void	createClient(int socket, std::string &hostname);
+        void    disconnectClient(int fd, size_t &pollIdx);
         void    recSignal();
         static void    signalHandler(int signal);
 
@@ -44,16 +50,24 @@ class Server {
         void    setNick(std::vector<std::string> &cmds, Client *client);
         bool	nickColission(std::string &nick);
         void    setUser(std::vector<std::string> &cmds, Client *client);
-		//commands
+		
+        //commands
 		int		kickUser(std::vector<std::string> &cmds, Client *client);
 		int		inviteUser(std::vector<std::string> &cmds, Client *client);
         void    joinCommand(std::vector<std::string> &cmds, Client *client);
-        void    privMsg(std::vector<std::string> &cmds, Client *client);
+        void    privMsg(std::vector<std::string> &cmds, Client *client, const std::string cmdLine);
         void    topic(std::vector<std::string> &cmds, Client *client, std::string cmd);
         void    mode(std::vector<std::string> &cmds, Client *client, std::string cmd);
+        void    parseModeCommands(std::vector<std::string>& cmds, Client* client, Channel *channel);
+        void    executeModeCommands(std::string action, std::vector<std::string>& cmds, unsigned int &parameter, Client* client, Channel *channel);
+		void	who(std::vector<std::string> &cmds, Client *client);
+		void	namesCommand(Channel *channel, Client *client);
+
 
         //RESPONSE
         void	sendResponse(int socket, const std::string &response) const;
+
+        void    log(const std::string &logMessage) const;
 
 		//API (BONUS)
 		int	numbersAPI(std::vector<std::string> &cmds, Client *client, Channel *channel);

@@ -21,8 +21,9 @@ void    Server::setUser(std::vector<std::string> &cmds, Client *client)
 		client->setRealName(realName);
 	if (!client->isAuth() && !client->getNick().empty())
 	{
-		sendResponse(client->getSocket(), RPL_WELCOME(client->getNick()));
+		sendResponse(client->getSocket(), RPL_WELCOME(client->getNick(), client->getPrefix()));
 		client->setAuth(true);
+		log(client->getPrefix() + " is now authenticated");
 	}
-	std::cout << "RealName is: " << client->getRealName() << std::endl;
+	//std::cout << "RealName is: " << client->getRealName() << std::endl;
 }

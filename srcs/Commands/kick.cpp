@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   kick.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aconceic <aconceic@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mfassbin <mfassbin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/19 15:06:34 by aconceic          #+#    #+#             */
-/*   Updated: 2025/04/24 13:39:19 by aconceic         ###   ########.fr       */
+/*   Updated: 2025/04/26 15:25:12 by mfassbin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,6 +71,4 @@ static bool	isTargetUserOnChannel(Channel *channel, Client *target, Client *clie
 	client->sendToClient(client, ERR_USERNOTINCHANNEL(client->getNick(), target->getNick(), channel->getName()));
 	return (false);
 }
-
-
 

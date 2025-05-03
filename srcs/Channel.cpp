@@ -1,9 +1,6 @@
 #include "../includes/Channel.hpp"
 
-Channel::Channel(const std::string &name, const std::string &key): _name(name), _key(key), _mode("t"),
-_inviteOnly(false), _topicRestricted(false), _userLimit(-1)/*  _hasPassword(0), _hasUserLimit(0), _userLimit(0) */ {
-	(void) _userLimit;
-}
+Channel::Channel(const std::string &name): _name(name), _key(""), _inviteOnly(false), _topicRestricted(false), _userLimit(-1){}
 
 Channel::~Channel() {}
 
@@ -11,8 +8,8 @@ std::string	Channel::getName() const {
 	return this->_name;
 }
 
-std::string	Channel::getTopic() const {
-	return this->_topic;
+std::string	Channel::getTopic(unsigned int index) const {
+	return this->_topic[index];
 }
 
 std::string	Channel::getKey() const {
@@ -23,22 +20,22 @@ std::string	Channel::getMode() const {
 	return this->_mode;
 }
 
-std::vector<int> Channel::getClients() const {
+std::vector<int> &Channel::getClients() {
 	return this->_channelClients;
 }
 
-std::vector<int> Channel::getAdmins() const {
+std::vector<int> &Channel::getAdmins() {
 	return this->_channelAdmins;
 }
 
-std::vector<int> &Channel::getClientsRef(){
-	return (this->_channelClients);
+std::vector<int> &Channel::getChannelInvites() {
+	return this->_channelInvites;
 }
 
-std::vector<int> &Channel::getChannelInvites(){
-	return (this->_channelInvites);
-}
 
+int	Channel::getUserLimit() const {
+	return this->_userLimit;
+}
 
 bool	Channel::getInviteOnly() const {
 	return this->_inviteOnly;
@@ -48,16 +45,14 @@ bool	Channel::getTopicRestricted() const {
 	return this->_topicRestricted;
 }
 
-int		Channel::getUserLimit() const {
-	return this->_userLimit;
-}
-
 void	Channel::setName(const std::string &newName) {
 	this->_name = newName;
 }
 
-void	Channel::setTopic(const std::string &newTopic) {
-	this->_topic = newTopic;
+void	Channel::setTopic(const std::string &newTopic, std::string client, std::string time) {
+	this->_topic[0] = newTopic;
+	this->_topic[1] = client;
+	this->_topic[2] = time;
 }
 
 void	Channel::setKey(const std::string &newKey) {
@@ -87,6 +82,12 @@ void	Channel::addClient(const Client *client) {
 
 void	Channel::addAdmin(const Client *client) {
 	this->_channelAdmins.push_back(client->getSocket());
+}
+
+void	Channel::removeAdmin(int socket) {
+	std::vector<int>::iterator it = std::find(_channelAdmins.begin(), _channelAdmins.end(), socket);
+	if (it != _channelAdmins.end())	
+		_channelAdmins.erase(it);
 }
 
 void	Channel::addChannelInvite(const Client *client){

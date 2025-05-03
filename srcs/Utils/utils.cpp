@@ -3,15 +3,25 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aconceic <aconceic@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mfassbin <mfassbin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 13:12:43 by aconceic          #+#    #+#             */
-/*   Updated: 2025/04/25 14:36:46 by aconceic         ###   ########.fr       */
+/*   Updated: 2025/04/26 15:27:47 by mfassbin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/Channel.hpp"
 #include "../../includes/utils.hpp"
+
+bool    onlyNumbers(const std::string &str)
+{
+    for (size_t i = 0; i < str.size(); i++)
+    {
+        if (!std::isdigit(str[i]))
+            return false;
+    }
+    return true;
+}
 
 //This one is declared on Server.hpp
 std::string extractMessage(std::string cmd, int maxSpaces)
@@ -90,7 +100,7 @@ bool	isClientOnChannel(Client *client, Channel *channel)
 		return (false);
 
 	int	client_fd = client->getSocket();
-	std::vector<int> clients_on_channel = channel->getClients();
+	std::vector<int> &clients_on_channel = channel->getClients();
 
 	for (std::vector<int>::iterator it = clients_on_channel.begin(); 
 			it != clients_on_channel.end(); it ++)
@@ -105,7 +115,7 @@ bool	isClientOnChannel(Client *client, Channel *channel)
 //Broadcast MSG to all the clients in the channel
 void	BroadcastMsgToChannel(Channel *channel, const std::string &msg) 
 {
-	std::vector<int> &members = channel->getClientsRef();
+	std::vector<int> members = channel->getClients();
 	for (std::vector<int>::iterator it = members.begin(); it != members.end(); it++) {
 		send(*it, msg.c_str(), msg.size(), 0);
 	}
@@ -153,7 +163,7 @@ void removeUserFromChannel(Channel *channel, Client *target, Client *client, std
 	}
 	reason_msg = reason_msg + "\n";
 
-	std::vector<int> &clients = channel->getClientsRef();
+	std::vector<int> &clients = channel->getClients();
 	for (std::vector<int>::iterator it = clients.begin(); it != clients.end(); ++it)
 	{
 		if (*it == target_fd)

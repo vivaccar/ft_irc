@@ -49,16 +49,6 @@ void    changePassword(std::string &cmd, std::vector<std::string>& cmds, Client 
     }
 }
 
-bool    onlyNumbers(std::string &str)
-{
-    for (size_t i = 0; i < str.size(); i++)
-    {
-        if (!std::isdigit(str[i]))
-            return false;
-    }
-    return true;
-}
-
 void    changeUserLimit(std::string &cmd, std::vector<std::string>& cmds, Client *client, Channel *channel, unsigned int &parameter)
 {
     if (cmd == "-l" && channel->getUserLimit() != -1)
@@ -85,18 +75,45 @@ void    changeUserLimit(std::string &cmd, std::vector<std::string>& cmds, Client
         else
         {
             channel->setUserLimit((int)limit);
+			std::cout << "MUDOU O USER LIMIT PARA -> " << (int)limit << std::endl; 
             client->sendToAllChannel(channel, SET_KEY(client->getNick(), channel->getName(), "+l", cmds[parameter]));
         }
     }
 }
 
-void    executeModeCommands(std::string action, std::vector<std::string>& cmds, unsigned int &parameter, Client* client, Channel *channel)
+void    operatorMode(std::string &cmd, std::vector<std::string>& cmds, Client *client, Channel *channel, unsigned int &parameter, Server *server)
 {
-    (void) parameter;
-    (void) cmds;
-    
-    
-    std::cout << action << " Size: " << action.size() <<  std::endl;
+    if (cmds.size() <= parameter)
+    {
+        std::string msg = "The " + cmd + " mode needs a parameter <nickname>";
+        client->sendToClient(client, ERR_INVALIDEMODEPARAM(client->getNick(), channel->getName(), msg));
+        return;
+    }
+    Client *target = server->getClientByNick(cmds[parameter]);
+    if (!target)
+        return client->sendToClient(client, ERR_NOSUCHNICK(cmds[parameter], channel->getName()));
+    if (!client->isChannelMember(channel))
+        return client->sendToClient(client, ERR_USERNOTINCHANNEL(client->getNick(), cmds[parameter], channel->getName()));
+    if (cmd == "+o" && !target->isChannelAdmin(channel))
+    {
+        channel->addAdmin(target);
+        client->sendToAllChannel(channel, MODE_OPERATOR(client->getNick(), channel->getName(), cmd, target->getNick()));
+        return;
+    }
+    else if (cmd == "-o" && target->isChannelAdmin(channel))
+    {
+        channel->removeAdmin(target->getSocket());
+        client->sendToAllChannel(channel, MODE_OPERATOR(client->getNick(), channel->getName(), cmd, target->getNick()));
+        return;
+    }
+}
+// VERIFICAR SE O NICK PARA SER OU RETIRAR OP ESTA NO CANAL
+// SE FOR +O VERIFICAR SE JA E OP
+// SE FOR -0 VERIFICAR SE JA NAO E OP
+
+void    Server::executeModeCommands(std::string action, std::vector<std::string>& cmds, unsigned int &parameter, Client* client, Channel *channel)
+{
+
     if (action == "+i" || action == "-i")
         return inviteOnlyMode(action, client, channel);
     if (action == "+t" || action == "-t")
@@ -105,9 +122,12 @@ void    executeModeCommands(std::string action, std::vector<std::string>& cmds, 
         return changePassword(action, cmds, client, channel, parameter);
     if (action == "+l" || action == "-l")
         return changeUserLimit(action, cmds, client, channel, parameter);
+    if (action == "+o" || action == "-o")
+        return operatorMode(action, cmds, client, channel, parameter, this);
+    return sendResponse(client->getSocket(), ERR_UNKNOWNMODE(client->getNick(), action[1]));
 }
 
-void parseModeCommands(std::vector<std::string>& cmds, Client* client, Channel *channel)
+void Server::parseModeCommands(std::vector<std::string>& cmds, Client* client, Channel *channel)
 {
     std::string modes = cmds[2];
     char signal = '+';
@@ -132,7 +152,7 @@ void parseModeCommands(std::vector<std::string>& cmds, Client* client, Channel *
             action += signal;
             action += modes[i];
             executeModeCommands(action, cmds, curParameter, client, channel);
-            if (modes[i] == 'k' || modes[i] == 'l' || modes[i] == 'o')
+            if (action == "+k" || action == "+l" || modes[i] == 'o')
                 curParameter++;
         }
     }
@@ -141,17 +161,50 @@ void parseModeCommands(std::vector<std::string>& cmds, Client* client, Channel *
 // +ilt
 // separa o mode em primeiro lugar da string e depois coloca o parametro nos modes caso necessario
 
+//324 nene #ola +knt :senha
+void    describeModes(Client *client, Channel *channel)
+{
+    (void) client;
+    std::string modes = "";
+
+    if (!channel->getKey().empty())
+        modes += "+k";
+    if (channel->getInviteOnly())
+    {
+        if (modes.empty())
+            modes += "+i";
+        else
+            modes += "i";
+    }
+    if (channel->getUserLimit() != -1)
+    {
+        if (modes.empty())
+            modes += "+l";
+        else
+            modes += "l";
+    }
+    if (channel->getTopicRestricted())
+    {
+        if (modes.empty())
+            modes += "+t";
+        else
+            modes += "t";
+    }
+
+}
 
 void    Server::mode(std::vector<std::string> &cmds, Client *client, std::string cmd)
 {
     (void)cmd;
-    if (cmds.size() < 3)
+    if (cmds.size() < 2)
         return sendResponse(client->getSocket(), ERR_NEEDMOREPARAMS(client->getNick(), "MODE"));
     Channel *channel = getChannelByName(cmds[1]);
     if (!channel)
         return sendResponse(client->getSocket(), ERR_NOSUCHCHANNEL(client->getNick(), cmds[1]));
     if (!client->isChannelMember(channel))
         return sendResponse(client->getSocket(), ERR_NOTONCHANNEL(client->getNick(), channel->getName()));
+    if (cmds.size() == 2)
+        return describeModes(client, channel);
     if (!client->isChannelAdmin(channel))
         return sendResponse(client->getSocket(), ERR_CHANOPRIVSNEEDED(client->getNick(), channel->getName()));
     parseModeCommands(cmds, client, channel);

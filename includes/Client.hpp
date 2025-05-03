@@ -14,6 +14,8 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <limits>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 #define RED "\e[31m"
 #define BLUE "\e[34m"
@@ -34,10 +36,11 @@ class Client {
             std::string _nick;
             std::string _user;
             std::string _realName;
+            std::string _hostname;
             std::vector<Channel *> _channels;
         
         public:
-            Client(const int socket);
+            Client(const int socket, std::string &hostname);
             ~Client();
 
             //GETTERS    
@@ -46,8 +49,10 @@ class Client {
             std::string getUser() const;
             std::string getNick() const;
             std::string getRealName() const;
+            std::string getHostname() const;
             std::vector<Channel *> getChannels() const;
             bool isAuth() const;
+            const std::string getPrefix() const;
             
 
             //SETTERS
@@ -57,7 +62,7 @@ class Client {
             void setUser(const std::string &user);
             void setRealName(const std::string &realName);
             
-            Channel *createChannel(const std::string &name, const std::string &key);
+            Channel *createChannel(const std::string &name);
             int	joinChannel(Channel *channel, const std::string &key);
 
 
@@ -67,4 +72,5 @@ class Client {
             void	sendError(Client *client, const char *error);
             bool	isChannelMember(Channel *channel);
             bool	isChannelAdmin(Channel *channel);
+			bool 	isChannelInvited(Channel *channel);
 };

@@ -45,6 +45,7 @@ bool						isClientOnChannel(Client *target, Channel *channel);
 void						BroadcastMsgToChannel(Channel *channel, const std::string &msg);
 std::vector<std::string> 	splitVectorString(const std::vector<std::string>& strs);
 void 						removeUserFromChannel(Channel *channel, Client *target, Client *client, std::vector<std::string> &cmds);
+bool    					onlyNumbers(const std::string &str);
 
 
 #endif

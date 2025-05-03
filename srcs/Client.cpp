@@ -1,6 +1,6 @@
 #include "../includes/Client.hpp"
 
-Client::Client(int socket) : _socket(socket), _isAuth(false), _insertPassword(false) {
+Client::Client(int socket, std::string &hostname) : _socket(socket), _isAuth(false), _insertPassword(false), _hostname(hostname) {
     //std::cout << "New client created Socket " << _socket << std::endl; 
 }
 
@@ -26,10 +26,19 @@ std::string     Client::getNick() const {
 std::string		Client::getRealName() const {
 	return this->_realName;
 }
+
+std::string		Client::getHostname() const {
+	return this->_hostname;
+}
+
 std::vector<Channel *> Client::getChannels() const {
 	return this->_channels;
 }
 
+const std::string Client::getPrefix() const {
+	return _nick + "!" + _user + "@" + _hostname;
+}
+//:dan!d@localhost
 // - - - - - - - SETTERS - - - - - - - 
 void    Client::setInsertPassword(bool status) {
     _insertPassword = status;
@@ -55,8 +64,8 @@ bool    Client::isAuth() const {
     return this->_isAuth;
 }
 
-Channel *Client::createChannel(const std::string &name, const std::string &key) {
-	Channel *c = new Channel(name, key);
+Channel *Client::createChannel(const std::string &name) {
+	Channel *c = new Channel(name);
 	c->addClient(this);
 	c->addAdmin(this);
 	this->_channels.push_back(c);
@@ -94,9 +103,17 @@ bool	Client::isChannelMember(Channel *channel) {
 	return false;
 }
 
+
 bool	Client::isChannelAdmin(Channel *channel) {
 	std::vector<int> admins = channel->getAdmins();
 	if (std::find(admins.begin(), admins.end(), this->getSocket()) != admins.end())
+		return true;
+	return false;
+}
+
+bool	Client::isChannelInvited(Channel *channel) {
+	std::vector<int> members = channel->getChannelInvites();
+	if (std::find(members.begin(), members.end(), this->getSocket()) != members.end())
 		return true;
 	return false;
 }
