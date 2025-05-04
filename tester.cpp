@@ -77,7 +77,43 @@ void    testChannel(int sock)
     send_line(sock, "JOIN #42");
     // CREATING NEW USER
     int newUser = connect();
+    // AUTH NEW USER
     send_line(newUser, "PASS SENHA\nNICK newUser\nUSER NEWUSER 0 0 0");
+    // SET INVITE ONLY AND PASSWORD;
+    makeTest(sock, "MODE #42 k senha", "5 - SETTING KEY TO CHANNEL", "MODE #42 +k :senha");
+    makeTest(sock, "MODE #42 -k senha", "6 - REMOVING CHANNEL KEY", "MODE #42 :-k");
+    makeTest(sock, "MODE #42 +k senha", "7 - SETTING KEY TO CHANNEL", "MODE #42 +k :senha");
+    makeTest(sock, "MODE #42 +k", "8 - MISSING KEY PARAM", "696");
+    makeTest(sock, "MODE #42 i senha", "9 - SETTING INVITE ONLY CHANNEL", "MODE #42 :+i");
+    makeTest(sock, "MODE #42 -i senha", "10 - REMOVING INVITE ONLY CHANNEL", "MODE #42 :-i");
+    makeTest(sock, "MODE #42 +i senha", "11 - SETTING INVITE ONLY CHANNEL", "MODE #42 :+i");
+    
+    // MODE NO SUCH CHANNEL
+    makeTest(sock, "MODE #invalid +k senha", "12 - SETTING K INVALID CHANNEL", "403");
+    makeTest(sock, "MODE #invalid +l 10", "13 - SETTING L INVALID CHANNEL", "403");
+    makeTest(sock, "MODE #invalid +t", "14 - SETTING T INVALID CHANNEL", "403");
+    makeTest(sock, "MODE #invalid +o USER", "15 - SETTING O INVALID CHANNEL", "403");
+    makeTest(sock, "MODE #invalid +i", "16 - SETTING I INVALID CHANNEL", "403");
+    makeTest(sock, "MODE #invalid -k", "17 - SETTING -K INVALID CHANNEL", "403");
+    makeTest(sock, "MODE #invalid -l", "18 - SETTING -L INVALID CHANNEL", "403");
+    makeTest(sock, "MODE #invalid -t", "19 - SETTING -T INVALID CHANNEL", "403");
+    makeTest(sock, "MODE #invalid -o", "20 - SETTING -O INVALID CHANNEL", "403");
+    makeTest(sock, "MODE #invalid -i", "21 - SETTING -I INVALID CHANNEL", "403");
+
+    // JOIN INVITE ONLY CHANNEL 
+    makeTest(newUser, "JOIN #42", "22 - JOIN INVITE ONLY CHANNEL", "473");
+    // JOIN INVALID CHANNEL
+    makeTest(newUser, "JOIN invalid", "23 - JOIN INVALID CHANNEL", "476");
+
+
+
+
+
+
+
+
+    //" MODE " + channel + " " + cmd + " :" + key
+    // 
 }
 
 
@@ -132,30 +168,12 @@ void    testNick(int sock)
     makeTest(sock, "NICK $", "9 - ERRONEUS NICK", "432");
 }
 
-int connect()
-{
-    int sock = socket(AF_INET, SOCK_STREAM, 0);
-
-    sockaddr_in server_addr{};
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(6667); // Porta padrão do IRC
-    inet_pton(AF_INET, "127.0.0.1", &server_addr.sin_addr);
-    
-    if (connect(sock, (sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
-        perror("connect failed");
-        return 1;
-    }
-    return sock;
-}
-
 int main() {
     int sock = connect();
 
     testAuth(sock);
     testNick(sock);
     testChannel(sock);
-    //std::this_thread::sleep_for(std::chrono::milliseconds(500));
-    //testjoin(sock);
     close(sock);
     return 0;
 }
