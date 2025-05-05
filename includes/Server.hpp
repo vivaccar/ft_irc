@@ -29,7 +29,8 @@ class Server {
 		//GETTERS
         int getPort() const;
         const std::string &getPassword() const;
-		std::map<int, Client*> getClientsMap() const;
+		std::map<int, Client*> &getClientsMap();
+		std::map<std::string, Channel *> &getChannelsMap();
         Client *getClientBySocket(int socket);
 		Client* getClientByNick(const std::string &nick);
         int     servRunning() const;
@@ -61,7 +62,7 @@ class Server {
         void    parseModeCommands(std::vector<std::string>& cmds, Client* client, Channel *channel);
         void    executeModeCommands(std::string action, std::vector<std::string>& cmds, unsigned int &parameter, Client* client, Channel *channel);
 		void	who(std::vector<std::string> &cmds, Client *client);
-		void	namesCommand(Channel *channel, Client *client);
+		void	showNames(Channel *channel, Client *client);
 
 
         //RESPONSE

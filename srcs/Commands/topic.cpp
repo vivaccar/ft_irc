@@ -31,7 +31,6 @@ void    Server::topic(std::vector<std::string> &cmds, Client *client, std::strin
     std::string newTopic = extractMessage(cmd, 2);
     if (newTopic[0] == ':' && newTopic.size() == 3)
         newTopic = "";
-    std::cout << RED << "TOPIC IS --> " << newTopic << " size: " << newTopic.size() << RESET << std::endl;
     channel->setTopic(newTopic, client->getPrefix(), getTimestamp());
     client->sendToAllChannel(channel, TOPIC_CHANGE(client->getPrefix(), channel->getName(), newTopic)); // MUDAR PARA A FUNCAO QUE MANDA PARA TODOS DO CANAL;
     return;

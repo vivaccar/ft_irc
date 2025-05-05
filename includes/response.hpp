@@ -44,3 +44,5 @@
 #define RPL_JOIN(nick, channel) ":" + nick + " JOIN " + channel + "\r\n"
 #define RPL_PRIVMSG(nick, target, msg) ":" + nick + " PRIVMSG " + target + " :" + msg + "\r\n"
 
+#define RPL_NAMREPLY(client, channel, names) ": 353 " + client + " = " + channel + " :" + names + "\r\n"
+

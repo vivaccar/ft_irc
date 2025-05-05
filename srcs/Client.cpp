@@ -110,7 +110,6 @@ bool	Client::isChannelMember(Channel *channel) {
 	return false;
 }
 
-
 bool	Client::isChannelAdmin(Channel *channel) {
 	std::vector<int> admins = channel->getAdmins();
 	if (std::find(admins.begin(), admins.end(), this->getSocket()) != admins.end())

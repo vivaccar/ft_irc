@@ -28,8 +28,12 @@ const std::string& Server::getPassword() const {
     return this->_password;
 }
 
-std::map<int, Client*> Server::getClientsMap() const{
+std::map<int, Client*> &Server::getClientsMap(){
 	return this->_clients;
+}
+
+std::map<std::string, Channel *> &Server::getChannelsMap(){
+	return this->_channels;
 }
 
 Client* Server::getClientBySocket(int socket) {
@@ -160,8 +164,20 @@ void    Server::connectNewClient() {
 void    Server::disconnectClient(int fd, size_t &poolIdx)
 {
     Client  *toDelete = getClientBySocket(fd);
-    if (toDelete)
+    if (toDelete) {
         delete toDelete;
+	}
+	//verificar se algum canal esta sem clientes
+	std::map<std::string, Channel *> channelMap = getChannelsMap();
+	for(std::map<std::string, Channel *>::iterator it = channelMap.begin(); it != channelMap.end(); it++) {
+		Channel *channel = it->second;
+		if(channel->getClients().size() == 0) {
+			std::cout << RED BOLD << "O CANAL " << channel->getName() << " SERA APAGADO DO SERVER" RESET << std::endl;
+			std::map<std::string, Channel *>::iterator itToErase = it;
+			channelMap.erase(itToErase);
+			delete channel; //  *  * * * * * * *  ARRUMAR SEGFAULT *  * * * * * * * 
+		}
+	}
     _clients.erase(fd);
     close(fd);
     _fds.erase(_fds.begin() + poolIdx);  // Remove o cliente da lista
