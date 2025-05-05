@@ -97,9 +97,10 @@ void    Server::createClient(int socket, std::string &hostname) {
     this->_clients.insert(std::make_pair(socket, newClient));
 }
 
-void    Server::parseCommand(std::string cmd, int clientSocket) {
+void    Server::parseCommand(std::string cmd, int clientSocket, size_t &pollIdx) {
     std::istringstream streamLine(cmd);
 
+   std::cout << "cmds: " << cmd << std::endl;
     Client *client = getClientBySocket(clientSocket);
     std::vector<std::string> cmds;
     std::string word;
@@ -108,7 +109,9 @@ void    Server::parseCommand(std::string cmd, int clientSocket) {
         cmds.push_back(word);
     if (cmds.size() == 0)
         return ;
-    if (cmds[0] == "PASS" || cmds[0] == "pass")
+    if (cmds[0] == "QUIT" || cmds[0] == "quit")
+        disconnectClient(clientSocket, pollIdx);
+    else if (cmds[0] == "PASS" || cmds[0] == "pass")
         checkPassword(cmds, client);
     else if (cmds[0] == "NICK" || cmds[0] == "nick")
         setNick(cmds, client);
@@ -183,6 +186,7 @@ void Server::readNewMessage(size_t &pollIdx)
     while (true)
     {
         bytesRead = recv(fd, buffer, sizeof(buffer) - 1, 0);
+        std::cout << "BytesRead: " <<  bytesRead << std::endl;
         if (bytesRead == -1)
         {
             if (errno == EWOULDBLOCK)
@@ -206,7 +210,7 @@ void Server::readNewMessage(size_t &pollIdx)
             continue;
         if (!line.empty() && line[line.size() -1] == '\r')
             line = line.substr(0, line.size() - 1);
-        parseCommand(line, fd);
+        parseCommand(line, fd, pollIdx);
     }
 }
 void    Server::runPoll() {

@@ -45,7 +45,7 @@ class Server {
         static void    signalHandler(int signal);
 
 		//COMMANDS
-        void    parseCommand(std::string cmd, int clientSocket);
+        void    parseCommand(std::string cmd, int clientSocket, size_t &pollIdx);
         void    checkPassword(std::vector<std::string> &cmds, Client *client);
         void    setNick(std::vector<std::string> &cmds, Client *client);
         bool	nickColission(std::string &nick);
