@@ -49,5 +49,6 @@ class Channel {
 		void	addClient(const Client *client);
 		void	addAdmin(const Client *client);
 		void	removeAdmin(int socket);
+		void	removeClient(int socket);
 		void	addChannelInvite(const Client *client);
 };

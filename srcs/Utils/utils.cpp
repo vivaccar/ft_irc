@@ -6,7 +6,7 @@
 /*   By: mfassbin <mfassbin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 13:12:43 by aconceic          #+#    #+#             */
-/*   Updated: 2025/04/26 15:27:47 by mfassbin         ###   ########.fr       */
+/*   Updated: 2025/05/05 13:00:10 by mfassbin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -169,7 +169,9 @@ void removeUserFromChannel(Channel *channel, Client *target, Client *client, std
 		if (*it == target_fd)
 		{
 			BroadcastMsgToChannel(channel, KICK_MSG(client->getNick(), channel->getName(), target_name, reason_msg));
-			clients.erase(it);
+			channel->removeClient(target_fd);
+			if (target->isChannelAdmin(channel))
+				channel->removeAdmin(target_fd);
 			break;
 		}
 	}

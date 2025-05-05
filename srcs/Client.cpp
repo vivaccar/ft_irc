@@ -4,7 +4,14 @@ Client::Client(int socket, std::string &hostname) : _socket(socket), _isAuth(fal
     //std::cout << "New client created Socket " << _socket << std::endl; 
 }
 
-Client::~Client() {}
+Client::~Client() {
+	for (std::vector<Channel *>::iterator it = _channels.begin(); it != _channels.end(); it++) {
+		Channel *channel = *it;
+		channel->removeClient(this->getSocket());
+		if (isChannelAdmin(channel))
+			channel->removeAdmin(this->getSocket());
+	}
+}
 
 // - - - - - - - GETTERS - - - - - - - 
 int     Client::getSocket() const {

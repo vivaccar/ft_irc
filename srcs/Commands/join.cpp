@@ -46,8 +46,6 @@ void    Server::joinCommand(std::vector<std::string> &cmds, Client *client) {
 		else if (channelFound) {
 			std::string key = it->second;
 			if (!client->isChannelMember(channelFound)) {
-				std::cout << " GET USER LIMIT -> " << channelFound->getUserLimit() << std::endl;
-				std::cout << " GET CLIENTS SIZE -> " << channelFound->getClients().size() << std::endl;
 				if (channelFound->getUserLimit() != -1 && (static_cast<int>(channelFound->getClients().size()) >= channelFound->getUserLimit()))
 					sendResponse(client->getSocket(), ERR_CHANNELISFULL(client->getNick(), channelFound->getName()));
 				if (channelFound->getInviteOnly()) {
@@ -67,7 +65,7 @@ void    Server::joinCommand(std::vector<std::string> &cmds, Client *client) {
 					client->sendToAllChannel(channelFound, RPL_JOIN(client->getNick(), channelFound->getName()));
 					namesCommand(channelFound, client);
 					if (!channelFound->getTopic(1).empty())
-						sendResponse(client->getSocket(), RPL_TOPIC(client->getNick(), channelFound->getName(), channelFound->getTopic(1)));
+						sendResponse(client->getSocket(), RPL_TOPIC(client->getNick(), channelFound->getName(), channelFound->getTopic(0)));
 				}
 				else {
 					sendResponse(client->getSocket(), ERR_BADCHANNELKEY(client->getNick(), channelFound->getName()));

@@ -8,7 +8,7 @@ std::string getListOfNames(Server *server, Channel *channel) {
 	std::vector<int> clients = channel->getClients();
 	for (std::vector<int>::iterator it = clients.begin(); it != clients.end(); it++) {
 		Client *cl = server->getClientBySocket(*it);
-		if (isClientOperator(cl, channel))
+		if (cl->isChannelAdmin(channel))
 			names+="@";
 		names+=cl->getNick();
 		if (it!= clients.end() - 1)
@@ -20,5 +20,5 @@ std::string getListOfNames(Server *server, Channel *channel) {
 void	Server::namesCommand(Channel *channel, Client *client) {
 	std::string names = getListOfNames(this, channel);
 	client->sendToAllChannel(channel, RPL_NAMREPLY(client->getNick(), channel->getName(), names));
-	client->sendToAllChannel(channel, RPL_ENDOFNAMES(client->getNick(), channel->getName()));
+	//client->sendToAllChannel(channel, RPL_ENDOFNAMES(client->getNick(), channel->getName()));
 }

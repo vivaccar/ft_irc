@@ -21,7 +21,7 @@
 #define ERR_USERONCHANNEL(nick, channel_name) ": 443 " + nick + " " + channel_name + " :is already on channel\r\n"
 #define ERR_NOSUCHNICK(nick, noexist) ": 401 " + nick + " " + noexist + " :No such nick\r\n"
 #define ERR_CHANOPRIVSNEEDED(nick, channel_name) ": 482 " + nick + " " + channel_name + " : You're not channel operator\r\n"
-#define ERR_USERNOTINCHANNEL(nick, target, channel_name) ": 441 " + nick + " "  + target + " " + channel_name + " :They aren't on that channel"
+#define ERR_USERNOTINCHANNEL(nick, target, channel_name) ": 441 " + nick + " "  + target + " " + channel_name + " :They aren't on that channel\r\n"
 #define ERR_UNKNOWNMODE(nick, cmd) ": 472 " + nick + " " + cmd + ": is unknown mode\r\n"
 
 //// - - - - - - REPLIES - - - - - - 
