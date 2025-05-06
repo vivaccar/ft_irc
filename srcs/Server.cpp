@@ -134,6 +134,15 @@ void    Server::parseCommand(std::string cmd, int clientSocket) {
         kickUser(cmds, client);
     else if (cmds[0] == "INVITE" || cmds[0] == "invite")
         inviteUser(cmds, client);
+	else if (cmds[0] == "trivia" || cmds[0] == "math" || cmds[0] == "date" || cmds[0] == "year")
+	{
+		if (cmds.size() < 2 || cmds[1].empty()) //precisa necessariamente ter o nome do canal
+			return ;
+		Channel *channel = ReturnChannel(this->_channels, cmds[1], client);
+		if (!channel)
+			return ;
+		numbersAPI(cmds, client, channel);
+	}
     else
         sendResponse(client->getSocket(), ERR_UNKNOWNCOMMAND(client->getNick(), cmds[0]));
     

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   numbersApi.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mfassbin <mfassbin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: aconceic <aconceic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/27 16:08:27 by aconceic          #+#    #+#             */
-/*   Updated: 2025/05/05 11:25:11 by mfassbin         ###   ########.fr       */
+/*   Updated: 2025/05/06 17:33:56 by aconceic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,7 @@ int	Server::numbersAPI(std::vector<std::string> &cmds, Client *client, Channel *
 static std::string getNumbersApiCategory(std::vector<std::string> &cmds)
 {
 	std::string ret;
-	if (cmds[0] == "trivia" || cmds[0] == "math" || cmds[0] == "year")
+	if (cmds[0] == "trivia" || cmds[0] == "math" || cmds[0] == "year" || cmds[0] == "date")
 	{
 		for (std::string::size_type i = 0; i < cmds[0].size(); i++)
 		{
