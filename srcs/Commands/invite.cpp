@@ -16,32 +16,21 @@
 //Command: INVITE
 // /invite <nicK> <#channel>
 //Parameters: <nickname> <channel>
-int		Server::inviteUser(std::vector<std::string> &cmds, Client *client)
+void	Server::inviteUser(std::vector<std::string> &cmds, Client *client)
 {
 	std::string target_name = cmds[1];
 	std::string channel_name = cmds[2];
-	Client *target = ReturnClient(client, this->_clients, target_name, channel_name);
-	Channel *channel = ReturnChannel(this->_channels, channel_name, client);
+	Client *target = getClientByNick(target_name);
+	Channel *channel = getChannelByName(channel_name);
 
-	if (!channel || !target || !isClientOnChannel(client, channel))
-	{
-		client->sendToClient(client, ERR_NOTONCHANNEL(target_name, channel_name));
-		return (EXIT_FAILURE);
-	}
-	else if (isClientOnChannel(target, channel))
-	{
-		client->sendToClient(client, ERR_USERONCHANNEL(target_name, channel_name));
-		return (EXIT_FAILURE);
-	}
-	else if (channel->getInviteOnly() && !isClientOperator(client, channel))
-	{
-		client->sendToClient(client, ERR_CHANOPRIVSNEEDED(client->getNick(), channel_name));
-		return (EXIT_FAILURE);
-	}
+	if (!channel || !target || !client->isChannelMember(channel))
+		return sendResponse(client->getSocket(), ERR_NOTONCHANNEL(target_name, channel_name));
+	else if (target->isChannelMember(channel))
+		return sendResponse(client->getSocket(), ERR_USERONCHANNEL(target_name, channel_name));
+	else if (channel->getInviteOnly() && !client->isChannelAdmin(channel))
+		return sendResponse(client->getSocket(), ERR_CHANOPRIVSNEEDED(client->getNick(), channel_name));
 
-	std::string msg =  "You have been invited to " + channel_name + " by " + client->getNick() + "\r\n";
-	target->sendToClient(target, msg);
-	client->sendToClient(client, RPL_INVITING(target_name, channel_name, client->getNick()));
+	sendResponse(target->getSocket(), RPL_INVITED(channel_name, target_name));
+	sendResponse(client->getSocket(), RPL_INVITING(target_name, channel_name, client->getNick()));
 	channel->addChannelInvite(target);
-	return (EXIT_SUCCESS);
-};
+}

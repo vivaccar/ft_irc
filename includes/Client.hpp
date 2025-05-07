@@ -16,6 +16,7 @@
 #include <limits>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include "response.hpp"
 
 #define RED "\e[31m"
 #define BLUE "\e[34m"
@@ -63,8 +64,6 @@ class Client {
             void setRealName(const std::string &realName);
             
             Channel *createChannel(const std::string &name);
-            int	joinChannel(Channel *channel, const std::string &key);
-
 
             void	sendToChannel(Channel *channel, const std::string &msg);
             void	sendToAllChannel(Channel *channel, const std::string &msg);
@@ -73,4 +72,7 @@ class Client {
             bool	isChannelMember(Channel *channel);
             bool	isChannelAdmin(Channel *channel);
 			bool 	isChannelInvited(Channel *channel);
+
+            void    removeUserFromChannel(Channel *channel, Client *target, Client *client, std::vector<std::string> &cmds);
+
 };

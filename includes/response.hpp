@@ -21,7 +21,7 @@
 #define ERR_USERONCHANNEL(nick, channel_name) ": 443 " + nick + " " + channel_name + " :is already on channel\r\n"
 #define ERR_NOSUCHNICK(nick, noexist) ": 401 " + nick + " " + noexist + " :No such nick\r\n"
 #define ERR_CHANOPRIVSNEEDED(nick, channel_name) ": 482 " + nick + " " + channel_name + " : You're not channel operator\r\n"
-#define ERR_USERNOTINCHANNEL(nick, target, channel_name) ": 441 " + nick + " "  + target + " " + channel_name + " :They aren't on that channel"
+#define ERR_USERNOTINCHANNEL(nick, target, channel_name) ": 441 " + nick + " "  + target + " " + channel_name + " :They aren't on that channel\r\n"
 #define ERR_UNKNOWNMODE(nick, cmd) ": 472 " + nick + " " + cmd + ": is unknown mode\r\n"
 
 //// - - - - - - REPLIES - - - - - - 
@@ -35,6 +35,7 @@
 #define KICK_MSG(nick, channel_name, target, reason) ":" + nick + " KICK " + channel_name + " " + target + reason + "\r\n"
 #define TOPIC_CHANGE(nick, channel, topic) ":" + nick + " TOPIC " + channel + " " + topic + "\r\n"
 #define RPL_INVITING(target, channel_name, client) ": 341 " + client + " " + target + " " + channel_name + " : \r\n" //TALVEZ PRECISE DE MSG (AMAURI)
+#define RPL_INVITED(channel, client) "You have been invited to " + channel + " by " + client + "\r\n"
 #define RPL_CHANNELMODEIS(nick, channel, modes) ": 324 " + nick + " " + channel + " " + modes + "\r\n"
 #define MODE(nick, channel, status) ":" + nick + " MODE " + channel + " :" + status + "\r\n"
 #define SET_KEY(nick, channel, cmd, key) ":" + nick + " MODE " + channel + " " + cmd + " :" + key + "\r\n"
@@ -42,4 +43,6 @@
 
 #define RPL_JOIN(nick, channel) ":" + nick + " JOIN " + channel + "\r\n"
 #define RPL_PRIVMSG(nick, target, msg) ":" + nick + " PRIVMSG " + target + " :" + msg + "\r\n"
+
+#define RPL_NAMREPLY(client, channel, names) ": 353 " + client + " = " + channel + " :" + names + "\r\n"
 

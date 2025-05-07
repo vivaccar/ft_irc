@@ -29,7 +29,8 @@ class Server {
 		//GETTERS
         int getPort() const;
         const std::string &getPassword() const;
-		std::map<int, Client*> getClientsMap() const;
+		std::map<int, Client*> &getClientsMap();
+		std::map<std::string, Channel *> &getChannelsMap();
         Client *getClientBySocket(int socket);
 		Client* getClientByNick(const std::string &nick);
         int     servRunning() const;
@@ -52,8 +53,8 @@ class Server {
         void    setUser(std::vector<std::string> &cmds, Client *client);
 		
         //commands
-		int		kickUser(std::vector<std::string> &cmds, Client *client);
-		int		inviteUser(std::vector<std::string> &cmds, Client *client);
+		void	kickUser(std::vector<std::string> &cmds, Client *client);
+		void	inviteUser(std::vector<std::string> &cmds, Client *client);
         void    joinCommand(std::vector<std::string> &cmds, Client *client);
         void    privMsg(std::vector<std::string> &cmds, Client *client, const std::string cmdLine);
         void    topic(std::vector<std::string> &cmds, Client *client, std::string cmd);
@@ -61,7 +62,7 @@ class Server {
         void    parseModeCommands(std::vector<std::string>& cmds, Client* client, Channel *channel);
         void    executeModeCommands(std::string action, std::vector<std::string>& cmds, unsigned int &parameter, Client* client, Channel *channel);
 		void	who(std::vector<std::string> &cmds, Client *client);
-		void	namesCommand(Channel *channel, Client *client);
+		void	showNames(Channel *channel, Client *client);
 
 
         //RESPONSE

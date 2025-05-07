@@ -84,6 +84,12 @@ void	Channel::addAdmin(const Client *client) {
 	this->_channelAdmins.push_back(client->getSocket());
 }
 
+void	Channel::removeClient(int socket) {
+	std::vector<int>::iterator it = std::find(_channelClients.begin(), _channelClients.end(), socket);
+	if (it != _channelClients.end())	
+		_channelClients.erase(it);
+}
+
 void	Channel::removeAdmin(int socket) {
 	std::vector<int>::iterator it = std::find(_channelAdmins.begin(), _channelAdmins.end(), socket);
 	if (it != _channelAdmins.end())	

@@ -38,13 +38,7 @@ void print_container(T cont, std::string msg)
 
 //std::string extractMessage(std::string cmd, int maxSpaces); this is declared on Served.hpp
 
-Channel 					*ReturnChannel(std::map<std::string, Channel*> &channels, std::string channel_name, Client * client);
-Client 						*ReturnClient(Client *client, std::map<int, Client*> &clients, std::string target_user, std::string channel_name);
-bool						isClientOperator(Client *client, Channel *channel);
-bool						isClientOnChannel(Client *target, Channel *channel);
-void						BroadcastMsgToChannel(Channel *channel, const std::string &msg);
 std::vector<std::string> 	splitVectorString(const std::vector<std::string>& strs);
-void 						removeUserFromChannel(Channel *channel, Client *target, Client *client, std::vector<std::string> &cmds);
 bool    					onlyNumbers(const std::string &str);
 
 

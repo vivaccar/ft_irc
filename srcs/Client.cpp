@@ -4,7 +4,17 @@ Client::Client(int socket, std::string &hostname) : _socket(socket), _isAuth(fal
     //std::cout << "New client created Socket " << _socket << std::endl; 
 }
 
-Client::~Client() {}
+Client::~Client() {
+	for (std::vector<Channel *>::iterator it = _channels.begin(); it != _channels.end(); it++) {
+		Channel *channel = *it;
+		std::vector<Channel *>::iterator toErase = it;
+		channel->removeClient(this->getSocket());
+		if (isChannelAdmin(channel))
+			channel->removeAdmin(this->getSocket());
+		_channels.erase(toErase);
+	}
+	
+}
 
 // - - - - - - - GETTERS - - - - - - - 
 int     Client::getSocket() const {
@@ -103,7 +113,6 @@ bool	Client::isChannelMember(Channel *channel) {
 	return false;
 }
 
-
 bool	Client::isChannelAdmin(Channel *channel) {
 	std::vector<int> admins = channel->getAdmins();
 	if (std::find(admins.begin(), admins.end(), this->getSocket()) != admins.end())
@@ -116,4 +125,34 @@ bool	Client::isChannelInvited(Channel *channel) {
 	if (std::find(members.begin(), members.end(), this->getSocket()) != members.end())
 		return true;
 	return false;
+}
+
+//used on kick.cpp
+//Remove user from channel, having in consideration the reason msg.
+void Client::removeUserFromChannel(Channel *channel, Client *target, Client *client, std::vector<std::string> &cmds)
+{
+	int target_fd = target->getSocket();
+	std::string target_name = target->getNick();
+	std::string	reason_msg;
+	std::string tmp;
+
+	for (std::vector<std::string>::iterator it = cmds.begin() + 3; it != cmds.end(); it ++)
+	{
+		tmp = reason_msg + " ";
+		reason_msg = tmp + (*it);
+	}
+	reason_msg = reason_msg + "\n";
+
+	std::vector<int> &clients = channel->getClients();
+	for (std::vector<int>::iterator it = clients.begin(); it != clients.end(); ++it)
+	{
+		if (*it == target_fd)
+		{
+			sendToAllChannel(channel, KICK_MSG(client->getNick(), channel->getName(), target_name, reason_msg));
+			channel->removeClient(target_fd);
+			if (target->isChannelAdmin(channel))
+				channel->removeAdmin(target_fd);
+			break;
+		}
+	}
 }

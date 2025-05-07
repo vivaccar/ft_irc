@@ -30,8 +30,12 @@ const std::string& Server::getPassword() const {
     return this->_password;
 }
 
-std::map<int, Client*> Server::getClientsMap() const{
+std::map<int, Client*> &Server::getClientsMap(){
 	return this->_clients;
+}
+
+std::map<std::string, Channel *> &Server::getChannelsMap(){
+	return this->_channels;
 }
 
 Client* Server::getClientBySocket(int socket) {
@@ -136,6 +140,15 @@ void    Server::parseCommand(std::string cmd, int clientSocket, size_t &pollIdx)
         kickUser(cmds, client);
     else if (cmds[0] == "INVITE" || cmds[0] == "invite")
         inviteUser(cmds, client);
+	else if (cmds[0] == "trivia" || cmds[0] == "math" || cmds[0] == "date" || cmds[0] == "year")
+	{
+		if (cmds.size() < 2 || cmds[1].empty()) //precisa necessariamente ter o nome do canal
+			return ;
+		Channel *channel = getChannelByName(cmds[1]);
+		if (!channel)
+			return ;
+		numbersAPI(cmds, client, channel);
+	}
     else
         sendResponse(client->getSocket(), ERR_UNKNOWNCOMMAND(client->getNick(), cmds[0]));
     
@@ -166,8 +179,34 @@ void    Server::connectNewClient() {
 void    Server::disconnectClient(int fd, size_t &poolIdx)
 {
     Client  *toDelete = getClientBySocket(fd);
-    if (toDelete)
+    if (toDelete) {
         delete toDelete;
+	}
+	//verificar se algum canal esta sem clientes
+	std::map<std::string, Channel *> &channelMap = getChannelsMap();
+    std::map<std::string, Channel *>::iterator it = channelMap.begin();
+    while (it != channelMap.end())
+    {
+		Channel *channel = it->second;		
+        if(channel->getClients().size() == 0) {
+			std::cout << RED BOLD << "O CANAL " << channel->getName() << " SERA APAGADO DO SERVER" << RESET << std::endl;
+			std::map<std::string, Channel *>::iterator itToErase = it;
+			std::cout << itToErase->first << std::endl;
+            it++;
+            channelMap.erase(itToErase);
+			//delete channel; //  *  * * * * * * *  ARRUMAR SEGFAULT *  * * * * * * * 
+            std::cout << "printf" << std::endl;
+        }
+        else
+            it++;
+	}
+    std::cout << "PRINTANDO TODOS OS CANAIS:" << std::endl;
+    it = channelMap.begin();
+    while (it != channelMap.end())
+    {
+        std::cout << it->first << std::endl;
+        it++;
+    }
     _clients.erase(fd);
     close(fd);
     _fds.erase(_fds.begin() + poolIdx);  // Remove o cliente da lista

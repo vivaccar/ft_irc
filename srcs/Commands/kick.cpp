@@ -21,35 +21,29 @@ static bool		isTargetUserOnChannel(Channel *channel, Client *target, Client *cli
 //FORMAT OF MSG ---> KICK #channel targetUser [:reason])
 //FORMAT OF MSG CAN BE ---> KICK #channel targetUser,targetUser2,targetUser3 [:reason])
 //MAIN FUNCTION
-int	Server::kickUser(std::vector<std::string> &cmds, Client *client)
+void	Server::kickUser(std::vector<std::string> &cmds, Client *client)
 {
-
 	if (cmds.size() < 3)
-	{
-		client->sendToClient(client, ERR_NEEDMOREPARAMS(client->getNick(), cmds[0]));
-		return (EXIT_FAILURE);
-	}
+		return(sendResponse(client->getSocket(), ERR_NEEDMOREPARAMS(client->getNick(), cmds[0])));
 	else if (cmds.size() == 3)
 		cmds.push_back("Default reason to kick someone\n");
 
-	Channel *channel = ReturnChannel(this->_channels, cmds[1], client);
+	Channel *channel = getChannelByName(cmds[1]);
 	std::vector<std::string> targets = splitVectorString(cmds);
-	if (channel && isClientOperator(client, channel))
+	if (channel && client->isChannelAdmin(channel))
 	{
 		for (std::vector<std::string>::iterator it = targets.begin(); it != targets.end(); it ++)
 		{
-			Client	*target = ReturnClient(client, this->_clients, *it, cmds[1]);
+			Client	*target = getClientByNick(*it);
 			if (target && isTargetUserOnChannel(channel, target, client))
 			{
-				removeUserFromChannel(channel, target, client, cmds);
+				client->removeUserFromChannel(channel, target, client, cmds);
 				//if user is the last of the channel
 					//delete channel??? maybe.
 					//broadcast a message to the server
 			}
 		}
 	}
-	
-	return (EXIT_SUCCESS);
 }
 
 //Check if target user is on the channel
