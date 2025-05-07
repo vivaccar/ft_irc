@@ -22,5 +22,5 @@ void    Server::setUser(std::vector<std::string> &cmds, Client *client)
 		client->setAuth(true);
 		log(client->getPrefix() + " is now authenticated");
 	}
-	//std::cout << "RealName is: " << client->getRealName() << std::endl;
+
 }

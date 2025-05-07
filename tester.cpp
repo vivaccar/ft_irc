@@ -64,6 +64,7 @@ void    makeTest(int sock, std::string command, std::string testName, std::strin
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
 }
 
+
 void    testChannel(int sock)
 {
     std::cout << RED << "\nTEST CASE [05] - CHANNEL TESTS\n" << RESET << std::endl; 
@@ -78,7 +79,7 @@ void    testChannel(int sock)
     // CREATING NEW USER
     int newUser = connect();
     // AUTH NEW USER
-    send_line(newUser, "PASS SENHA\nNICK newUser\nUSER NEWUSER 0 0 0");
+    send_line(newUser, "PASS senha\nNICK newUser\nUSER NEWUSER 0 0 0");
     // SET INVITE ONLY AND PASSWORD;
     makeTest(sock, "MODE #42 k senha", "5 - SETTING KEY TO CHANNEL", "MODE #42 +k :senha");
     makeTest(sock, "MODE #42 -k senha", "6 - REMOVING CHANNEL KEY", "MODE #42 :-k");
@@ -87,6 +88,7 @@ void    testChannel(int sock)
     makeTest(sock, "MODE #42 i senha", "9 - SETTING INVITE ONLY CHANNEL", "MODE #42 :+i");
     makeTest(sock, "MODE #42 -i senha", "10 - REMOVING INVITE ONLY CHANNEL", "MODE #42 :-i");
     makeTest(sock, "MODE #42 +i senha", "11 - SETTING INVITE ONLY CHANNEL", "MODE #42 :+i");
+    makeTest(sock, "MODE #42 -k senha", "6 - REMOVING CHANNEL KEY", "MODE #42 :-k");
     
     // MODE NO SUCH CHANNEL
     makeTest(sock, "MODE #invalid +k senha", "12 - SETTING K INVALID CHANNEL", "403");
@@ -101,7 +103,7 @@ void    testChannel(int sock)
     makeTest(sock, "MODE #invalid -i", "21 - SETTING -I INVALID CHANNEL", "403");
 
     // JOIN INVITE ONLY CHANNEL 
-    makeTest(newUser, "JOIN #42", "22 - JOIN INVITE ONLY CHANNEL", "473");
+    makeTest(newUser, "JOIN #42 senha", "22 - JOIN INVITE ONLY CHANNEL", "473");
     // JOIN INVALID CHANNEL
     makeTest(newUser, "JOIN invalid", "23 - JOIN INVALID CHANNEL", "476");
 

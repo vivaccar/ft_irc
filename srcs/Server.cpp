@@ -10,8 +10,10 @@ Server::Server(const std::string &port, const std::string &password) {
 }
 
 Server::~Server() {
-    std::cout << "Server Destroyed!" << std::endl;
+    //log("Server Destroyed");
     for (std::map<int, Client*>::iterator it = _clients.begin(); it != _clients.end(); it++)
+        delete it->second;
+    for (std::map<std::string, Channel*>::iterator it = _channels.begin(); it != _channels.end(); it++)
         delete it->second;
     close(_socketFd);
 }
@@ -57,6 +59,8 @@ void Server::recSignal() {
     instance = this;
     signal(SIGINT, Server::signalHandler);
     signal(SIGQUIT, SIG_IGN);
+    signal(SIGPIPE, SIG_IGN);
+    signal(SIGTSTP, SIG_IGN);
 }
 
 Channel *Server::getChannelByName(const std::string &name) {
@@ -100,7 +104,6 @@ void    Server::createClient(int socket, std::string &hostname) {
 void    Server::parseCommand(std::string cmd, int clientSocket, size_t &pollIdx) {
     std::istringstream streamLine(cmd);
 
-   std::cout << "cmds: " << cmd << std::endl;
     Client *client = getClientBySocket(clientSocket);
     std::vector<std::string> cmds;
     std::string word;
@@ -186,11 +189,10 @@ void Server::readNewMessage(size_t &pollIdx)
     while (true)
     {
         bytesRead = recv(fd, buffer, sizeof(buffer) - 1, 0);
-        std::cout << "BytesRead: " <<  bytesRead << std::endl;
         if (bytesRead == -1)
         {
             if (errno == EWOULDBLOCK)
-                continue;
+                return;
             else
                 throw std::runtime_error("Recv Error");
         }

@@ -75,7 +75,6 @@ void    changeUserLimit(std::string &cmd, std::vector<std::string>& cmds, Client
         else
         {
             channel->setUserLimit((int)limit);
-			std::cout << "MUDOU O USER LIMIT PARA -> " << (int)limit << std::endl; 
             client->sendToAllChannel(channel, SET_KEY(client->getNick(), channel->getName(), "+l", cmds[parameter]));
         }
     }
@@ -192,6 +191,7 @@ std::string    describeModes(Client *client, Channel *channel)
 void    Server::mode(std::vector<std::string> &cmds, Client *client, std::string cmd)
 {
     (void)cmd;
+    
     if (cmds.size() < 2)
         return sendResponse(client->getSocket(), ERR_NEEDMOREPARAMS(client->getNick(), "MODE"));
     Channel *channel = getChannelByName(cmds[1]);
