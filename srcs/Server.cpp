@@ -178,10 +178,20 @@ void    Server::connectNewClient() {
 
 void    Server::disconnectClient(int fd, size_t &poolIdx)
 {
-    Client  *toDelete = getClientBySocket(fd);
+    Client* toDelete = getClientBySocket(fd);
     if (toDelete) {
+        std::vector<Channel*> clientChannels = toDelete->getChannels();
+        std::vector<Channel*>::iterator it = clientChannels.begin();
+        while (it != clientChannels.end()) {
+            Channel* channel = *it;
+            channel->removeClient(fd);
+            if (toDelete->isChannelAdmin(channel)) {
+                channel->removeAdmin(fd);
+            }
+            ++it;
+        }
         delete toDelete;
-	}
+    }
 	//verificar se algum canal esta sem clientes
 	std::map<std::string, Channel *> &channelMap = getChannelsMap();
     std::map<std::string, Channel *>::iterator it = channelMap.begin();
@@ -194,7 +204,7 @@ void    Server::disconnectClient(int fd, size_t &poolIdx)
 			std::cout << itToErase->first << std::endl;
             it++;
             channelMap.erase(itToErase);
-			//delete channel; //  *  * * * * * * *  ARRUMAR SEGFAULT *  * * * * * * * 
+			delete channel; //  *  * * * * * * *  ARRUMAR SEGFAULT *  * * * * * * * 
             std::cout << "printf" << std::endl;
         }
         else
@@ -231,7 +241,7 @@ void Server::readNewMessage(size_t &pollIdx)
         if (bytesRead == -1)
         {
             if (errno == EWOULDBLOCK)
-                return;
+                break;
             else
                 throw std::runtime_error("Recv Error");
         }
