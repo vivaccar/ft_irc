@@ -13,7 +13,7 @@ Client::~Client() {
 			channel->removeAdmin(this->getSocket());
 		_channels.erase(toErase);
 	}
-	
+
 }
 
 // - - - - - - - GETTERS - - - - - - - 
