@@ -176,37 +176,29 @@ void    Server::connectNewClient() {
     log(message.str());
 }
 
+void	Server::deleteChannelWithNoClients() {
+	std::map<std::string, Channel *> &channelMap = getChannelsMap();
+	std::map<std::string, Channel *>::iterator it = channelMap.begin();
+	while (it != channelMap.end())
+	{
+		Channel *channel = it->second;
+		if(channel->getClients().size() == 0) {
+			std::map<std::string, Channel *>::iterator itToErase = it;
+			it++;
+			channelMap.erase(itToErase);
+			delete channel;
+		}
+		else
+			it++;
+	}
+}
+
 void    Server::disconnectClient(int fd, size_t &poolIdx)
 {
-    Client  *toDelete = getClientBySocket(fd);
-    if (toDelete) {
+    Client* toDelete = getClientBySocket(fd);
+    if (toDelete)
         delete toDelete;
-	}
-	//verificar se algum canal esta sem clientes
-	std::map<std::string, Channel *> &channelMap = getChannelsMap();
-    std::map<std::string, Channel *>::iterator it = channelMap.begin();
-    while (it != channelMap.end())
-    {
-		Channel *channel = it->second;		
-        if(channel->getClients().size() == 0) {
-			std::cout << RED BOLD << "O CANAL " << channel->getName() << " SERA APAGADO DO SERVER" << RESET << std::endl;
-			std::map<std::string, Channel *>::iterator itToErase = it;
-			std::cout << itToErase->first << std::endl;
-            it++;
-            channelMap.erase(itToErase);
-			//delete channel; //  *  * * * * * * *  ARRUMAR SEGFAULT *  * * * * * * * 
-            std::cout << "printf" << std::endl;
-        }
-        else
-            it++;
-	}
-    std::cout << "PRINTANDO TODOS OS CANAIS:" << std::endl;
-    it = channelMap.begin();
-    while (it != channelMap.end())
-    {
-        std::cout << it->first << std::endl;
-        it++;
-    }
+    deleteChannelWithNoClients();
     _clients.erase(fd);
     close(fd);
     _fds.erase(_fds.begin() + poolIdx);  // Remove o cliente da lista
@@ -231,7 +223,7 @@ void Server::readNewMessage(size_t &pollIdx)
         if (bytesRead == -1)
         {
             if (errno == EWOULDBLOCK)
-                return;
+                break;
             else
                 throw std::runtime_error("Recv Error");
         }

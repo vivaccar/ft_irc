@@ -5,15 +5,16 @@ Client::Client(int socket, std::string &hostname) : _socket(socket), _isAuth(fal
 }
 
 Client::~Client() {
-	for (std::vector<Channel *>::iterator it = _channels.begin(); it != _channels.end(); it++) {
-		Channel *channel = *it;
-		std::vector<Channel *>::iterator toErase = it;
+	std::vector<Channel*> clientChannels = this->getChannels();
+	std::vector<Channel*>::iterator it = clientChannels.begin();
+	while (it != clientChannels.end()) {
+		Channel* channel = *it;
 		channel->removeClient(this->getSocket());
-		if (isChannelAdmin(channel))
+		if (this->isChannelAdmin(channel)) {
 			channel->removeAdmin(this->getSocket());
-		_channels.erase(toErase);
+		}
+		++it;
 	}
-
 }
 
 // - - - - - - - GETTERS - - - - - - - 

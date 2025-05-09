@@ -11,7 +11,7 @@ NAME = ircserv
 
 CC = c++
 
-CPP_FLAGS = -Wall -Wextra -Werror -std=c++98 -g
+CPP_FLAGS = -Wall -Wextra -Werror -std=c++
 
 all: $(NAME)
 

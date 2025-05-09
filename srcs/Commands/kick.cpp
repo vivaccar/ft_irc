@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   kick.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mfassbin <mfassbin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: marcelo <marcelo@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/19 15:06:34 by aconceic          #+#    #+#             */
-/*   Updated: 2025/04/26 15:25:12 by mfassbin         ###   ########.fr       */
+/*   Updated: 2025/05/09 15:15:52 by marcelo          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,9 +38,16 @@ void	Server::kickUser(std::vector<std::string> &cmds, Client *client)
 			if (target && isTargetUserOnChannel(channel, target, client))
 			{
 				client->removeUserFromChannel(channel, target, client, cmds);
+				if (channel->getClients().size() == 0) {
+					std::map<std::string, Channel *> &map = getChannelsMap();
+					std::map<std::string, Channel *>::iterator it = map.find(channel->getName());
+					map.erase(it);
+					delete channel;
+				}
 				//if user is the last of the channel
 					//delete channel??? maybe.
 					//broadcast a message to the server
+				
 			}
 		}
 	}
