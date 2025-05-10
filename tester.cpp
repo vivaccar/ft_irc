@@ -8,14 +8,14 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <fcntl.h>
-#define RED "\e[31m"
-#define BLUE "\e[34m"
-#define GREEN "\e[32m"
-#define YELLOW "\e[33m"
+#include "responseTest.hpp"
 
-#define BOLD "\e[1m"
-#define BLINK "\e[5m"
-#define RESET "\e[0m"
+
+#define GREEN "\033[32m"
+#define RED "\033[31m"
+#define RESET "\033[0m"
+#define YELLOW "\033[33m"
+#define CYAN "\033[36m"
 
 int connect()
 {
@@ -48,20 +48,24 @@ std::string receive_response(int sock) {
     return std::string(buffer);
 }
 
-void    makeTest(int sock, std::string command, std::string testName, std::string expected)
+void makeTest(int sock, std::string command, std::string testName, std::string expected)
 {
     send_line(sock, command);
-    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    std::this_thread::sleep_for(std::chrono::milliseconds(150));
     std::string resp = receive_response(sock);
-    
-    
-    std::cout << testName << " -> ";
+
+    std::cout << CYAN << "\nTEST NAME: " << RESET << YELLOW << testName << RESET << std::endl;
+/*     std::cout << "Command: " << command << std::endl;
+    std::cout << "Expected: " << expected << std::endl;
+    std::cout << "Received: " << resp; */
+
+    std::cout << "Result: ";
     if (resp.find(expected) != std::string::npos) {
-        std::cout << GREEN << "[OK] Servidor respondeu corretamente\n" << RESET;
+        std::cout << GREEN << "[OK]" << RESET << std::endl;
     } else {
-        std::cerr << RED << "[ERRO] Resposta inesperada do servidor.\n" << RESET;
+        std::cerr << RED << "[ERRO]" << RESET << std::endl;
     }
-    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    std::this_thread::sleep_for(std::chrono::milliseconds(150));
 }
 
 
@@ -88,19 +92,20 @@ void    testChannel(int sock)
     makeTest(sock, "MODE #42 i senha", "9 - SETTING INVITE ONLY CHANNEL", "MODE #42 :+i");
     makeTest(sock, "MODE #42 -i senha", "10 - REMOVING INVITE ONLY CHANNEL", "MODE #42 :-i");
     makeTest(sock, "MODE #42 +i senha", "11 - SETTING INVITE ONLY CHANNEL", "MODE #42 :+i");
-    makeTest(sock, "MODE #42 -k senha", "6 - REMOVING CHANNEL KEY", "MODE #42 :-k");
+    makeTest(sock, "MODE #42 -k senha", "12 - REMOVING CHANNEL KEY", "MODE #42 :-k");
     
     // MODE NO SUCH CHANNEL
-    makeTest(sock, "MODE #invalid +k senha", "12 - SETTING K INVALID CHANNEL", "403");
-    makeTest(sock, "MODE #invalid +l 10", "13 - SETTING L INVALID CHANNEL", "403");
-    makeTest(sock, "MODE #invalid +t", "14 - SETTING T INVALID CHANNEL", "403");
-    makeTest(sock, "MODE #invalid +o USER", "15 - SETTING O INVALID CHANNEL", "403");
-    makeTest(sock, "MODE #invalid +i", "16 - SETTING I INVALID CHANNEL", "403");
-    makeTest(sock, "MODE #invalid -k", "17 - SETTING -K INVALID CHANNEL", "403");
-    makeTest(sock, "MODE #invalid -l", "18 - SETTING -L INVALID CHANNEL", "403");
-    makeTest(sock, "MODE #invalid -t", "19 - SETTING -T INVALID CHANNEL", "403");
-    makeTest(sock, "MODE #invalid -o", "20 - SETTING -O INVALID CHANNEL", "403");
-    makeTest(sock, "MODE #invalid -i", "21 - SETTING -I INVALID CHANNEL", "403");
+    makeTest(sock, "MODE #invalid +k senha", "13 - SETTING K INVALID CHANNEL", "403");
+    makeTest(sock, "MODE #invalid +l 10", "14 - SETTING L INVALID CHANNEL", "403");
+    makeTest(sock, "MODE #invalid +t", "15 - SETTING T INVALID CHANNEL", "403");
+    makeTest(sock, "MODE #invalid +o USER", "16 - SETTING O INVALID CHANNEL", "403");
+    makeTest(sock, "MODE #invalid +i", "17 - SETTING I INVALID CHANNEL", "403");
+    makeTest(sock, "MODE #invalid -k", "18 - SETTING -K INVALID CHANNEL", "403");
+    makeTest(sock, "MODE #invalid -l", "19 - SETTING -L INVALID CHANNEL", "403");
+    makeTest(sock, "MODE #invalid -t", "20 - SETTING -T INVALID CHANNEL", "403");
+    makeTest(sock, "MODE #invalid -o", "21 - SETTING -O INVALID CHANNEL", "403");
+    makeTest(sock, "MODE #invalid -i", "22 - SETTING -I INVALID CHANNEL", "403");
+    
 
     // JOIN INVITE ONLY CHANNEL 
     makeTest(newUser, "JOIN #42 senha", "22 - JOIN INVITE ONLY CHANNEL", "473");
@@ -108,7 +113,7 @@ void    testChannel(int sock)
     makeTest(newUser, "JOIN invalid", "23 - JOIN INVALID CHANNEL", "476");
 
 
-
+    close(newUser);
 
 
 
@@ -170,12 +175,79 @@ void    testNick(int sock)
     makeTest(sock, "NICK $", "9 - ERRONEUS NICK", "432");
 }
 
+
+void makeclientstest(std::string testName, int sender, std::string cmd, int receiver, std::string expected)
+{
+    send_line(sender, cmd);
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    std::string resp = receive_response(receiver);
+
+    std::cout << CYAN << "\nTEST NAME: " << RESET << YELLOW << testName << RESET << std::endl;
+/*     std::cout << "Comand: " << cmd << std::endl;
+    std::cout << "Expected: " << expected << std::endl;
+    std::cout << "Received: " << resp; */
+    std::cout << "Result: ";
+    if (resp.find(expected) != std::string::npos) {
+        std::cout << GREEN << "[OK]" << std::endl << RESET;
+    } else {
+        std::cerr << RED << "[ERRO]" << std::endl << RESET;
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(150));
+}
+void    testclients()
+{
+    std::cout << RED << "\nTEST CASE [06] - CLIENTS INTERACTION\n" << RESET << std::endl; 
+    
+    int vini = connect();
+    int mano = connect();
+
+    send_line(vini, "PASS senha\nNICK vini\nUSER Vini * 0 vinicius");
+    std::this_thread::sleep_for(std::chrono::milliseconds(150));
+    send_line(mano, "PASS senha\nNICK mano\nUSER Mano * 0 mano");
+    std::this_thread::sleep_for(std::chrono::milliseconds(150));
+
+
+    send_line(mano, "JOIN #students");
+    std::this_thread::sleep_for(std::chrono::milliseconds(150));
+
+    makeclientstest("1 - NEW CLIENT ON CHANNEL", vini, "JOIN #students", mano, "vini JOIN #students");
+    makeclientstest("2 - SEND MESSAGE ON CHANNEL", vini, "PRIVMSG #students :ola galera", mano, "vini PRIVMSG #students");
+    makeclientstest("3 - SEND PRIVATE MESSAGE", vini, "PRIVMSG mano :ola mano", mano, "vini PRIVMSG mano");
+    makeclientstest("4 - SEND PRIVATE MESSAGE", mano, "PRIVMSG vini :ola vini", vini, "mano PRIVMSG vini");
+    
+    // TOPIC
+    makeTest(vini, "TOPIC #students", "5 - NO TOPIC SET",  "331");
+    makeclientstest("6 - SET NEW TOPIC", mano, "TOPIC #students :alterei o topico", vini, "TOPIC #students alterei o topico");
+    makeTest(vini, "TOPIC #students", "7 - VIEW TOPIC", "332");
+    makeTest(vini, "TOPIC #students", "8 - VIEW TOPIC", "332");
+    makeTest(mano, "mode #students +i" , "9 - MODE INVITE ONLY", "MODE #students :+i");
+    makeTest(mano, "mode #students +t" , "10 - MODE TOPIC RESTRICTED", "MODE #students :+t");
+    makeTest(mano, "mode #students +l 10" , "11 - MODE USER LIMIT", "MODE #students +l :10");
+    makeTest(mano, "mode #students +k senha" , "12 - MODE CHANNEL PASS", "MODE #students +k :senha");
+    makeTest(mano, "mode #students -i" , "13 - MODE REMOVE INVITE ONLY", "MODE #students :-i");
+    makeTest(mano, "mode #students -t" , "14 - MODE REMOVE TOPIC RESTRICTED", "MODE #students :-t");
+    makeTest(mano, "mode #students -l" , "15 - MODE REMOVE USER LIMIT", "MODE #students :-l");
+    makeTest(mano, "mode #students -k" , "16 - MODE REMOVE KEY", "MODE #students :-k");
+    makeTest(mano, "mode #students +o vini" , "17 - MODE ADD OP", "MODE #students +o :vini");
+    makeTest(mano, "mode #students -o vini" , "18 - MODE REMOVE OP", "MODE #students -o :vini");
+
+
+    //MODE " + channel + " :" + status
+
+//TOPIC_CHANGE(nick, channel, topic) ":" + nick + " TOPIC " + channel + " " + topic + "\r\n"
+    close(mano);
+    close(vini);
+
+}
+
 int main() {
     int sock = connect();
 
     testAuth(sock);
     testNick(sock);
     testChannel(sock);
+    
     close(sock);
+    testclients();
     return 0;
 }

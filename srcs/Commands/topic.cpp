@@ -27,7 +27,7 @@ void    Server::topic(std::vector<std::string> &cmds, Client *client, std::strin
         sendResponse(client->getSocket(), RPL_TOPIC(client->getPrefix(), cmds[1], channel->getTopic(0)));
         return sendResponse(client->getSocket(), RPL_TOPICWHOTIME(client->getNick(), cmds[1], channel->getTopic(1), channel->getTopic(2)));
     }
-    if (!client->isChannelAdmin(channel))
+    if (!client->isChannelAdmin(channel) && channel->getTopicRestricted())
         return sendResponse(client->getSocket(), ERR_CHANOPRIVSNEEDED(client->getNick(), channel->getName()));
     std::string newTopic = extractMessage(cmd, 2);
     if (newTopic[0] == ':' && newTopic.size() == 3)

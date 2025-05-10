@@ -264,6 +264,8 @@ void    Server::runPoll() {
             connectNewClient();
         for (size_t i = 1; i < _fds.size(); i++)
         {  // Começa no índice 1, já que o índice 0 é o servidor
+            if (_fds[i].revents & POLLHUP)
+                disconnectClient(_fds[i].fd, i);
             if (_fds[i].revents & POLLIN)
                 readNewMessage(i);
         }
