@@ -8,6 +8,8 @@ void	Server::who(std::vector<std::string> &cmds, Client *client) {
 		std::vector<int> clients = channelFound->getClients();
 		for (std::vector<int>::iterator it = clients.begin(); it != clients.end(); it++) {
 			Client *cl = getClientBySocket(*it);
+			if (!cl)
+				return;
 			sendResponse(client->getSocket(), RPL_WHOREPLY(client->getNick(), channelFound->getName(), cl->getUser(), cl->getHostname(), cl->getNick(), cl->getRealName()));
 		}
 		sendResponse(client->getSocket(), RPL_ENDOFWHO(client->getNick(), channelFound->getName()));

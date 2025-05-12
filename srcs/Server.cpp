@@ -181,8 +181,11 @@ void	Server::deleteChannelWithNoClients() {
 	std::map<std::string, Channel *>::iterator it = channelMap.begin();
 	while (it != channelMap.end())
 	{
-		Channel *channel = it->second;
+		std::cout << RED << "ENTROU NO WHILE\n";
+        Channel *channel = it->second;
 		if(channel->getClients().size() == 0) {
+    		std::cout << RED << "ENTROU NO IF\n";
+
 			std::map<std::string, Channel *>::iterator itToErase = it;
 			it++;
 			channelMap.erase(itToErase);

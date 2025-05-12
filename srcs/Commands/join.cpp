@@ -42,7 +42,7 @@ void    Server::joinCommand(std::vector<std::string> &cmds, Client *client) {
 			if (!client->isChannelMember(channelFound)) {
 				if (channelFound->getUserLimit() != -1 && (static_cast<int>(channelFound->getClients().size()) >= channelFound->getUserLimit()))
 					sendResponse(client->getSocket(), ERR_CHANNELISFULL(client->getNick(), channelFound->getName()));
-				if (channelFound->getInviteOnly()) {
+				else if (channelFound->getInviteOnly()) {
 					if (client->isChannelInvited(channelFound)) {
 						channelFound->addClient(client);
 						client->sendToAllChannel(channelFound, RPL_JOIN(client->getNick(), channelFound->getName()));

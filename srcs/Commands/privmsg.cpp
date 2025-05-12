@@ -12,6 +12,8 @@ void	Server::privMsg(std::vector<std::string> &cmds, Client *client, const std::
 	for(std::vector<std::string>::iterator it = dest.begin(); it != dest.end(); it++) {
 		if (it->at(0) == '#') {
 			Channel *channelDest = getChannelByName(*it);
+			if (!channelDest)
+				return sendResponse(client->getSocket(), ERR_NOSUCHCHANNEL(client->getNick(), cmds[1]));
 			if (channelDest && client->isChannelMember(channelDest))
 				client->sendToChannel(channelDest, RPL_PRIVMSG(client->getNick(), channelDest->getName(), msg));
 			else if (channelDest && !client->isChannelMember(channelDest))

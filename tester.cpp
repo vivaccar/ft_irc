@@ -54,7 +54,7 @@ void makeTest(int sock, std::string command, std::string testName, std::string e
     std::this_thread::sleep_for(std::chrono::milliseconds(150));
     std::string resp = receive_response(sock);
 
-    std::cout << CYAN << "\nTEST NAME: " << RESET << YELLOW << testName << RESET << std::endl;
+    std::cout << CYAN << "\nTEST NAME: " << RESET << YELLOW << testName <<  " - " << resp << RESET << std::endl;
 /*     std::cout << "Command: " << command << std::endl;
     std::cout << "Expected: " << expected << std::endl;
     std::cout << "Received: " << resp; */
@@ -230,6 +230,22 @@ void    testclients()
     makeTest(mano, "mode #students -k" , "16 - MODE REMOVE KEY", "MODE #students :-k");
     makeTest(mano, "mode #students +o vini" , "17 - MODE ADD OP", "MODE #students +o :vini");
     makeTest(mano, "mode #students -o vini" , "18 - MODE REMOVE OP", "MODE #students -o :vini");
+    
+    // create new client to test invite.
+
+    int celo = connect();
+    send_line(celo, "PASS senha\nnick celo\nuser marcelo 0 0 0");
+
+    makeTest(vini, "INVITE name #students", "19 - INVITE NO SUCH NICK", "442");
+    makeTest(vini, "INVITE o", "20 - INVITE NO PARAMS", "461");
+    makeTest(vini, "INVITE ", "22 - INVITE NO PARAMS", "461");
+    makeTest(vini, "INVITE mano #invalid", "23 - INVITE NO SUCH CHANNEL", "442");
+    makeTest(vini, "INVITE mano #students", "24 - INVITE ALREADY ON CHANNEL", "443");
+    send_line(mano, "mode +i #students");
+    makeTest(vini, "INVITE celo #students", "25 - NOT OPERATOR INVITE SOMEONE IN +I CHANNEL", "482");    
+
+
+
 
 
     //MODE " + channel + " :" + status
@@ -237,17 +253,18 @@ void    testclients()
 //TOPIC_CHANGE(nick, channel, topic) ":" + nick + " TOPIC " + channel + " " + topic + "\r\n"
     close(mano);
     close(vini);
+    close(celo);
 
 }
 
 int main() {
-    int sock = connect();
+/*     int sock = connect();
 
     testAuth(sock);
     testNick(sock);
     testChannel(sock);
     
-    close(sock);
+    close(sock); */
     testclients();
     return 0;
 }

@@ -18,6 +18,9 @@
 //Parameters: <nickname> <channel>
 void	Server::inviteUser(std::vector<std::string> &cmds, Client *client)
 {
+	if (cmds.size() < 3)
+		return sendResponse(client->getSocket(), ERR_NEEDMOREPARAMS(client->getNick(), cmds[0]));
+
 	std::string target_name = cmds[1];
 	std::string channel_name = cmds[2];
 	Client *target = getClientByNick(target_name);
