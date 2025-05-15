@@ -51,7 +51,7 @@ class Client {
             std::string getNick() const;
             std::string getRealName() const;
             std::string getHostname() const;
-            std::vector<Channel *> getChannels() const;
+            std::vector<Channel *>& getChannels();
             bool isAuth() const;
             const std::string getPrefix() const;
             

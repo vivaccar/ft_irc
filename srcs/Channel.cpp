@@ -75,19 +75,23 @@ void	Channel::setUserLimit(int limit) {
 	this->_userLimit = limit;
 }
 
-void	Channel::addClient(const Client *client) {
+void	Channel::addClient(Client *client) {
 	this->_channelClients.push_back(client->getSocket());
 	client->getChannels().push_back(this);
 }
 
-void	Channel::addAdmin(const Client *client) {
+void	Channel::addAdmin(Client *client) {
 	this->_channelAdmins.push_back(client->getSocket());
 }
 
 void	Channel::removeClient(int socket) {
 	std::vector<int>::iterator it = std::find(_channelClients.begin(), _channelClients.end(), socket);
-	if (it != _channelClients.end())	
+	if (it != _channelClients.end())
+	{
+		std::cout << "Saindo do canal socket: " << *it << std::endl;
 		_channelClients.erase(it);
+		std::cout << "Size agora eh " << _channelClients.size() << std::endl;	
+	}	
 }
 
 void	Channel::removeAdmin(int socket) {

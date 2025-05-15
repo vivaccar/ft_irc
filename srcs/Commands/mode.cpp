@@ -89,7 +89,7 @@ void    operatorMode(std::string &cmd, std::vector<std::string>& cmds, Client *c
         return;
     }
     Client *target = server->getClientByNick(cmds[parameter]);
-    if (!target)
+    if (!target || !target->isChannelMember(channel))
         return client->sendToClient(client, ERR_NOSUCHNICK(cmds[parameter], channel->getName()));
     if (!client->isChannelMember(channel))
         return client->sendToClient(client, ERR_USERNOTINCHANNEL(client->getNick(), cmds[parameter], channel->getName()));

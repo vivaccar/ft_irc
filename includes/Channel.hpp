@@ -46,8 +46,8 @@ class Channel {
 		void	setTopicRestricted(bool status);
 		void	setUserLimit(int limit);
 
-		void	addClient(const Client *client);
-		void	addAdmin(const Client *client);
+		void	addClient(Client *client);
+		void	addAdmin(Client *client);
 		void	removeAdmin(int socket);
 		void	removeClient(int socket);
 		void	addChannelInvite(const Client *client);

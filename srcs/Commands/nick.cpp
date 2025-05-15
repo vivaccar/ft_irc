@@ -33,10 +33,10 @@ void    Server::setNick(std::vector<std::string> &cmds, Client *client)
 {
 	if (!client->passInserted())
 		return sendResponse(client->getSocket(), ERR_NOTREGISTERED(client->getNick()));
-	if (nickColission(cmds[1]))
-		return sendResponse(client->getSocket(), ERR_NICKNAMEINUSE(client->getNick(), cmds[1]));
 	if (cmds.size() < 2)
 		return sendResponse(client->getSocket(), ERR_NONICKNAMEGIVEN(client->getNick()));
+	if (nickColission(cmds[1]))
+		return sendResponse(client->getSocket(), ERR_NICKNAMEINUSE(client->getNick(), cmds[1]));
 	if (validNickname(cmds[1]))
 	{
 		if (cmds.size() > 1)

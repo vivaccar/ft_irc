@@ -26,7 +26,7 @@ void	Server::kickUser(std::vector<std::string> &cmds, Client *client)
 	if (cmds.size() < 3)
 		return(sendResponse(client->getSocket(), ERR_NEEDMOREPARAMS(client->getNick(), cmds[0])));
 	else if (cmds.size() == 3)
-		cmds.push_back("Default reason to kick someone\n");
+		cmds.push_back("Default reason to kick someone");
 
 	Channel *channel = getChannelByName(cmds[1]);
 	std::vector<std::string> targets = splitVectorString(cmds);

@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include "responseTest.hpp"
+#include <sstream>
 
 
 #define GREEN "\033[32m"
@@ -36,6 +37,7 @@ int connect()
 void send_line(int sock, const std::string& msg) {
     std::string full_msg = msg + "\n";
     send(sock, full_msg.c_str(), full_msg.size(), 0);
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }
 
 std::string receive_response(int sock) {
@@ -220,6 +222,8 @@ void    testclients()
     makeclientstest("6 - SET NEW TOPIC", mano, "TOPIC #students :alterei o topico", vini, "TOPIC #students alterei o topico");
     makeTest(vini, "TOPIC #students", "7 - VIEW TOPIC", "332");
     makeTest(vini, "TOPIC #students", "8 - VIEW TOPIC", "332");
+
+    // MODE
     makeTest(mano, "mode #students +i" , "9 - MODE INVITE ONLY", "MODE #students :+i");
     makeTest(mano, "mode #students +t" , "10 - MODE TOPIC RESTRICTED", "MODE #students :+t");
     makeTest(mano, "mode #students +l 10" , "11 - MODE USER LIMIT", "MODE #students +l :10");
@@ -236,13 +240,22 @@ void    testclients()
     int celo = connect();
     send_line(celo, "PASS senha\nnick celo\nuser marcelo 0 0 0");
 
+
+    // INVITE TESTS
     makeTest(vini, "INVITE name #students", "19 - INVITE NO SUCH NICK", "442");
     makeTest(vini, "INVITE o", "20 - INVITE NO PARAMS", "461");
     makeTest(vini, "INVITE ", "22 - INVITE NO PARAMS", "461");
     makeTest(vini, "INVITE mano #invalid", "23 - INVITE NO SUCH CHANNEL", "442");
     makeTest(vini, "INVITE mano #students", "24 - INVITE ALREADY ON CHANNEL", "443");
-    send_line(mano, "mode +i #students");
-    makeTest(vini, "INVITE celo #students", "25 - NOT OPERATOR INVITE SOMEONE IN +I CHANNEL", "482");    
+    send_line(mano, "mode #students +i");
+    makeTest(vini, "INVITE celo #students", "25 - NOT OPERATOR INVITE SOMEONE IN +I CHANNEL", "482");
+    makeclientstest("26 - INVITE SOMEONE TO CHANNEL", mano, "invite celo #students", celo, "You have been invited to #students");
+    makeTest(celo, "join #students", "27 - JOIN AFTER INVITE", ":celo JOIN #students");
+
+    // KICK TESTS
+    makeTest(mano, "kick ", "28 - KICK NEED MORE PARAMS", "461");
+    makeTest(mano, "kick #students", "28 - KICK NEED MORE PARAMS", "461");
+
 
 
 
@@ -257,6 +270,122 @@ void    testclients()
 
 }
 
+void checkleaks() {
+    int a = connect();
+    int b = connect();
+    int c = connect();
+    int d = connect();
+    int e = connect();
+    int f = connect();
+    int g = connect();
+
+    send_line(a, "PASS senha\r\nNICK a\r\nUSER a 0 0 0");
+    send_line(b, "PASS senha\r\nNICK b\r\nUSER b 0 0 0");
+    send_line(c, "PASS senha\r\nNICK c\r\nUSER c 0 0 0");
+    send_line(d, "PASS senha\r\nNICK d\r\nUSER d 0 0 0");
+    send_line(e, "PASS senha\r\nNICK e\r\nUSER e 0 0 0");
+    send_line(f, "PASS senha\r\nNICK f\r\nUSER f 0 0 0");
+    send_line(g, "PASS senha\r\nNICK g\r\nUSER g 0 0 0");
+
+    send_line(a, "JOIN #1");
+    send_line(a, "JOIN #2");
+    send_line(a, "JOIN #3");
+
+    send_line(b, "JOIN #1");
+    send_line(c, "JOIN #1");
+    send_line(d, "JOIN #2");
+    send_line(e, "JOIN #2");
+    send_line(f, "JOIN #3");
+    send_line(g, "JOIN #3");
+
+    send_line(a, "MODE #1 +i");
+    send_line(a, "MODE #1 +k senha1");
+    send_line(a, "MODE #1 +l 5");
+    send_line(a, "MODE #1 +t");
+
+    send_line(a, "INVITE f #1");
+    send_line(f, "JOIN #1 senha1");
+
+    send_line(b, "MODE #1 +o b");
+    send_line(c, "MODE #1 +o c");
+    send_line(d, "MODE #2 +o d");
+    send_line(e, "MODE #2 +o e");
+
+    send_line(f, "JOIN #4");
+    send_line(f, "JOIN #5");
+    send_line(g, "JOIN #5");
+
+    send_line(f, "MODE #5 +i");
+    send_line(f, "INVITE g #5");
+    send_line(g, "JOIN #5");
+
+    send_line(b, "TOPIC #1 :Bem-vindos ao canal 1");
+    send_line(e, "TOPIC #2 :Topico canal 2");
+
+    send_line(c, "KICK #1 b");
+    send_line(d, "KICK #2 e");
+    send_line(e, "KICK #2 d");
+
+    close(b);
+    close(c);
+    close(d);
+    close(e);
+
+    int h = connect();
+    send_line(h, "PASS senha\r\nNICK h\r\nUSER h 0 0 0");
+    send_line(h, "JOIN #1 senha1");
+    send_line(h, "JOIN #2");
+    send_line(h, "JOIN #3");
+
+    int i = connect();
+    send_line(i, "PASS senha\r\nNICK i\r\nUSER i 0 0 0");
+    send_line(i, "JOIN #1 senha1");
+    send_line(i, "JOIN #5");
+
+    send_line(i, "MODE #1 -k senha1");
+    send_line(i, "MODE #1 -i");
+    send_line(i, "MODE #1 -t");
+    send_line(i, "MODE #1 -l");
+
+    send_line(h, "MODE #1 +k nova");
+    send_line(h, "INVITE i #1");
+
+    send_line(f, "PART #4");
+    send_line(f, "PART #5");
+
+    send_line(g, "PART #5");
+
+    close(a);
+    close(f);
+    close(g);
+    close(h);
+    close(i);
+
+    // STRESS LOOP
+    for (int j = 0; j < 20; ++j) {
+        int sock = connect();
+        std::stringstream nick;
+        nick << "N" << j;
+        std::stringstream user;
+        user << "U" << j;
+        std::stringstream channel;
+        channel << "#chan" << j % 5;
+
+        send_line(sock, "PASS senha");
+        send_line(sock, "NICK " + nick.str());
+        send_line(sock, "USER " + user.str() + " 0 0 0");
+        send_line(sock, "JOIN " + channel.str());
+
+        if (j % 2 == 0)
+            send_line(sock, "MODE " + channel.str() + " +i");
+
+        if (j % 3 == 0)
+            send_line(sock, "TOPIC " + channel.str() + " :Stress test");
+
+        close(sock);
+    }
+}
+
 int main() {
 /*     int sock = connect();
 
@@ -264,7 +393,8 @@ int main() {
     testNick(sock);
     testChannel(sock);
     
-    close(sock); */
-    testclients();
+    close(sock);
+    testclients(); */
+    checkleaks();
     return 0;
 }

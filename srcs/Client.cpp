@@ -5,7 +5,7 @@ Client::Client(int socket, std::string &hostname) : _socket(socket), _isAuth(fal
 }
 
 Client::~Client() {
-	std::vector<Channel*> clientChannels = this->getChannels();
+	std::vector<Channel*> &clientChannels = this->getChannels();
 	std::vector<Channel*>::iterator it = clientChannels.begin();
 	while (it != clientChannels.end()) {
 		Channel* channel = *it;
@@ -42,7 +42,7 @@ std::string		Client::getHostname() const {
 	return this->_hostname;
 }
 
-std::vector<Channel *> Client::getChannels() const {
+std::vector<Channel *>& Client::getChannels() {
 	return this->_channels;
 }
 

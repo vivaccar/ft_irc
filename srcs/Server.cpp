@@ -201,6 +201,8 @@ void    Server::disconnectClient(int fd, size_t &poolIdx)
     Client* toDelete = getClientBySocket(fd);
     if (toDelete)
         delete toDelete;
+    else
+        std::cout << RED << "toDelete is NULL \n";
     deleteChannelWithNoClients();
     _clients.erase(fd);
     close(fd);
