@@ -105,6 +105,24 @@ void    Server::createClient(int socket, std::string &hostname) {
     this->_clients.insert(std::make_pair(socket, newClient));
 }
 
+void    Server::info() {
+    std::cout << GREEN << "SERVER CURRENT CLIENTS CONNECTED: " << _clients.size() << std::endl;
+    std::cout << "NICKNAMES:";
+    for (std::map<int, Client*>::iterator it = _clients.begin(); it != _clients.end(); it++) 
+    {
+        std::cout << it->second->getNick() << " ";
+    }
+    std::cout << std::endl;
+    std::cout << GREEN << "SERVER CURRENT CHANNELS: " << _channels.size() << std::endl;
+    std::cout << "CHANNEL NAME AND NUMBER OF MEMBERS:";
+    for (std::map<std::string, Channel*>::iterator it = _channels.begin(); it != _channels.end(); it++) 
+    {
+        std::cout << it->first << " has " << it->second->getClients().size() << " members" << std::endl;
+    }
+    std::cout << std::endl;
+    return;
+}
+
 void    Server::parseCommand(std::string cmd, int clientSocket, size_t &pollIdx) {
     std::istringstream streamLine(cmd);
 
@@ -138,6 +156,8 @@ void    Server::parseCommand(std::string cmd, int clientSocket, size_t &pollIdx)
         who(cmds, client);
     else if (cmds[0] == "KICK" || cmds[0] == "kick") //TO START WORKING AT THE COMMANDS REQUIRED BY THE SUBJECT
         kickUser(cmds, client);
+    else if(cmds[0] == "info")
+        info();
     else if (cmds[0] == "INVITE" || cmds[0] == "invite")
         inviteUser(cmds, client);
 	else if (cmds[0] == "trivia" || cmds[0] == "math" || cmds[0] == "date" || cmds[0] == "year")
@@ -207,7 +227,6 @@ void    Server::disconnectClient(int fd, size_t &poolIdx)
     _clients.erase(fd);
     close(fd);
     _fds.erase(_fds.begin() + poolIdx);  // Remove o cliente da lista
-    _clients.erase(poolIdx);
     --poolIdx;
     std::stringstream message;
     message << "Client disconnected Socket: " << fd;

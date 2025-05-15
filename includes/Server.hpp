@@ -73,6 +73,10 @@ class Server {
 
 		//API (BONUS)
 		int	numbersAPI(std::vector<std::string> &cmds, Client *client, Channel *channel);
+
+        // INFO DEBUG
+
+        void info();
 };
 
 // UTILS
