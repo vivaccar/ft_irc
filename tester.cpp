@@ -9,7 +9,6 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include "responseTest.hpp"
-#include <sstream>
 
 
 #define GREEN "\033[32m"
@@ -270,121 +269,7 @@ void    testclients()
 
 }
 
-void checkleaks() {
-    int a = connect();
-    int b = connect();
-    int c = connect();
-    int d = connect();
-    int e = connect();
-    int f = connect();
-    int g = connect();
 
-    send_line(a, "PASS senha\r\nNICK a\r\nUSER a 0 0 0");
-    send_line(b, "PASS senha\r\nNICK b\r\nUSER b 0 0 0");
-    send_line(c, "PASS senha\r\nNICK c\r\nUSER c 0 0 0");
-    send_line(d, "PASS senha\r\nNICK d\r\nUSER d 0 0 0");
-    send_line(e, "PASS senha\r\nNICK e\r\nUSER e 0 0 0");
-    send_line(f, "PASS senha\r\nNICK f\r\nUSER f 0 0 0");
-    send_line(g, "PASS senha\r\nNICK g\r\nUSER g 0 0 0");
-
-    send_line(a, "JOIN #1");
-    send_line(a, "JOIN #2");
-    send_line(a, "JOIN #3");
-
-    send_line(b, "JOIN #1");
-    send_line(c, "JOIN #1");
-    send_line(d, "JOIN #2");
-    send_line(e, "JOIN #2");
-    send_line(f, "JOIN #3");
-    send_line(g, "JOIN #3");
-
-    send_line(a, "MODE #1 +i");
-    send_line(a, "MODE #1 +k senha1");
-    send_line(a, "MODE #1 +l 5");
-    send_line(a, "MODE #1 +t");
-
-    send_line(a, "INVITE f #1");
-    send_line(f, "JOIN #1 senha1");
-
-    send_line(b, "MODE #1 +o b");
-    send_line(c, "MODE #1 +o c");
-    send_line(d, "MODE #2 +o d");
-    send_line(e, "MODE #2 +o e");
-
-    send_line(f, "JOIN #4");
-    send_line(f, "JOIN #5");
-    send_line(g, "JOIN #5");
-
-    send_line(f, "MODE #5 +i");
-    send_line(f, "INVITE g #5");
-    send_line(g, "JOIN #5");
-
-    send_line(b, "TOPIC #1 :Bem-vindos ao canal 1");
-    send_line(e, "TOPIC #2 :Topico canal 2");
-
-    send_line(c, "KICK #1 b");
-    send_line(d, "KICK #2 e");
-    send_line(e, "KICK #2 d");
-
-    close(b);
-    close(c);
-    close(d);
-    close(e);
-
-    int h = connect();
-    send_line(h, "PASS senha\r\nNICK h\r\nUSER h 0 0 0");
-    send_line(h, "JOIN #1 senha1");
-    send_line(h, "JOIN #2");
-    send_line(h, "JOIN #3");
-
-    int i = connect();
-    send_line(i, "PASS senha\r\nNICK i\r\nUSER i 0 0 0");
-    send_line(i, "JOIN #1 senha1");
-    send_line(i, "JOIN #5");
-
-    send_line(i, "MODE #1 -k senha1");
-    send_line(i, "MODE #1 -i");
-    send_line(i, "MODE #1 -t");
-    send_line(i, "MODE #1 -l");
-
-    send_line(h, "MODE #1 +k nova");
-    send_line(h, "INVITE i #1");
-
-    send_line(f, "PART #4");
-    send_line(f, "PART #5");
-
-    send_line(g, "PART #5");
-
-    close(a);
-    close(f);
-    close(g);
-    close(h);
-    close(i);
-
-    // STRESS LOOP
-    for (int j = 0; j < 20; ++j) {
-        int sock = connect();
-        std::stringstream nick;
-        nick << "N" << j;
-        std::stringstream user;
-        user << "U" << j;
-        std::stringstream channel;
-        channel << "#chan" << j % 5;
-
-        send_line(sock, "PASS senha");
-        send_line(sock, "NICK " + nick.str());
-        send_line(sock, "USER " + user.str() + " 0 0 0");
-        send_line(sock, "JOIN " + channel.str());
-
-        if (j % 2 == 0)
-            send_line(sock, "MODE " + channel.str() + " +i");
-
-        if (j % 3 == 0)
-            send_line(sock, "TOPIC " + channel.str() + " :Stress test");
-
-        close(sock);
-    }
-}
 
 int main() {
 /*     int sock = connect();
@@ -395,6 +280,38 @@ int main() {
     
     close(sock);
     testclients(); */
-    checkleaks();
+
+
+    int c1 = connect();
+    int c2 = connect();
+    int c3 = connect();
+    send_line(c1, "PASS senha\nuser c1 c c c\nnick c1");
+    send_line(c2, "PASS senha\nuser c2 c c c\nnick c2");
+    send_line(c3, "PASS senha\nuser c3 c c c\nnick c3");
+
+    send_line(c1, "JOIN #CANAL");
+    send_line(c2, "JOIN #CANAL");
+    send_line(c3, "JOIN #CANAL");
+
+    close(c1);
+    close(c2);
+    close(c3);
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    c1 = connect();
+    c2 = connect();
+    c3 = connect();
+
+    send_line(c1, "PASS senha\nuser c1 c c c\nnick c1");
+    send_line(c2, "PASS senha\nuser c1 c c c\nnick c2");
+    send_line(c3, "PASS senha\nuser c1 c c c\nnick c3");
+
+    send_line(c1, "quit");
+    send_line(c2, "JOIN #CANAL");
+    send_line(c3, "JOIN #CANAL");
+
+/*     close(c1);
+    close(c2);
+    close(c3); */
+
     return 0;
 }
