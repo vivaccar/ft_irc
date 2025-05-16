@@ -34,6 +34,7 @@ class Client {
             int _socket;
             bool _isAuth;
             bool _insertPassword;
+            std::string _buffer;
             std::string _nick;
             std::string _user;
             std::string _realName;
@@ -54,6 +55,7 @@ class Client {
             std::vector<Channel *>& getChannels();
             bool isAuth() const;
             const std::string getPrefix() const;
+            std::string& getBuffer();
             
 
             //SETTERS
@@ -63,6 +65,8 @@ class Client {
             void setUser(const std::string &user);
             void setRealName(const std::string &realName);
             
+            void    bufferAppend(std::string str);
+            void    clearBuf(); 
             Channel *createChannel(const std::string &name);
 
             void	sendToChannel(Channel *channel, const std::string &msg);

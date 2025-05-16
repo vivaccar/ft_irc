@@ -226,7 +226,7 @@ void    Server::disconnectClient(int fd, size_t &poolIdx)
     deleteChannelWithNoClients();
     _clients.erase(fd);
     close(fd);
-    _fds.erase(_fds.begin() + poolIdx);  // Remove o cliente da lista
+    _fds.erase(_fds.begin() + poolIdx);
     --poolIdx;
     std::stringstream message;
     message << "Client disconnected Socket: " << fd;
@@ -238,31 +238,28 @@ void Server::readNewMessage(size_t &pollIdx)
     char buffer[1024];
     bzero(buffer, sizeof(buffer));
     int fd = _fds[pollIdx].fd;
+    Client  *client = getClientBySocket(fd);
 
-    std::string msg;
     ssize_t bytesRead;
-    while (true)
+    bytesRead = recv(fd, buffer, sizeof(buffer) - 1, 0);
+    if (bytesRead == -1)
     {
-        bytesRead = recv(fd, buffer, sizeof(buffer) - 1, 0);
-        if (bytesRead == -1)
-        {
-            if (errno == EWOULDBLOCK)
-                break;
-            else
-                throw std::runtime_error("Recv Error");
-        }
-        else if (bytesRead == 0)
-            return disconnectClient(fd, pollIdx);
-        buffer[bytesRead] = '\0';
-        msg.append(buffer);
-        if (msg.find('\n') != std::string::npos)
-            break;
+        if (errno == EWOULDBLOCK || errno == EAGAIN)
+            return;
+        else
+            throw std::runtime_error("Recv Error"); 
     }
+    if (bytesRead == 0)
+        return disconnectClient(fd, pollIdx);
+    client->bufferAppend(buffer);
+    std::string msg = client->getBuffer();
+    if (msg.find('\n') == std::string::npos)
+        return;
     std::istringstream iss(msg);
     std::string line;
     while (std::getline(iss, line)) 
     {
-        // remove \r se vier no final (de \r\n)
+        client->clearBuf();
         if (line.empty() || (line[0] == '\r' && line.size() == 1))
             continue;
         if (!line.empty() && line[line.size() -1] == '\r')
@@ -270,6 +267,7 @@ void Server::readNewMessage(size_t &pollIdx)
         parseCommand(line, fd, pollIdx);
     }
 }
+
 void    Server::runPoll() {
     // CRIA A ESTRUTURA DO DO SOCKET DO SERVIDOR PARA SER UTILIZADO NO POLL
     struct pollfd server;

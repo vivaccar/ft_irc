@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include "responseTest.hpp"
+#include "vector"
 
 
 #define GREEN "\033[32m"
@@ -269,20 +270,30 @@ void    testclients()
 
 }
 
-
+void    stressTest()
+{
+    std::vector<int> fds;
+    for (int i = 0; i < 1000; i++){
+            fds.push_back(connect());
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    for (std::vector<int>::iterator it = fds.begin(); it != fds.end(); it++)
+        close(*it);
+}
 
 int main() {
-/*     int sock = connect();
+    int sock = connect();
 
     testAuth(sock);
     testNick(sock);
     testChannel(sock);
     
     close(sock);
-    testclients(); */
+    testclients();
+    //stressTest();
 
 
-    int c1 = connect();
+/*     int c1 = connect();
     int c2 = connect();
     int c3 = connect();
     send_line(c1, "PASS senha\nuser c1 c c c\nnick c1");
@@ -307,7 +318,7 @@ int main() {
 
     send_line(c1, "quit");
     send_line(c2, "JOIN #CANAL");
-    send_line(c3, "JOIN #CANAL");
+    send_line(c3, "JOIN #CANAL"); */
 
 /*     close(c1);
     close(c2);

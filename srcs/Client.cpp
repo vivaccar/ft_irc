@@ -49,6 +49,15 @@ std::vector<Channel *>& Client::getChannels() {
 const std::string Client::getPrefix() const {
 	return _nick + "!" + _user + "@" + _hostname;
 }
+
+std::string& Client::getBuffer() {
+	return this->_buffer;
+}
+
+void	Client::clearBuf() {
+	this->_buffer.clear();
+}
+
 //:dan!d@localhost
 // - - - - - - - SETTERS - - - - - - - 
 void    Client::setInsertPassword(bool status) {
@@ -73,6 +82,10 @@ void	Client::setRealName(const std::string &realName) {
 
 bool    Client::isAuth() const {
     return this->_isAuth;
+}
+
+void	Client::bufferAppend(std::string str) {
+	this->_buffer += str;
 }
 
 Channel *Client::createChannel(const std::string &name) {
