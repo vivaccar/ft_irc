@@ -26,7 +26,6 @@ void    Server::joinCommand(std::vector<std::string> &cmds, Client *client) {
 		Channel *channelFound = this->getChannelByName(it->first);
 		if (!channelFound) {
 			if (it->first[0] == '#') {
-				std::cout << "entrou no if certo" << std::endl;
 				Channel *newChannel = client->createChannel(it->first);
 				this->_channels.insert(std::make_pair(newChannel->getName(), newChannel));
 				sendResponse(client->getSocket(), RPL_JOIN(client->getNick(), newChannel->getName()));
@@ -36,8 +35,6 @@ void    Server::joinCommand(std::vector<std::string> &cmds, Client *client) {
 				sendResponse(client->getSocket(), ERR_BADCHANMASK(it->first));
 		}
 		else if (channelFound) {
-			std::cout << "entrou no if errado" << std::endl;
-			std::cout << "NOME DO CANAL ENCONTRADO NO JOIN: " << channelFound->getName() << std::endl;
 			std::string key = it->second;
 			if (!client->isChannelMember(channelFound)) {
 				if (channelFound->getUserLimit() != -1 && (static_cast<int>(channelFound->getClients().size()) >= channelFound->getUserLimit()))

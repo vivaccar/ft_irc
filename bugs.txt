@@ -1,2 +1,0 @@
-1- cliente consegue alterar o topico  em modo +t apos deixar de ser op.
-2- servidor envia um NOTCHANNELADM PARA o cara que entra em um canal existente.
