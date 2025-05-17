@@ -7,8 +7,6 @@
 #define ERR_NICKNAMEINUSE(nick, attempt) ": 433 " + nick + " " + attempt + " :Nickname in use.\r\n"
 #define ERR_ERRONEUSNICKNAME(nick, attempt) ": 432 " + nick + " " + attempt + " :Erroneus nickname\r\n"
 #define ERR_UNKNOWNCOMMAND(nick, cmd) ": 421 " + nick + " " + cmd + " :Unknown command\r\n"
-
-#define ERR_BANNEDFROMCHAN(nick) ": 474 " + nick + " :You are banned from this channel\n"
 #define ERR_BADCHANNELKEY(client, channel) ": 476 " + client + " " + channel + " :Cannot join channel (+k)\r\n"
 #define ERR_INVITEONLYCHAN(nick, channel) ": 473 " + nick + " " + channel + " :Cannot join channel (+i)\r\n"
 #define ERR_CHANNELISFULL(nick, channel) ": 471 " + nick + " " + channel + " :Cannot join channel (+l)\r\n"
@@ -24,7 +22,7 @@
 #define ERR_USERNOTINCHANNEL(nick, target, channel_name) ": 441 " + nick + " "  + target + " " + channel_name + " :They aren't on that channel\r\n"
 #define ERR_UNKNOWNMODE(nick, cmd) ": 472 " + nick + " " + cmd + ": is unknown mode\r\n"
 
-//// - - - - - - REPLIES - - - - - - 
+// - - - - - - REPLIES - - - - - - 
 #define RPL_WELCOME(nick, prefix) ":" + prefix + " 001 " + nick + " :Welcome " + nick + " to the ft_irc\r\n"
 #define RPL_NOTOPIC(nick, channel) ": 331 " + nick + " " + channel + " :No topic is set\r\n"
 #define RPL_TOPIC(nick, channel ,topic) ": 332 " + nick + " " + channel + " " + topic + "\r\n"
@@ -34,15 +32,12 @@
 #define RPL_ENDOFWHO(client, channel) ": 315 " + client + " " + channel + " :End of WHO list\r\n"
 #define KICK_MSG(nick, channel_name, target, reason) ":" + nick + " KICK " + channel_name + " " + target + reason + "\r\n"
 #define TOPIC_CHANGE(nick, channel, topic) ":" + nick + " TOPIC " + channel + " " + topic + "\r\n"
-#define RPL_INVITING(target, channel_name, client) ": 341 " + client + " " + target + " " + channel_name + " : \r\n" //TALVEZ PRECISE DE MSG (AMAURI)
+#define RPL_INVITING(target, channel_name, client) ": 341 " + client + " " + target + " " + channel_name + " : \r\n"
 #define RPL_INVITED(channel, client) "You have been invited to " + channel + " by " + client + "\r\n"
 #define RPL_CHANNELMODEIS(nick, channel, modes) ": 324 " + nick + " " + channel + " " + modes + "\r\n"
 #define MODE(nick, channel, status) ":" + nick + " MODE " + channel + " :" + status + "\r\n"
 #define SET_KEY(nick, channel, cmd, key) ":" + nick + " MODE " + channel + " " + cmd + " :" + key + "\r\n"
 #define MODE_OPERATOR(nick, channel, cmd, target) ":" + nick + " MODE " + channel + " " + cmd + " :" + target + "\r\n"
-
 #define RPL_JOIN(nick, channel) ":" + nick + " JOIN " + channel + "\r\n"
 #define RPL_PRIVMSG(nick, target, msg) ":" + nick + " PRIVMSG " + target + " :" + msg + "\r\n"
-
 #define RPL_NAMREPLY(client, channel, names) ": 353 " + client + " = " + channel + " :" + names + "\r\n"
-

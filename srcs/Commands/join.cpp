@@ -46,7 +46,6 @@ void    Server::joinCommand(std::vector<std::string> &cmds, Client *client) {
 						showNames(channelFound, client);
 						std::vector<int>::iterator it = std::find(channelFound->getChannelInvites().begin(), channelFound->getChannelInvites().end(), client->getSocket());
 						channelFound->getChannelInvites().erase(it);
-						//remover cliente do invited ou nao?
 					}
 					else
 						sendResponse(client->getSocket(), ERR_INVITEONLYCHAN(client->getNick(), channelFound->getName()));
@@ -58,9 +57,8 @@ void    Server::joinCommand(std::vector<std::string> &cmds, Client *client) {
 					if (!channelFound->getTopic(1).empty())
 						sendResponse(client->getSocket(), RPL_TOPIC(client->getNick(), channelFound->getName(), channelFound->getTopic(0)));
 				}
-				else {
+				else
 					sendResponse(client->getSocket(), ERR_BADCHANNELKEY(client->getNick(), channelFound->getName()));
-				}
 			}
 		}
 	}	

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   kick.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marcelo <marcelo@student.42.fr>            +#+  +:+       +#+        */
+/*   By: mfassbin <mfassbin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/19 15:06:34 by aconceic          #+#    #+#             */
-/*   Updated: 2025/05/09 15:15:52 by marcelo          ###   ########.fr       */
+/*   Updated: 2025/05/17 17:29:00 by mfassbin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,12 +15,8 @@
 
 static bool		isTargetUserOnChannel(Channel *channel, Client *target, Client *client);
 
-/**************************************/
-/*             MAIN FUNTION           */
-/**************************************/
 //FORMAT OF MSG ---> KICK #channel targetUser [:reason])
 //FORMAT OF MSG CAN BE ---> KICK #channel targetUser,targetUser2,targetUser3 [:reason])
-//MAIN FUNCTION
 void	Server::kickUser(std::vector<std::string> &cmds, Client *client)
 {
 	if (cmds.size() < 3)
@@ -43,11 +39,7 @@ void	Server::kickUser(std::vector<std::string> &cmds, Client *client)
 					std::map<std::string, Channel *>::iterator it = map.find(channel->getName());
 					map.erase(it);
 					delete channel;
-				}
-				//if user is the last of the channel
-					//delete channel??? maybe.
-					//broadcast a message to the server
-				
+				}	
 			}
 		}
 	}

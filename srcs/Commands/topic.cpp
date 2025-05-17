@@ -36,11 +36,3 @@ void    Server::topic(std::vector<std::string> &cmds, Client *client, std::strin
     client->sendToAllChannel(channel, TOPIC_CHANGE(client->getPrefix(), channel->getName(), newTopic));
     return;
 }
-
-// se tiver menos de 2 parametros --> NEEDMOREPARAMS.
-// VERIFICAR SE O CANAL EXISTE. --> NOSUCHCHANNEL.
-// Verificar se o cliente esta no canal, se nao estiver ->  ERR_NOTONCHANNEL (442).
-// parametros TOPIC <channel> <topic> --> se o parametro topic nao for fornecido retornar o topic do canal RPL_TOPIC e depois RPL_TOPICWHOTIME
-// Se <topic> for fornecido altera-se o topico do canal (caso permitido).
-
-

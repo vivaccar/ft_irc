@@ -10,7 +10,6 @@ Server::Server(const std::string &port, const std::string &password) {
 }
 
 Server::~Server() {
-    //log("Server Destroyed");
     for (std::map<int, Client*>::iterator it = _clients.begin(); it != _clients.end(); it++)
         delete it->second;
     for (std::map<std::string, Channel*>::iterator it = _channels.begin(); it != _channels.end(); it++)
@@ -76,8 +75,7 @@ Channel *Server::getChannelByName(const std::string &name) {
 
 
 void    Server::createSocket() {
-    // CRIA O SOCKET DO SERVIDOR
-    _socketFd = socket(AF_INET, SOCK_STREAM, 0); //AF_INET = IPV4, SOCK_STREAM = TCP, 0 = PADRAO
+    _socketFd = socket(AF_INET, SOCK_STREAM, 0); //AF_INET = IPV4, SOCK_STREAM = TCP, 0 = STANDARD
     if (_socketFd <= 0)
         throw("Server Socket Fail");
     _sockAddr.sin_family = AF_INET;
@@ -85,17 +83,15 @@ void    Server::createSocket() {
     _sockAddr.sin_addr.s_addr = INADDR_ANY;
 
     int en = 1;
-    if (setsockopt(_socketFd, SOL_SOCKET, SO_REUSEADDR, &en, sizeof(en)) == -1) //HABILITAR A REUTILIZACAO DA PORTA ASSIM QUE FOR FECHADO
+    if (setsockopt(_socketFd, SOL_SOCKET, SO_REUSEADDR, &en, sizeof(en)) == -1)
         throw(std::runtime_error("faild to set option (SO_REUSEADDR) on socket"));
     
     if (fcntl(_socketFd, F_SETFL, O_NONBLOCK) == -1)
-        throw(std::runtime_error("faild to set option (O_NONBLOCK) on socket"));
+        throw(std::runtime_error("failed to set option (O_NONBLOCK) on socket"));
     
-    // FAZ O SOCKET ESCUTAR NA PORTA E IP DESEJADOS
     if (bind(_socketFd, (struct sockaddr *)&_sockAddr, sizeof(_sockAddr)) < 0)
         throw (std::runtime_error("Bind Fail"));
     
-    // COLOCA O SOCKET DO SERVIDOR EM MODO ESCUTA
     if (listen(_socketFd, __INT_MAX__) < 0)
         throw(std::runtime_error("Listen Fail"));
 }
@@ -114,45 +110,46 @@ void    Server::parseCommand(std::string cmd, int clientSocket, size_t &pollIdx)
     std::string word;
     std::istringstream streamCmd(cmd);
     while (streamCmd >> word)
-    cmds.push_back(word);
-    if (cmds.size() == 0)
-    return ;
+    	cmds.push_back(word);
+    if (cmds.size() == 0) {
+    	return ;
+	}
     if (cmds[0] == "QUIT" || cmds[0] == "quit")
-    disconnectClient(clientSocket, pollIdx);
+		disconnectClient(clientSocket, pollIdx);
     else if (cmds[0] == "PASS" || cmds[0] == "pass")
-    checkPassword(cmds, client);
+		checkPassword(cmds, client);
     else if (cmds[0] == "NICK" || cmds[0] == "nick")
-    setNick(cmds, client);
+		setNick(cmds, client);
     else if (cmds[0] == "USER" || cmds[0] == "user")
-    setUser(cmds, client);
-    else if (!client->isAuth())
-    sendResponse(client->getSocket(), ERR_NOTREGISTERED(client->getNick()));
+		setUser(cmds, client);
+	else if (!client->isAuth())
+		sendResponse(client->getSocket(), ERR_NOTREGISTERED(client->getNick()));
     else if (cmds[0] == "TOPIC" || cmds[0] == "topic")
-    topic(cmds, client, cmd);
+    	topic(cmds, client, cmd);
     else if (cmds[0] == "MODE" || cmds[0] == "mode")
-    mode(cmds, client, cmd);
+    	mode(cmds, client, cmd);
     else if (cmds[0] == "JOIN" || cmds[0] == "join")
-    joinCommand(cmds, client);
+    	joinCommand(cmds, client);
     else if (cmds[0] == "PRIVMSG" || cmds[0] == "privmsg")
-    privMsg(cmds, client, cmd);
+    	privMsg(cmds, client, cmd);
 	else if (cmds[0] == "WHO" || cmds[0] == "who")
-    who(cmds, client);
-    else if (cmds[0] == "KICK" || cmds[0] == "kick") //TO START WORKING AT THE COMMANDS REQUIRED BY THE SUBJECT
-    kickUser(cmds, client);
+    	who(cmds, client);
+    else if (cmds[0] == "KICK" || cmds[0] == "kick")
+    	kickUser(cmds, client);
     else if (cmds[0] == "INVITE" || cmds[0] == "invite")
-    inviteUser(cmds, client);
+    	inviteUser(cmds, client);
 	else if (cmds[0] == "trivia" || cmds[0] == "math" || cmds[0] == "date" || cmds[0] == "year")
 	{
-        if (cmds.size() < 2 || cmds[1].empty()) //precisa necessariamente ter o nome do canal
-        return ;
+        if (cmds.size() < 2 || cmds[1].empty()) {
+        	return ;
+		}
 		Channel *channel = getChannelByName(cmds[1]);
 		if (!channel)
-        return ;
+        	return ;
 		numbersAPI(cmds, client, channel);
 	}
     else
-    sendResponse(client->getSocket(), ERR_UNKNOWNCOMMAND(client->getNick(), cmds[0]));
-    
+    	sendResponse(client->getSocket(), ERR_UNKNOWNCOMMAND(client->getNick(), cmds[0]));
 }
 
 void    Server::connectNewClient() {
@@ -161,9 +158,9 @@ void    Server::connectNewClient() {
     
     int newClientSocket = accept(_socketFd, (struct sockaddr *)&clientAddr, &clientAddrLen);
     if (newClientSocket < 0)
-    return log("Fail to accept connection");
+    	return log("Failed to accept connection");
     if (fcntl(newClientSocket, F_SETFL, O_NONBLOCK) == -1)
-    return log("Fail to set client FD Non Blocking");
+    	return log("Failed to set client FD Non Blocking");
     std::string hostname = inet_ntoa(clientAddr.sin_addr);
     createClient(newClientSocket, hostname);
     struct pollfd newClient;
@@ -198,7 +195,7 @@ void    Server::disconnectClient(int fd, size_t &poolIdx)
 {
     Client* toDelete = getClientBySocket(fd);
     if (toDelete)
-    delete toDelete;
+    	delete toDelete;
     deleteChannelWithNoClients();
     _clients.erase(fd);
     close(fd);
@@ -215,37 +212,35 @@ void Server::readNewMessage(size_t &pollIdx)
     bzero(buffer, sizeof(buffer));
     int fd = _fds[pollIdx].fd;
     Client  *client = getClientBySocket(fd);
-    
     ssize_t bytesRead;
     bytesRead = recv(fd, buffer, sizeof(buffer) - 1, 0);
     if (bytesRead == -1)
     {
         if (errno == EWOULDBLOCK || errno == EAGAIN)
-        return;
+        	return;
         else
-        throw std::runtime_error("Recv Error"); 
+        	throw std::runtime_error("Recv Error"); 
     }
     if (bytesRead == 0)
-    return disconnectClient(fd, pollIdx);
+    	return disconnectClient(fd, pollIdx);
     client->bufferAppend(buffer);
     std::string msg = client->getBuffer();
     client->clearBuf();
     if (msg.find('\n') == std::string::npos)
-    return;
+    	return;
     std::istringstream iss(msg);
     std::string line;
     while (std::getline(iss, line)) 
     {
         if (line.empty() || (line[0] == '\r' && line.size() == 1))
-        continue;
+        	continue;
         if (!line.empty() && line[line.size() -1] == '\r')
-        line = line.substr(0, line.size() - 1);
+        	line = line.substr(0, line.size() - 1);
         parseCommand(line, fd, pollIdx);
     }
 }
 
 void    Server::runPoll() {
-    // CRIA A ESTRUTURA DO DO SOCKET DO SERVIDOR PARA SER UTILIZADO NO POLL
     struct pollfd server;
     server.fd = _socketFd;
     server.events = POLLIN;
@@ -257,15 +252,15 @@ void    Server::runPoll() {
     {
         int ret = poll(_fds.data(), _fds.size(), 0);   
         if (ret < 0 && _run)
-        throw(std::runtime_error("Poll Error"));
+        	throw(std::runtime_error("Poll Error"));
         if (_fds[0].revents & POLLIN)
-        connectNewClient();
+       		connectNewClient();
         for (size_t i = 1; i < _fds.size(); i++)
-        {  // Começa no índice 1, já que o índice 0 é o servidor
+        { 
             if (_fds[i].revents & POLLHUP)
-            disconnectClient(_fds[i].fd, i);
+            	disconnectClient(_fds[i].fd, i);
             if (_fds[i].revents & POLLIN)
-            readNewMessage(i);
+            	readNewMessage(i);
         }
     }
     log("Shutting down Server");
@@ -282,26 +277,3 @@ void    Server::log(const std::string &logMessage) const {
     std::cout << GREEN << "[" << localTime->tm_mday << "-" << localTime->tm_mon + 1 << "-" << localTime->tm_year + 1900
     << " - " << localTime->tm_hour << ":" << localTime->tm_min << ":" << localTime->tm_sec << "]" << RESET << " * " << logMessage  << std::endl;
 }
-
-
-
-
-// ************DEBUG*************** 
-
-/* void    Server::info() {
-    std::cout << GREEN << "SERVER CURRENT CLIENTS CONNECTED: " << _clients.size() << std::endl;
-    std::cout << "NICKNAMES:";
-    for (std::map<int, Client*>::iterator it = _clients.begin(); it != _clients.end(); it++) 
-    {
-        std::cout << it->second->getNick() << " ";
-    }
-    std::cout << std::endl;
-    std::cout << GREEN << "SERVER CURRENT CHANNELS: " << _channels.size() << std::endl;
-    std::cout << "CHANNEL NAME AND NUMBER OF MEMBERS:";
-    for (std::map<std::string, Channel*>::iterator it = _channels.begin(); it != _channels.end(); it++) 
-    {
-        std::cout << it->first << " has " << it->second->getClients().size() << " members" << std::endl;
-    }
-    std::cout << std::endl;
-    return;
-} */

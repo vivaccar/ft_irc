@@ -1,8 +1,6 @@
 #include "../includes/Client.hpp"
 
-Client::Client(int socket, std::string &hostname) : _socket(socket), _isAuth(false), _insertPassword(false), _hostname(hostname) {
-    //std::cout << "New client created Socket " << _socket << std::endl; 
-}
+Client::Client(int socket, std::string &hostname) : _socket(socket), _isAuth(false), _insertPassword(false), _hostname(hostname) {}
 
 Client::~Client() {
 	std::vector<Channel*> &clientChannels = this->getChannels();
@@ -58,7 +56,6 @@ void	Client::clearBuf() {
 	this->_buffer.clear();
 }
 
-//:dan!d@localhost
 // - - - - - - - SETTERS - - - - - - - 
 void    Client::setInsertPassword(bool status) {
     _insertPassword = status;

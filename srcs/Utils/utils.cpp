@@ -6,7 +6,7 @@
 /*   By: mfassbin <mfassbin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/24 13:12:43 by aconceic          #+#    #+#             */
-/*   Updated: 2025/05/05 13:00:10 by mfassbin         ###   ########.fr       */
+/*   Updated: 2025/05/17 17:56:35 by mfassbin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,10 +47,6 @@ std::string extractMessage(std::string cmd, int maxSpaces)
     return cmd.substr(index, cmd.size());
 }
 
-
-/**********************************************/
-/*              AMAURI DECLARATIONS           */
-/**********************************************/
 //used on kick.cpp
 //Split a vector of strings using a "," as separator.
 //Return a vector with all the strings.
@@ -76,7 +72,6 @@ std::vector<std::string> splitVectorString(const std::vector<std::string>& strs)
     }
     return (client_users);
 }
-
 
 std::vector<std::string> splitString(std::string &str) {
 	size_t start = 0;

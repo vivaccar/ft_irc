@@ -11,7 +11,6 @@
 #include "responseTest.hpp"
 #include "vector"
 
-
 #define GREEN "\033[32m"
 #define RED "\033[31m"
 #define RESET "\033[0m"
@@ -57,9 +56,6 @@ void makeTest(int sock, std::string command, std::string testName, std::string e
     std::string resp = receive_response(sock);
 
     std::cout << CYAN << "\nTEST NAME: " << RESET << YELLOW << testName <<  " - " << resp << RESET << std::endl;
-/*     std::cout << "Command: " << command << std::endl;
-    std::cout << "Expected: " << expected << std::endl;
-    std::cout << "Received: " << resp; */
 
     std::cout << "Result: ";
     if (resp.find(expected) != std::string::npos) {
@@ -114,15 +110,7 @@ void    testChannel(int sock)
     // JOIN INVALID CHANNEL
     makeTest(newUser, "JOIN invalid", "23 - JOIN INVALID CHANNEL", "476");
 
-
     close(newUser);
-
-
-
-
-
-    //" MODE " + channel + " " + cmd + " :" + key
-    // 
 }
 
 
@@ -185,9 +173,7 @@ void makeclientstest(std::string testName, int sender, std::string cmd, int rece
     std::string resp = receive_response(receiver);
 
     std::cout << CYAN << "\nTEST NAME: " << RESET << YELLOW << testName << RESET << std::endl;
-/*     std::cout << "Comand: " << cmd << std::endl;
-    std::cout << "Expected: " << expected << std::endl;
-    std::cout << "Received: " << resp; */
+
     std::cout << "Result: ";
     if (resp.find(expected) != std::string::npos) {
         std::cout << GREEN << "[OK]" << std::endl << RESET;
@@ -234,8 +220,6 @@ void    testclients()
     makeTest(mano, "mode #students -k" , "16 - MODE REMOVE KEY", "MODE #students :-k");
     makeTest(mano, "mode #students +o vini" , "17 - MODE ADD OP", "MODE #students +o :vini");
     makeTest(mano, "mode #students -o vini" , "18 - MODE REMOVE OP", "MODE #students -o :vini");
-    
-    // create new client to test invite.
 
     int celo = connect();
     send_line(celo, "PASS senha\nnick celo\nuser marcelo 0 0 0");
@@ -256,14 +240,6 @@ void    testclients()
     makeTest(mano, "kick ", "28 - KICK NEED MORE PARAMS", "461");
     makeTest(mano, "kick #students", "28 - KICK NEED MORE PARAMS", "461");
 
-
-
-
-
-
-    //MODE " + channel + " :" + status
-
-//TOPIC_CHANGE(nick, channel, topic) ":" + nick + " TOPIC " + channel + " " + topic + "\r\n"
     close(mano);
     close(vini);
     close(celo);
@@ -291,38 +267,6 @@ int main() {
     close(sock);
     testclients();
     //stressTest();
-
-
-/*     int c1 = connect();
-    int c2 = connect();
-    int c3 = connect();
-    send_line(c1, "PASS senha\nuser c1 c c c\nnick c1");
-    send_line(c2, "PASS senha\nuser c2 c c c\nnick c2");
-    send_line(c3, "PASS senha\nuser c3 c c c\nnick c3");
-
-    send_line(c1, "JOIN #CANAL");
-    send_line(c2, "JOIN #CANAL");
-    send_line(c3, "JOIN #CANAL");
-
-    close(c1);
-    close(c2);
-    close(c3);
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    c1 = connect();
-    c2 = connect();
-    c3 = connect();
-
-    send_line(c1, "PASS senha\nuser c1 c c c\nnick c1");
-    send_line(c2, "PASS senha\nuser c1 c c c\nnick c2");
-    send_line(c3, "PASS senha\nuser c1 c c c\nnick c3");
-
-    send_line(c1, "quit");
-    send_line(c2, "JOIN #CANAL");
-    send_line(c3, "JOIN #CANAL"); */
-
-/*     close(c1);
-    close(c2);
-    close(c3); */
 
     return 0;
 }

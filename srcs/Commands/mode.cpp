@@ -106,9 +106,6 @@ void    operatorMode(std::string &cmd, std::vector<std::string>& cmds, Client *c
         return;
     }
 }
-// VERIFICAR SE O NICK PARA SER OU RETIRAR OP ESTA NO CANAL
-// SE FOR +O VERIFICAR SE JA E OP
-// SE FOR -0 VERIFICAR SE JA NAO E OP
 
 void    Server::executeModeCommands(std::string action, std::vector<std::string>& cmds, unsigned int &parameter, Client* client, Channel *channel)
 {
@@ -207,7 +204,3 @@ void    Server::mode(std::vector<std::string> &cmds, Client *client, std::string
         return sendResponse(client->getSocket(), ERR_CHANOPRIVSNEEDED(client->getNick(), channel->getName()));
     parseModeCommands(cmds, client, channel);
 }
-
-//VERIFICAR SE TEM MAIS DE UM PARAMETRO;
-//VERIFICAR SE O CANAL EXISTE;
-//VERIFICAR SE O CLIENTE QUE ESTA TENTANDO EXECUTAR E UM MODERADOR
