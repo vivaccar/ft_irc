@@ -33,7 +33,7 @@
 #define RPL_ENDOFWHO(client, channel) ": 315 " + client + " " + channel + " :End of WHO list\r\n"
 #define KICK_MSG(nick, channel_name, target, reason) ":" + nick + " KICK " + channel_name + " " + target + reason + "\r\n"
 #define TOPIC_CHANGE(nick, channel, topic) ":" + nick + " TOPIC " + channel + " " + topic + "\r\n"
-#define RPL_INVITING(target, channel_name, client) ": 341 " + client + " " + target + " " + channel_name + " : \r\n" //TALVEZ PRECISE DE MSG (AMAURI)
+#define RPL_INVITING(target, channel_name, client) ": 341 " + client + " " + target + " " + channel_name + " : \r\n" 
 #define RPL_INVITED(channel, client) "You have been invited to " + channel + " by " + client + "\r\n"
 #define RPL_CHANNELMODEIS(nick, channel, modes) ": 324 " + nick + " " + channel + " " + modes + "\r\n"
 #define MODE(nick, channel, status) ":" + nick + " MODE " + channel + " :" + status + "\r\n"

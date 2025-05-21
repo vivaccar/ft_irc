@@ -106,7 +106,7 @@ static int createAndConnectSocketBOT(addrinfo *res)
 	//AQUI PRECISO TORNAR NON BLOCKING
 	if (fcntl(sock, F_SETFL, O_NONBLOCK) == -1) //make non blocking
 	{
-		std::cout << "PAROU AQUI \n";
+		//std::cout << "PAROU AQUI \n";
 		close(sock);
 		return (-1);
 	}
@@ -163,7 +163,7 @@ static int createAndConnectSocketBOT(addrinfo *res)
 
     // Conexão estabelecida com sucesso!
 	freeaddrinfo(res);
-	std::cout << "CONEXAO FEITA!\n";
+	//std::cout << "CONEXAO FEITA!\n";
 	return (sock);
 }
 
@@ -200,13 +200,11 @@ static std::string receiveResponseFromAPI(int socket)
 			else
 				break;	
 		}
-		std::cout << "TESTE \n";
+		//std::cout << "TESTE \n";
 		buffer[n] = '\0';
 		resposta += buffer;	
 	}
 	close(socket);
-
-	std::cout << "RESPOSTA : " << resposta << "\n";
 	//5. separar cabecalhos do corpo
 	size_t sep = resposta.find("\r\n\r\n");
 	if (sep == std::string::npos)

@@ -225,9 +225,9 @@ void Server::readNewMessage(size_t &pollIdx)
     	return disconnectClient(fd, pollIdx);
     client->bufferAppend(buffer);
     std::string msg = client->getBuffer();
-    client->clearBuf();
     if (msg.find('\n') == std::string::npos)
-    	return;
+        return;
+    client->clearBuf();
     std::istringstream iss(msg);
     std::string line;
     while (std::getline(iss, line)) 
