@@ -140,12 +140,11 @@ void    Server::parseCommand(std::string cmd, int clientSocket, size_t &pollIdx)
     	inviteUser(cmds, client);
 	else if (cmds[0] == "trivia" || cmds[0] == "math" || cmds[0] == "date" || cmds[0] == "year")
 	{
-        if (cmds.size() < 2 || cmds[1].empty()) {
-        	return ;
-		}
+        if (cmds.size() != 2)
+			return (client->sendToClient(client, ERR_NEEDMOREPARAMS(client->getNick(), cmds[0])));
 		Channel *channel = getChannelByName(cmds[1]);
 		if (!channel)
-        	return ;
+			return (client->sendToClient(client, ERR_NOSUCHCHANNEL(client->getNick(), cmds[1])));
 		numbersAPI(cmds, client, channel);
 	}
     else
