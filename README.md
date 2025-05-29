@@ -101,3 +101,6 @@ You can connect nc using:
 
 - **HexChat**:
 
+To connect with HexChat, simply edit the server IP and port to `localhost` and the port you chose when starting the server.
+
+![Screenshot](docs/hexchat.png)
